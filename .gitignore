@@ -1,0 +1,25 @@
+###> env files ###
+/.env.local
+/.env.test
+/.env.local.php
+/.env.*.local
+###< env files ###
+
+###> composer ###
+/vendor/
+###< composer ###
+
+###> npm ###
+node_modules
+###< npm ###
+
+###> ignore some local files ###
+/.idea
+*.iml
+*~
+.web-server-pid
+/.DS_Store
+/data
+/snapshots
+/RELEASE
+###< ignore some local files ### 

@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+
+use Ixnode\PhpVault\Core;
+
+foreach ([__DIR__ . '/../vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
+
+$core = new Core(true);
+
+print 'Private Key: '.$core->getKeyPair()->getPrivate()."\n";
+print 'Public Key:  '.$core->getKeyPair()->getPublic()."\n";

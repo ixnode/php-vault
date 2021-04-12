@@ -1,0 +1,27 @@
+{
+    "name": "ixnode/php-vault",
+    "description": "Secure PHP Vault",
+    "license": "MIT",
+    "keywords": ["security", "encryption", "decryption", "cipher", "cryptography", "crypto", "env", "environment", "vault"],
+    "authors": [
+        {
+            "name": "Björn Hempel",
+            "email": "bjoern@hempel.li",
+            "homepage": "https://www.hempel.li/"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Ixnode\\PhpVault\\": "src"
+        }
+    },
+    "require": {
+        "php":  "^7.4 || ^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    },
+    "bin": [
+        "bin/generate-key-pair"
+    ]
+}
