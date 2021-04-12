@@ -66,7 +66,7 @@ final class KeyTest extends TestCase
      *
      * @return string[][]
      */
-    public function dataProvider()
+    public function dataProvider(): array
     {
         return array(
             /* Basic keys */

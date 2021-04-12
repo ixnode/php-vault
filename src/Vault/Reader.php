@@ -30,6 +30,10 @@ class Reader
 {
     protected Vault $vault;
 
+    const PATTERN_NAME_VALUE = '~^([a-z][a-z0-9]+)=(.+)$~i';
+
+    const PATTERN_DESCRIPTION = '~^# (.+)$~i';
+
     /**
      * Writer constructor.
      *
@@ -38,5 +42,60 @@ class Reader
     public function __construct(Vault $vault)
     {
         $this->vault = $vault;
+    }
+
+    /**
+     * Converts given stream to array.
+     *
+     * @param string $stream
+     * @return array[]
+     */
+    public function convertStreamToArray(string $stream): array
+    {
+        $lines = explode("\n", $stream);
+        $return = array();
+
+        $default = array(
+            'name' => null,
+            'value' => null,
+            'description' => null,
+        );
+
+        $current = $default;
+        foreach ($lines as $line) {
+            $matches = array();
+
+            /* # DESCRIPTION detected */
+            if (preg_match(self::PATTERN_DESCRIPTION, $line, $matches)) {
+
+                /* add parsed values to current array */
+                $current['description'] = $matches[1];
+
+                /* go to next line */
+                continue;
+            }
+
+            /* NAME=VALUE detected */
+            if (preg_match(self::PATTERN_NAME_VALUE, $line, $matches)) {
+
+                /* add parsed values to current array */
+                $current['name'] = $matches[1];
+                $current['value'] = $matches[2];
+
+                /* add current array to return array */
+                $return[$current['name']] = array(
+                    'value' => $current['value'],
+                    'description' => $current['description'],
+                );
+
+                /* create new current array */
+                $current = $default;
+
+                /* go to next line */
+                continue;
+            }
+        }
+
+        return $return;
     }
 }

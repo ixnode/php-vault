@@ -24,22 +24,12 @@
  * SOFTWARE.
  */
 
-use Ixnode\PhpVault\Core;
 use Ixnode\PhpVault\Vault\Vault;
 use Ixnode\PhpVault\Vault\Writer;
 use Test\Ixnode\PhpVault\Vault\VaultTestCase;
 
 final class WriterTest extends VaultTestCase
 {
-    /**
-     * Setup routines for the tests.
-     * @throws SodiumException
-     */
-    public static function setUpBeforeClass(): void
-    {
-        self::$core = new Core(false, self::$privateKey);
-    }
-
     /**
      * Test writer class exists.
      *

@@ -28,6 +28,7 @@ namespace Test\Ixnode\PhpVault\Vault;
 
 use PHPUnit\Framework\TestCase;
 use Ixnode\PhpVault\Core;
+use SodiumException;
 
 class VaultTestCase extends TestCase
 {
@@ -38,4 +39,13 @@ class VaultTestCase extends TestCase
     protected static string $privateKey = 'o8aZw6FIZmSMZq/89DNgxpNZHcgMbEOiU+1TMhNntb4=';
 
     protected static string $nonce = '57nrsXGZtxzD5PtRygZAy9Nr7PSCLFse';
+
+    /**
+     * Setup routines for the tests.
+     * @throws SodiumException
+     */
+    public static function setUpBeforeClass(): void
+    {
+        self::$core = new Core(false, self::$privateKey);
+    }
 }

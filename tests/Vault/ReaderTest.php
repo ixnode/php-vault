@@ -24,22 +24,12 @@
  * SOFTWARE.
  */
 
-use Ixnode\PhpVault\Core;
 use Ixnode\PhpVault\Vault\Vault;
 use Ixnode\PhpVault\Vault\Reader;
 use Test\Ixnode\PhpVault\Vault\VaultTestCase;
 
 final class ReaderTest extends VaultTestCase
 {
-    /**
-     * Setup routines for the tests.
-     * @throws SodiumException
-     */
-    public static function setUpBeforeClass(): void
-    {
-        self::$core = new Core(false, self::$privateKey);
-    }
-
     /**
      * Test reader class exists.
      *
@@ -57,5 +47,119 @@ final class ReaderTest extends VaultTestCase
         $this->assertClassHasAttribute('reader', Vault::class);
         $this->assertTrue(method_exists(Vault::class, 'getReader'), 'Class Vault does not have method getReader.');
         $this->assertInstanceOf($expected, self::$core->getVault()->getReader());
+    }
+
+    /**
+     * Test vault reader array.
+     *
+     * @dataProvider dataProviderArray
+     * @param string $stream
+     * @param array $array
+     */
+    public function testReaderArray(string $stream, array $array)
+    {
+        /* Arrange */
+        $expected = $array;
+
+        /* Act */
+        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream);
+
+        /* Assert */
+        $this->assertSame($expected, $actual);
+    }
+
+    /**
+     * Provides some key variants to be converted.
+     *
+     * @return string[][]
+     */
+    public function dataProviderArray(): array
+    {
+        return array(
+            array(
+
+                ###> STREAM ###
+                "TEST=123",
+                ###< STREAM ###
+
+                array(
+                    'TEST' => array(
+                        'value' => '123',
+                        'description' => null,
+                    ),
+                )
+            ),
+            array(
+
+                ###> STREAM ###
+                "TEST1=123\n".
+                "TEST2=456",
+                ###< STREAM ###
+
+                array(
+                    'TEST1' => array(
+                        'value' => '123',
+                        'description' => null,
+                    ),
+                    'TEST2' => array(
+                        'value' => '456',
+                        'description' => null,
+                    ),
+                )
+            ),
+            array(
+
+                ###> STREAM ###
+                "# A comment with some text.\n".
+                "TEST=123",
+                ###< STREAM ###
+
+                array(
+                    'TEST' => array(
+                        'value' => '123',
+                        'description' => 'A comment with some text.',
+                    ),
+                )
+            ),
+            array(
+
+                ###> STREAM ###
+                "\n".
+                "# A comment with some text.\n".
+                "TEST=123\n".
+                "\n",
+                ###< STREAM ###
+
+                array(
+                    'TEST' => array(
+                        'value' => '123',
+                        'description' => 'A comment with some text.',
+                    ),
+                )
+            ),
+            array(
+
+                ###> STREAM ###
+                "\n".
+                "# A comment with some text 123.\n".
+                "TEST1=123\n".
+                "\n".
+                "# A comment with some text 456.\n".
+                "TEST2=456\n".
+                "\n",
+                ###< STREAM ###
+
+                array(
+                    'TEST1' => array(
+                        'value' => '123',
+                        'description' => 'A comment with some text 123.',
+                    ),
+                    'TEST2' => array(
+                        'value' => '456',
+                        'description' => 'A comment with some text 456.',
+                    ),
+                )
+            ),
+        );
     }
 }

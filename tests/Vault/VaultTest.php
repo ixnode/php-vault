@@ -73,8 +73,6 @@ TEXT;
      */
     public static function setUpBeforeClass(): void
     {
-        self::$core = new Core(false, self::$privateKey);
-
         self::$data = (object) [
             'value' => '0123456789ABCDEF',
             'description' => 'The value 0123456789ABCDEF was given.',
@@ -88,6 +86,8 @@ TEXT;
             'valueDecrypted' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImVCMjM3YUJoOEdKbFlSTndOK1d2UUh3WWtjTXozendCcXc9PSJd',
             'descriptionDecrypted' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIk5jTUNjbUJtQURJRyszSDVFcUh1QkZZWWxZMDMxeUFBcCtEZ3J2V0FXU2I4U2d1bExmbEpkV0k9Il0='
         ];
+
+        parent::setUpBeforeClass();
     }
 
     /**
