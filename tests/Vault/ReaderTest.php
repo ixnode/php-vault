@@ -148,6 +148,25 @@ final class ReaderTest extends VaultTestCase
             array(
 
                 ###> STREAM ###
+                "TEST1=123",
+                ###< STREAM ###
+
+                array(
+                    'TEST_1' => (object) [
+                        'value' => '123',
+                        'description' => null,
+                    ],
+                ),
+                array(
+                    'TEST_1' => (object) [
+                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
+                        'description' => null,
+                    ],
+                )
+            ),
+            array(
+
+                ###> STREAM ###
                 "TEST_1=123\n".
                 "TEST_2=456",
                 ###< STREAM ###

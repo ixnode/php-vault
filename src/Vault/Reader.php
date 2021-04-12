@@ -85,7 +85,7 @@ class Reader
                 $current->value = $matches[2];
 
                 /* add current array to return array */
-                $return[$current->name] = (object) [
+                $return[$this->vault->getUnderscoredKey($current->name)] = (object) [
                     'value' => $current->value,
                     'description' => $current->description,
                 ];
