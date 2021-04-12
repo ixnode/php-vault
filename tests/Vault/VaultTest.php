@@ -24,31 +24,12 @@
  * SOFTWARE.
  */
 
-use PHPUnit\Framework\TestCase;
-use Ixnode\PhpVault\Vault\Vault;
-use Ixnode\PhpVault\Vault\Writer as VaultWriter;
-use Ixnode\PhpVault\KeyPair;
-use Ixnode\PhpVault\Decrypter;
 use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\Vault\Vault;
+use Test\Ixnode\PhpVault\Vault\VaultTestCase;
 
-final class VaultTest extends TestCase
+final class VaultTest extends VaultTestCase
 {
-    protected static Core $core;
-
-    protected static Vault $vault;
-
-    protected static VaultWriter $vaultWriter;
-
-    protected static KeyPair $keyPair;
-
-    protected static Decrypter $decrypter;
-
-    protected static string $publicKey = 'rzgp2/3Rtg8t6q/spiMrcEZq7cG75o1qsR/Kux/OC1E=';
-
-    protected static string $privateKey = 'o8aZw6FIZmSMZq/89DNgxpNZHcgMbEOiU+1TMhNntb4=';
-
-    protected static string $nonce = '57nrsXGZtxzD5PtRygZAy9Nr7PSCLFse';
-
     protected static object $data;
 
     protected static object $data2;
@@ -107,6 +88,23 @@ TEXT;
             'valueDecrypted' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImVCMjM3YUJoOEdKbFlSTndOK1d2UUh3WWtjTXozendCcXc9PSJd',
             'descriptionDecrypted' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIk5jTUNjbUJtQURJRyszSDVFcUh1QkZZWWxZMDMxeUFBcCtEZ3J2V0FXU2I4U2d1bExmbEpkV0k9Il0='
         ];
+    }
+
+    /**
+     * Check some base things.
+     */
+    public function testBase()
+    {
+        /* Arrange */
+        $expected = Vault::class;
+
+        /* Act */
+        /* nothing to do */
+
+        /* Assert */
+        $this->assertClassHasAttribute('vault', Core::class);
+        $this->assertTrue(method_exists(Core::class, 'getVault'), 'Class Core does not have method getVault.');
+        $this->assertInstanceOf($expected, self::$core->getVault());
     }
 
     /**

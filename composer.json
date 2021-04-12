@@ -12,7 +12,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "Ixnode\\PhpVault\\": "src"
+            "Ixnode\\PhpVault\\": "src",
+            "Test\\Ixnode\\PhpVault\\": "tests"
         }
     },
     "require": {

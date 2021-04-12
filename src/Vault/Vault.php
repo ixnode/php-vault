@@ -34,6 +34,8 @@ class Vault
 {
     private Core $core;
 
+    private Reader $reader;
+
     private Writer $writer;
 
     private array $vault = [];
@@ -47,6 +49,8 @@ class Vault
     {
         $this->core = $core;
 
+        /* Set reader and writer */
+        $this->reader = new Reader($this);
         $this->writer = new Writer($this);
     }
 
@@ -187,11 +191,21 @@ class Vault
     }
 
     /**
+     * Returns the vault reader.
+     *
+     * @return Reader
+     */
+    public function getReader(): Reader
+    {
+        return $this->reader;
+    }
+
+    /**
      * Returns the vault writer.
      *
      * @return Writer
      */
-    public function getWriter()
+    public function getWriter(): Writer
     {
         return $this->writer;
     }
