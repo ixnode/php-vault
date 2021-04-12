@@ -54,18 +54,68 @@ final class ReaderTest extends VaultTestCase
      *
      * @dataProvider dataProviderArray
      * @param string $stream
-     * @param array $array
+     * @param array $decrypted
+     * @param array $encrypted
      */
-    public function testReaderArray(string $stream, array $array)
+    public function testReaderArray(string $stream, array $decrypted, array $encrypted)
     {
         /* Arrange */
-        $expected = $array;
+        $expected = $decrypted;
 
         /* Act */
+        self::$core->clearVault();
         $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream);
 
         /* Assert */
-        $this->assertSame($expected, $actual);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test add array to vault encrypted.
+     *
+     * @dataProvider dataProviderArray
+     * @param string $stream
+     * @param array $decrypted
+     * @param array $encrypted
+     * @throws SodiumException
+     */
+    public function testReaderAddArrayToVaultEncrypted(string $stream, array $decrypted, array $encrypted)
+    {
+        /* Arrange */
+        $expected = $encrypted;
+
+        /* Act */
+        self::$core->clearVault();
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream);
+        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
+        $actual = self::$core->getVault()->getAll(true, true, false);
+
+        /* Assert */
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test add array to vault decrypted.
+     *
+     * @dataProvider dataProviderArray
+     * @param string $stream
+     * @param array $decrypted
+     * @param array $encrypted
+     * @throws SodiumException
+     */
+    public function testReaderAddArrayToVaultDecryted(string $stream, array $decrypted, array $encrypted)
+    {
+        /* Arrange */
+        $expected = $decrypted;
+
+        /* Act */
+        self::$core->clearVault();
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream);
+        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
+        $actual = self::$core->getVault()->getAll(true, true, true);
+
+        /* Assert */
+        $this->assertEquals($expected, $actual);
     }
 
     /**
@@ -83,28 +133,44 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST' => array(
+                    'TEST' => (object) [
                         'value' => '123',
                         'description' => null,
-                    ),
+                    ],
+                ),
+                array(
+                    'TEST' => (object) [
+                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
+                        'description' => null,
+                    ],
                 )
             ),
             array(
 
                 ###> STREAM ###
-                "TEST1=123\n".
-                "TEST2=456",
+                "TEST_1=123\n".
+                "TEST_2=456",
                 ###< STREAM ###
 
                 array(
-                    'TEST1' => array(
+                    'TEST_1' => (object) [
                         'value' => '123',
                         'description' => null,
-                    ),
-                    'TEST2' => array(
+                    ],
+                    'TEST_2' => (object) [
                         'value' => '456',
                         'description' => null,
-                    ),
+                    ],
+                ),
+                array(
+                    'TEST_1' => (object) [
+                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
+                        'description' => null,
+                    ],
+                    'TEST_2' => (object) [
+                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0=',
+                        'description' => null,
+                    ],
                 )
             ),
             array(
@@ -115,10 +181,16 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST' => array(
+                    'TEST' => (object) [
                         'value' => '123',
                         'description' => 'A comment with some text.',
-                    ),
+                    ],
+                ),
+                array(
+                    'TEST' => (object) [
+                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
+                        'description' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd',
+                    ],
                 )
             ),
             array(
@@ -131,10 +203,16 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST' => array(
+                    'TEST' => (object) [
                         'value' => '123',
                         'description' => 'A comment with some text.',
-                    ),
+                    ],
+                ),
+                array(
+                    'TEST' => (object) [
+                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
+                        'description' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd',
+                    ],
                 )
             ),
             array(
@@ -142,22 +220,32 @@ final class ReaderTest extends VaultTestCase
                 ###> STREAM ###
                 "\n".
                 "# A comment with some text 123.\n".
-                "TEST1=123\n".
+                "TEST_1=123\n".
                 "\n".
                 "# A comment with some text 456.\n".
-                "TEST2=456\n".
+                "TEST_2=456\n".
                 "\n",
                 ###< STREAM ###
 
                 array(
-                    'TEST1' => array(
+                    'TEST_1' => (object) [
                         'value' => '123',
                         'description' => 'A comment with some text 123.',
-                    ),
-                    'TEST2' => array(
+                    ],
+                    'TEST_2' => (object) [
                         'value' => '456',
                         'description' => 'A comment with some text 456.',
-                    ),
+                    ],
+                ),
+                array(
+                    'TEST_1' => (object) [
+                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
+                        'description' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJSN1RwRzE4WmNFZUE3OHRTNjhmaFZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5SXBaT1AiXQ==',
+                    ],
+                    'TEST_2' => (object) [
+                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0=',
+                        'description' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInFVZDZNR3dOZ0NaU0p5U0t6SHBndVZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5Tm9wYVAiXQ==',
+                    ],
                 )
             ),
         );

@@ -135,4 +135,12 @@ class Core
     {
         return $this->vault;
     }
+
+    /**
+     * Clears the vault.
+     */
+    public function clearVault()
+    {
+        $this->vault->clear();
+    }
 }

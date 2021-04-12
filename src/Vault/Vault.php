@@ -128,7 +128,7 @@ class Vault
             case 'object':
                 $return = (object) [];
                 foreach ($data as $key => $encryptedValue) {
-                    $return->{$key} = $this->core->getDecrypter()->decrypt($data->{$key});
+                    $return->{$key} = $data->{$key} === null ? null : $this->core->getDecrypter()->decrypt($data->{$key});
                 }
                 return $return;
 
@@ -158,6 +158,14 @@ class Vault
             'value' => $encryptedValue,
             'description' => $encryptedDescription,
         ];
+    }
+
+    /**
+     * Clears the vault.
+     */
+    public function clear()
+    {
+        $this->vault = [];
     }
 
     /**

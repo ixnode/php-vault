@@ -26,11 +26,13 @@
 
 namespace Ixnode\PhpVault\Vault;
 
+use SodiumException;
+
 class Reader
 {
     protected Vault $vault;
 
-    const PATTERN_NAME_VALUE = '~^([a-z][a-z0-9]+)=(.+)$~i';
+    const PATTERN_NAME_VALUE = '~^([a-z][a-z0-9_]+)=(.+)$~i';
 
     const PATTERN_DESCRIPTION = '~^# (.+)$~i';
 
@@ -55,11 +57,11 @@ class Reader
         $lines = explode("\n", $stream);
         $return = array();
 
-        $default = array(
+        $default = (object) [
             'name' => null,
             'value' => null,
             'description' => null,
-        );
+        ];
 
         $current = $default;
         foreach ($lines as $line) {
@@ -69,7 +71,7 @@ class Reader
             if (preg_match(self::PATTERN_DESCRIPTION, $line, $matches)) {
 
                 /* add parsed values to current array */
-                $current['description'] = $matches[1];
+                $current->description = $matches[1];
 
                 /* go to next line */
                 continue;
@@ -79,17 +81,17 @@ class Reader
             if (preg_match(self::PATTERN_NAME_VALUE, $line, $matches)) {
 
                 /* add parsed values to current array */
-                $current['name'] = $matches[1];
-                $current['value'] = $matches[2];
+                $current->name = $matches[1];
+                $current->value = $matches[2];
 
                 /* add current array to return array */
-                $return[$current['name']] = array(
-                    'value' => $current['value'],
-                    'description' => $current['description'],
-                );
+                $return[$current->name] = (object) [
+                    'value' => $current->value,
+                    'description' => $current->description,
+                ];
 
                 /* create new current array */
-                $current = $default;
+                $current = clone $default;
 
                 /* go to next line */
                 continue;
@@ -97,5 +99,19 @@ class Reader
         }
 
         return $return;
+    }
+
+    /**
+     * Adds given array to vault.
+     *
+     * @param array $array
+     * @param string|null $nonce
+     * @throws SodiumException
+     */
+    public function addArrayToVault(array $array, string $nonce = null)
+    {
+        foreach ($array as $name => $data) {
+            $this->vault->add($name, $data->value, $data->description, $nonce);
+        }
     }
 }
