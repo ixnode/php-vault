@@ -79,7 +79,7 @@ final class ReaderTest extends VaultTestCase
      * @param array $decrypted
      * @param array $encrypted
      */
-    public function testReaderArrayFromEncrypted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderArrayFromEncryptedToEncrypted(string $stream, array $decrypted, array $encrypted)
     {
         /* Arrange */
         $expected = $encrypted;
@@ -87,6 +87,27 @@ final class ReaderTest extends VaultTestCase
         /* Act */
         self::$core->clearVault();
         $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream);
+
+        /* Assert */
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test vault reader array.
+     *
+     * @dataProvider dataProviderArrayFromEncrypted
+     * @param string $stream
+     * @param array $decrypted
+     * @param array $encrypted
+     */
+    public function testReaderArrayFromEncryptedToDecrypted(string $stream, array $decrypted, array $encrypted)
+    {
+        /* Arrange */
+        $expected = $decrypted;
+
+        /* Act */
+        self::$core->clearVault();
+        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, true);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -139,8 +160,6 @@ final class ReaderTest extends VaultTestCase
         /* Assert */
         $this->assertEquals($expected, $actual);
     }
-
-
 
     /**
      * Provides some key variants to be converted.
