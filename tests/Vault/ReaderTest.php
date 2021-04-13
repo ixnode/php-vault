@@ -125,7 +125,8 @@ final class ReaderTest extends VaultTestCase
      */
     public function dataProviderArray(): array
     {
-        return array(
+        $testConfig = array(
+            /* Simple number test with one entry. */
             array(
 
                 ###> STREAM ###
@@ -133,18 +134,11 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST' => (object) [
-                        'value' => '123',
-                        'description' => null,
-                    ],
-                ),
-                array(
-                    'TEST' => (object) [
-                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
-                        'description' => null,
-                    ],
+                    'TEST' => $this->getConfigArray(array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
                 )
             ),
+
+            /* Simple number test with number variable. */
             array(
 
                 ###> STREAM ###
@@ -152,18 +146,11 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST_1' => (object) [
-                        'value' => '123',
-                        'description' => null,
-                    ],
-                ),
-                array(
-                    'TEST_1' => (object) [
-                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
-                        'description' => null,
-                    ],
+                    'TEST_1' => $this->getConfigArray(array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
                 )
             ),
+
+            /* Simple number test with two entries. */
             array(
 
                 ###> STREAM ###
@@ -172,26 +159,12 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST_1' => (object) [
-                        'value' => '123',
-                        'description' => null,
-                    ],
-                    'TEST_2' => (object) [
-                        'value' => '456',
-                        'description' => null,
-                    ],
+                    'TEST_1' => $this->getConfigArray(array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
+                    'TEST_2' => $this->getConfigArray(array('456', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0=')),
                 ),
-                array(
-                    'TEST_1' => (object) [
-                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
-                        'description' => null,
-                    ],
-                    'TEST_2' => (object) [
-                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0=',
-                        'description' => null,
-                    ],
-                )
             ),
+
+            /* Simple number test with comment. */
             array(
 
                 ###> STREAM ###
@@ -200,18 +173,14 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST' => (object) [
-                        'value' => '123',
-                        'description' => 'A comment with some text.',
-                    ],
+                    'TEST' => $this->getConfigArray(
+                        array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='),
+                        array('A comment with some text.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd')
+                    ),
                 ),
-                array(
-                    'TEST' => (object) [
-                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
-                        'description' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd',
-                    ],
-                )
             ),
+
+            /* Simple number test with comment and unnecessary extra lines.  */
             array(
 
                 ###> STREAM ###
@@ -222,18 +191,14 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST' => (object) [
-                        'value' => '123',
-                        'description' => 'A comment with some text.',
-                    ],
+                    'TEST' => $this->getConfigArray(
+                        array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='),
+                        array('A comment with some text.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd')
+                    ),
                 ),
-                array(
-                    'TEST' => (object) [
-                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
-                        'description' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd',
-                    ],
-                )
             ),
+
+            /* Simple number test with comment and two entries. */
             array(
 
                 ###> STREAM ###
@@ -247,26 +212,72 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST_1' => (object) [
-                        'value' => '123',
-                        'description' => 'A comment with some text 123.',
-                    ],
-                    'TEST_2' => (object) [
-                        'value' => '456',
-                        'description' => 'A comment with some text 456.',
-                    ],
+                    'TEST_1' => $this->getConfigArray(
+                        array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='),
+                        array('A comment with some text 123.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJSN1RwRzE4WmNFZUE3OHRTNjhmaFZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5SXBaT1AiXQ==')
+                    ),
+                    'TEST_2' => $this->getConfigArray(
+                        array('456', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0='),
+                        array('A comment with some text 456.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInFVZDZNR3dOZ0NaU0p5U0t6SHBndVZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5Tm9wYVAiXQ==')
+                    ),
                 ),
-                array(
-                    'TEST_1' => (object) [
-                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
-                        'description' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJSN1RwRzE4WmNFZUE3OHRTNjhmaFZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5SXBaT1AiXQ==',
-                    ],
-                    'TEST_2' => (object) [
-                        'value' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0=',
-                        'description' => 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInFVZDZNR3dOZ0NaU0p5U0t6SHBndVZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5Tm9wYVAiXQ==',
-                    ],
-                )
             ),
         );
+
+        /* Separate decrypted and encrypted part to two different arrays.
+         * Convert 2 dimensional array into a 3 dimensional array:
+         *
+         * ---
+         * array(
+         *     string,                                                     # SAME STRING
+         *     {
+         *         a => {'decrypted' => ...1..., 'encrypted' => ...2...},  # COMBINED DECRYPTED AND ENCRYPTED STRING
+         *         b => {'decrypted' => ...3..., 'encrypted' => ...4...},  # COMBINED DECRYPTED AND ENCRYPTED STRING
+         *         ...
+         *     }
+         * )
+         *
+         * =>
+         *
+         * array(
+         *     string,                             # SAME STRING
+         *     {a => ...1..., b => ...3..., ...},  # DECRYPTED PART
+         *     {a => ...2..., b => ...4..., ...}   # ENCRYPTED PART
+         * )
+         * ---
+         */
+        array_walk($testConfig, function(&$item) {
+            $item = array(
+                $item[0],
+                array_map(function ($array) { return $array['decrypted']; }, $item[1]),
+                array_map(function ($array) { return $array['encrypted']; }, $item[1]),
+            );
+        });
+
+        /* Return converted string */
+        return $testConfig;
+    }
+
+    protected function getConfigArray(array $value, array $description = null)
+    {
+        return array(
+            'decrypted' => $this->getValueDescriptionObject($value[0], $description === null ? null : $description[0]),
+            'encrypted' => $this->getValueDescriptionObject($value[1], $description === null ? null : $description[1]),
+        );
+    }
+
+    /**
+     * Returns a value description object (helper function).
+     *
+     * @param string $value
+     * @param string|null $description
+     * @return object
+     */
+    protected function getValueDescriptionObject(string $value, string $description = null): object
+    {
+        return (object) [
+            'value' => $value,
+            'description' => $description,
+        ];
     }
 }
