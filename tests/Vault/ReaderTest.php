@@ -26,6 +26,7 @@
 
 use Ixnode\PhpVault\Vault\Vault;
 use Ixnode\PhpVault\Vault\Reader;
+use JetBrains\PhpStorm\ArrayShape;
 use Test\Ixnode\PhpVault\Vault\VaultTestCase;
 
 final class ReaderTest extends VaultTestCase
@@ -52,12 +53,12 @@ final class ReaderTest extends VaultTestCase
     /**
      * Test vault reader array.
      *
-     * @dataProvider dataProviderArray
+     * @dataProvider dataProviderArrayFromDecrypted
      * @param string $stream
      * @param array $decrypted
      * @param array $encrypted
      */
-    public function testReaderArray(string $stream, array $decrypted, array $encrypted)
+    public function testReaderArrayFromDecrypted(string $stream, array $decrypted, array $encrypted)
     {
         /* Arrange */
         $expected = $decrypted;
@@ -71,15 +72,36 @@ final class ReaderTest extends VaultTestCase
     }
 
     /**
+     * Test vault reader array.
+     *
+     * @dataProvider dataProviderArrayFromEncrypted
+     * @param string $stream
+     * @param array $decrypted
+     * @param array $encrypted
+     */
+    public function testReaderArrayFromEncrypted(string $stream, array $decrypted, array $encrypted)
+    {
+        /* Arrange */
+        $expected = $encrypted;
+
+        /* Act */
+        self::$core->clearVault();
+        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream);
+
+        /* Assert */
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
      * Test add array to vault encrypted.
      *
-     * @dataProvider dataProviderArray
+     * @dataProvider dataProviderArrayFromDecrypted
      * @param string $stream
      * @param array $decrypted
      * @param array $encrypted
      * @throws SodiumException
      */
-    public function testReaderAddArrayToVaultEncrypted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderAddArrayToVaultEncryptedFromDecrypted(string $stream, array $decrypted, array $encrypted)
     {
         /* Arrange */
         $expected = $encrypted;
@@ -97,13 +119,13 @@ final class ReaderTest extends VaultTestCase
     /**
      * Test add array to vault decrypted.
      *
-     * @dataProvider dataProviderArray
+     * @dataProvider dataProviderArrayFromDecrypted
      * @param string $stream
      * @param array $decrypted
      * @param array $encrypted
      * @throws SodiumException
      */
-    public function testReaderAddArrayToVaultDecryted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderAddArrayToVaultDecrytedFromDecrypted(string $stream, array $decrypted, array $encrypted)
     {
         /* Arrange */
         $expected = $decrypted;
@@ -118,19 +140,45 @@ final class ReaderTest extends VaultTestCase
         $this->assertEquals($expected, $actual);
     }
 
+
+
     /**
      * Provides some key variants to be converted.
      *
      * @return string[][]
      */
-    public function dataProviderArray(): array
+    public function dataProviderArrayFromDecrypted(): array
     {
-        $testConfig = array(
+        return $this->convertConfig($this->getTestConfig(), 0);
+    }
+
+    /**
+     * Provides some key variants to be converted.
+     *
+     * @return string[][]
+     */
+    public function dataProviderArrayFromEncrypted(): array
+    {
+        return $this->convertConfig($this->getTestConfig(), 1);
+    }
+
+    /**
+     * Returns the test config.
+     *
+     * @return array[]
+     */
+    protected function getTestConfig(): array
+    {
+        return array(
             /* Simple number test with one entry. */
             array(
 
                 ###> STREAM ###
                 'TEST=123',
+                ###< STREAM ###
+
+                ###> STREAM ###
+                'TEST=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
                 ###< STREAM ###
 
                 array(
@@ -145,6 +193,10 @@ final class ReaderTest extends VaultTestCase
                 'TEST=abc',
                 ###< STREAM ###
 
+                ###> STREAM ###
+                'TEST=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ==',
+                ###< STREAM ###
+
                 array(
                     'TEST' => $this->getConfigArray(array('abc', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ==')),
                 )
@@ -157,6 +209,10 @@ final class ReaderTest extends VaultTestCase
                 'TEST="abc"',
                 ###< STREAM ###
 
+                ###> STREAM ###
+                'TEST="WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ=="',
+                ###< STREAM ###
+
                 array(
                     'TEST' => $this->getConfigArray(array('abc', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ==')),
                 )
@@ -167,6 +223,10 @@ final class ReaderTest extends VaultTestCase
 
                 ###> STREAM ###
                 'TEST1=123',
+                ###< STREAM ###
+
+                ###> STREAM ###
+                'TEST1=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
                 ###< STREAM ###
 
                 array(
@@ -182,6 +242,11 @@ final class ReaderTest extends VaultTestCase
                 'TEST_2=456',
                 ###< STREAM ###
 
+                ###> STREAM ###
+                'TEST_1=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='."\n".
+                'TEST_2=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0=',
+                ###< STREAM ###
+
                 array(
                     'TEST_1' => $this->getConfigArray(array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
                     'TEST_2' => $this->getConfigArray(array('456', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0=')),
@@ -194,6 +259,11 @@ final class ReaderTest extends VaultTestCase
                 ###> STREAM ###
                 '# A comment with some text.'."\n".
                 'TEST=123',
+                ###< STREAM ###
+
+                ###> STREAM ###
+                '# WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd'."\n".
+                'TEST=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==',
                 ###< STREAM ###
 
                 array(
@@ -211,6 +281,13 @@ final class ReaderTest extends VaultTestCase
                 "\n".
                 '# A comment with some text.'."\n".
                 'TEST=123'."\n".
+                "\n",
+                ###< STREAM ###
+
+                ###> STREAM ###
+                "\n".
+                '# WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd'."\n".
+                'TEST=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='."\n".
                 "\n",
                 ###< STREAM ###
 
@@ -232,6 +309,16 @@ final class ReaderTest extends VaultTestCase
                 "\n".
                 '# A comment with some text 456.'."\n".
                 'TEST_2=456'."\n".
+                "\n",
+                ###< STREAM ###
+
+                ###> STREAM ###
+                "\n".
+                '# WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJSN1RwRzE4WmNFZUE3OHRTNjhmaFZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5SXBaT1AiXQ=='."\n".
+                'TEST_1=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='."\n".
+                "\n".
+                '# WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInFVZDZNR3dOZ0NaU0p5U0t6SHBndVZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5Tm9wYVAiXQ=='."\n".
+                'TEST_2=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0='."\n".
                 "\n",
                 ###< STREAM ###
 
@@ -264,6 +351,20 @@ final class ReaderTest extends VaultTestCase
                 "\n",
                 ###< STREAM ###
 
+                ###> STREAM ###
+                "\n".
+                '# WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJSN1RwRzE4WmNFZUE3OHRTNjhmaFZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5SXBaT1AiXQ=='."\n".
+                'TEST_1=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='."\n".
+                '# WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInFVZDZNR3dOZ0NaU0p5U0t6SHBndVZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5Tm9wYVAiXQ=='."\n".
+                'TEST_2=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0='."\n".
+                "\n".
+                '# WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJhb2hRVWRhMjBWUDNGYWVtbWVyNjFOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5T3I1bVAiXQ=='."\n".
+                'TEST_3="WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIkc5SzhXTDJyM01ycW0rdFpkd1FwdzBZVmo1MWwxeU5VcjZcLzk2XC9tVEN5MjVTMHFcL09mQVMiXQ=="'."\n".
+                '#WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInVENUhYckpyRUFQTjdwbGtLZkl0aTFOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd6WTljT1AiXQ=='."\n".
+                'TEST_4=WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIkc5SzhXTDJyM01ycW0rdFpkd1FwdzBZVmo1MWwxeU5VcjZcLzk2XC9tVEN5MjVTMHFcL09mQVMiXQ=='."\n".
+                "\n",
+                ###< STREAM ###
+
                 array(
                     'TEST_1' => $this->getConfigArray(
                         array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='),
@@ -284,42 +385,56 @@ final class ReaderTest extends VaultTestCase
                 ),
             ),
         );
+    }
 
-        /* Separate decrypted and encrypted part to two different arrays.
-         * Convert 2 dimensional array into a 3 dimensional array:
-         *
-         * ---
-         * array(
-         *     string,                                                     # SAME STRING
-         *     {
-         *         a => {'decrypted' => ...1..., 'encrypted' => ...2...},  # COMBINED DECRYPTED AND ENCRYPTED STRING
-         *         b => {'decrypted' => ...3..., 'encrypted' => ...4...},  # COMBINED DECRYPTED AND ENCRYPTED STRING
-         *         ...
-         *     }
-         * )
-         *
-         * =>
-         *
-         * array(
-         *     string,                             # SAME STRING
-         *     {a => ...1..., b => ...3..., ...},  # DECRYPTED PART
-         *     {a => ...2..., b => ...4..., ...}   # ENCRYPTED PART
-         * )
-         * ---
-         */
-        array_walk($testConfig, function(&$item) {
+    /**
+     * Separates the decrypted and encrypted part to two different arrays of given config.
+     * Convert 2 dimensional array into a 3 dimensional array:
+     *
+     * ---
+     * array(
+     *     string,                                                     # SAME STRING
+     *     {
+     *         a => {'decrypted' => ...1..., 'encrypted' => ...2...},  # COMBINED DECRYPTED AND ENCRYPTED STRING
+     *         b => {'decrypted' => ...3..., 'encrypted' => ...4...},  # COMBINED DECRYPTED AND ENCRYPTED STRING
+     *         ...
+     *     }
+     * )
+     *
+     * =>
+     *
+     * array(
+     *     string,                             # SAME STRING
+     *     {a => ...1..., b => ...3..., ...},  # DECRYPTED PART
+     *     {a => ...2..., b => ...4..., ...}   # ENCRYPTED PART
+     * )
+     * ---
+     *
+     * @param array $config
+     * @param int $number
+     * @return mixed
+     */
+    protected function convertConfig(array $config, int $number): array
+    {
+        array_walk($config, function(&$item) use ($number) {
             $item = array(
-                $item[0],
-                array_map(function ($array) { return $array['decrypted']; }, $item[1]),
-                array_map(function ($array) { return $array['encrypted']; }, $item[1]),
+                $item[$number],
+                array_map(function ($array) { return $array['decrypted']; }, $item[2]),
+                array_map(function ($array) { return $array['encrypted']; }, $item[2]),
             );
         });
 
-        /* Return converted string */
-        return $testConfig;
+        return $config;
     }
 
-    protected function getConfigArray(array $value, array $description = null)
+    /**
+     * Returns a config array from given values and descriptions.
+     *
+     * @param array $value
+     * @param array|null $description
+     * @return object[]
+     */
+    #[ArrayShape(['decrypted' => "object", 'encrypted' => "object"])] protected function getConfigArray(array $value, array $description = null): array
     {
         return array(
             'decrypted' => $this->getValueDescriptionObject($value[0], $description === null ? null : $description[0]),
