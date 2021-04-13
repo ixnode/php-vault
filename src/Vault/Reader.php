@@ -50,9 +50,10 @@ class Reader
      * Converts given stream to array.
      *
      * @param string $stream
+     * @param bool $decrypt
      * @return array[]
      */
-    public function convertStreamToArray(string $stream): array
+    public function convertStreamToArray(string $stream, bool $decrypt = false): array
     {
         $lines = explode("\n", $stream);
         $return = array();
@@ -71,7 +72,7 @@ class Reader
             if (preg_match(self::PATTERN_DESCRIPTION, $line, $matches)) {
 
                 /* add parsed values to current array */
-                $current->description = $matches[1];
+                $current->description = $this->vault->convertString($matches[1], $decrypt);
 
                 /* go to next line */
                 continue;
@@ -86,7 +87,7 @@ class Reader
 
                 /* add current array to return array */
                 $return[$this->vault->getUnderscoredKey($current->name)] = (object) [
-                    'value' => $this->vault->removeQuotes($current->value),
+                    'value' => $this->vault->convertString($current->value, $decrypt),
                     'description' => $current->description,
                 ];
 

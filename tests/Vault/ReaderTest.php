@@ -65,7 +65,7 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream);
+        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -86,7 +86,7 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream);
+        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -129,7 +129,31 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream);
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
+        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
+        $actual = self::$core->getVault()->getAll(true, true, false);
+
+        /* Assert */
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test add array to vault encrypted.
+     *
+     * @dataProvider dataProviderArrayFromEncrypted
+     * @param string $stream
+     * @param array $decrypted
+     * @param array $encrypted
+     * @throws SodiumException
+     */
+    public function testReaderAddArrayToVaultEncryptedFromEncrypted(string $stream, array $decrypted, array $encrypted)
+    {
+        /* Arrange */
+        $expected = $encrypted;
+
+        /* Act */
+        self::$core->clearVault();
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, true);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
         $actual = self::$core->getVault()->getAll(true, true, false);
 
@@ -153,7 +177,31 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream);
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
+        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
+        $actual = self::$core->getVault()->getAll(true, true, true);
+
+        /* Assert */
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test add array to vault decrypted.
+     *
+     * @dataProvider dataProviderArrayFromEncrypted
+     * @param string $stream
+     * @param array $decrypted
+     * @param array $encrypted
+     * @throws SodiumException
+     */
+    public function testReaderAddArrayToVaultDecrytedFromEncrypted(string $stream, array $decrypted, array $encrypted)
+    {
+        /* Arrange */
+        $expected = $decrypted;
+
+        /* Act */
+        self::$core->clearVault();
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, true);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
         $actual = self::$core->getVault()->getAll(true, true, true);
 

@@ -199,14 +199,21 @@ class Vault
     }
 
     /**
-     * Removes quotes from string if needed.
+     * Removes quotes from string and decrypt if needed.
      *
      * @param string $string
+     * @param bool $decrypt
      * @return string
      */
-    public function removeQuotes(string $string): string
+    public function convertString(string $string, bool $decrypt = false): string
     {
-        return preg_replace('~^[\'"]?(.*?)[\'"]?$~', '$1', $string);
+        $string = preg_replace('~^[\'"]?(.*?)[\'"]?$~', '$1', $string);
+
+        if ($decrypt) {
+            $string = $this->core->getDecrypter()->decrypt($string);
+        }
+
+        return $string;
     }
 
     /**
