@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+
+use Ixnode\PhpVault\Core;
+
+# Load autoloader
+foreach ([__DIR__ . '/../vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
+
+/* Set private key */
+$_SERVER['PRIVATE_KEY'] = 'o8aZw6FIZmSMZq/89DNgxpNZHcgMbEOiU+1TMhNntb4=';
+
+/* Reads first parameter */
+$file = $argv[1];
+
+/* Initiate the PhpVault Core */
+$core = new Core();
+$core->getVault()->getReader()->addFileToVault($file, false);
+
+/* Print decrypted vault */
+print "\n";
+foreach ($core->getVault()->getAllDecrypted(false, true) as $key => $data) {
+    print sprintf("%s\n", 'Entry');
+    print sprintf("%s\n", '-----');
+    print sprintf("%-15s%s\n", 'Name:', $key);
+    print sprintf("%-15s%s\n", 'Value:', $data->value);
+    print sprintf("%-15s%s\n", 'Description:', $data->description);
+    print "\n";
+}

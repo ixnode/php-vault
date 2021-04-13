@@ -27,6 +27,7 @@
 namespace Ixnode\PhpVault\Vault;
 
 use SodiumException;
+use Exception;
 
 class Reader
 {
@@ -100,6 +101,34 @@ class Reader
         }
 
         return $return;
+    }
+
+    /**
+     * Adds given file to vault.
+     *
+     * @param string $file
+     * @param bool $decrypt
+     * @throws SodiumException
+     */
+    public function addFileToVault(string $file, bool $decrypt = false)
+    {
+        if (!file_exists($file)) {
+            throw new Exception(sprintf('The given file "%s" does not exist.', $file));
+        }
+
+        $this->addStreamToVault(file_get_contents($file), $decrypt);
+    }
+
+    /**
+     * Adds given stream to vault.
+     *
+     * @param string $stream
+     * @param bool $decrypt
+     * @throws SodiumException
+     */
+    public function addStreamToVault(string $stream, bool $decrypt = false)
+    {
+        $this->addArrayToVault($this->convertStreamToArray($stream, $decrypt));
     }
 
     /**
