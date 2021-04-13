@@ -34,7 +34,7 @@ class Reader
 
     const PATTERN_NAME_VALUE = '~^([a-z][a-z0-9_]+)=(.+)$~i';
 
-    const PATTERN_DESCRIPTION = '~^# (.+)$~i';
+    const PATTERN_DESCRIPTION = '~^#[ ]?(.+)$~i';
 
     /**
      * Writer constructor.
@@ -86,7 +86,7 @@ class Reader
 
                 /* add current array to return array */
                 $return[$this->vault->getUnderscoredKey($current->name)] = (object) [
-                    'value' => $current->value,
+                    'value' => $this->vault->removeQuotes($current->value),
                     'description' => $current->description,
                 ];
 

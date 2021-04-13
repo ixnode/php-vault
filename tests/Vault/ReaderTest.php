@@ -130,7 +130,7 @@ final class ReaderTest extends VaultTestCase
             array(
 
                 ###> STREAM ###
-                "TEST=123",
+                'TEST=123',
                 ###< STREAM ###
 
                 array(
@@ -138,11 +138,35 @@ final class ReaderTest extends VaultTestCase
                 )
             ),
 
+            /* Simple string test with one entry and without quotes. */
+            array(
+
+                ###> STREAM ###
+                'TEST=abc',
+                ###< STREAM ###
+
+                array(
+                    'TEST' => $this->getConfigArray(array('abc', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ==')),
+                )
+            ),
+
+            /* Simple string test with one entry and quotes. */
+            array(
+
+                ###> STREAM ###
+                'TEST="abc"',
+                ###< STREAM ###
+
+                array(
+                    'TEST' => $this->getConfigArray(array('abc', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ==')),
+                )
+            ),
+
             /* Simple number test with number variable. */
             array(
 
                 ###> STREAM ###
-                "TEST1=123",
+                'TEST1=123',
                 ###< STREAM ###
 
                 array(
@@ -154,8 +178,8 @@ final class ReaderTest extends VaultTestCase
             array(
 
                 ###> STREAM ###
-                "TEST_1=123\n".
-                "TEST_2=456",
+                'TEST_1=123'."\n".
+                'TEST_2=456',
                 ###< STREAM ###
 
                 array(
@@ -168,8 +192,8 @@ final class ReaderTest extends VaultTestCase
             array(
 
                 ###> STREAM ###
-                "# A comment with some text.\n".
-                "TEST=123",
+                '# A comment with some text.'."\n".
+                'TEST=123',
                 ###< STREAM ###
 
                 array(
@@ -185,8 +209,8 @@ final class ReaderTest extends VaultTestCase
 
                 ###> STREAM ###
                 "\n".
-                "# A comment with some text.\n".
-                "TEST=123\n".
+                '# A comment with some text.'."\n".
+                'TEST=123'."\n".
                 "\n",
                 ###< STREAM ###
 
@@ -203,11 +227,11 @@ final class ReaderTest extends VaultTestCase
 
                 ###> STREAM ###
                 "\n".
-                "# A comment with some text 123.\n".
-                "TEST_1=123\n".
+                '# A comment with some text 123.'."\n".
+                'TEST_1=123'."\n".
                 "\n".
-                "# A comment with some text 456.\n".
-                "TEST_2=456\n".
+                '# A comment with some text 456.'."\n".
+                'TEST_2=456'."\n".
                 "\n",
                 ###< STREAM ###
 
@@ -219,6 +243,43 @@ final class ReaderTest extends VaultTestCase
                     'TEST_2' => $this->getConfigArray(
                         array('456', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0='),
                         array('A comment with some text 456.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInFVZDZNR3dOZ0NaU0p5U0t6SHBndVZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5Tm9wYVAiXQ==')
+                    ),
+                ),
+            ),
+
+            /* Complex test with comments and multiple entries and some "mistakes". */
+            array(
+
+                ###> STREAM ###
+                "\n".
+                '# A comment with some text 123.'."\n".
+                'TEST_1=123'."\n".
+                '# A comment with some text 456.'."\n".
+                'TEST_2=456'."\n".
+                "\n".
+                '# A comment with some text 789.'."\n".
+                'TEST_3="This is a secure value."'."\n".
+                '#A comment with some text abc.'."\n".
+                'TEST_4=This is a secure value.'."\n".
+                "\n",
+                ###< STREAM ###
+
+                array(
+                    'TEST_1' => $this->getConfigArray(
+                        array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='),
+                        array('A comment with some text 123.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJSN1RwRzE4WmNFZUE3OHRTNjhmaFZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5SXBaT1AiXQ==')
+                    ),
+                    'TEST_2' => $this->getConfigArray(
+                        array('456', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0='),
+                        array('A comment with some text 456.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInFVZDZNR3dOZ0NaU0p5U0t6SHBndVZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5Tm9wYVAiXQ==')
+                    ),
+                    'TEST_3' => $this->getConfigArray(
+                        array('This is a secure value.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIkc5SzhXTDJyM01ycW0rdFpkd1FwdzBZVmo1MWwxeU5VcjZcLzk2XC9tVEN5MjVTMHFcL09mQVMiXQ=='),
+                        array('A comment with some text 789.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJhb2hRVWRhMjBWUDNGYWVtbWVyNjFOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5T3I1bVAiXQ==')
+                    ),
+                    'TEST_4' => $this->getConfigArray(
+                        array('This is a secure value.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIkc5SzhXTDJyM01ycW0rdFpkd1FwdzBZVmo1MWwxeU5VcjZcLzk2XC9tVEN5MjVTMHFcL09mQVMiXQ=='),
+                        array('A comment with some text abc.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInVENUhYckpyRUFQTjdwbGtLZkl0aTFOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd6WTljT1AiXQ==')
                     ),
                 ),
             ),

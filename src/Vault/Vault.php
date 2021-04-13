@@ -199,6 +199,17 @@ class Vault
     }
 
     /**
+     * Removes quotes from string if needed.
+     *
+     * @param string $string
+     * @return string
+     */
+    public function removeQuotes(string $string): string
+    {
+        return preg_replace('~^[\'"]?(.*?)[\'"]?$~', '$1', $string);
+    }
+
+    /**
      * Returns the vault reader.
      *
      * @return Reader
