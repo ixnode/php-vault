@@ -11,11 +11,13 @@ foreach ([__DIR__ . '/../vendor/autoload.php'] as $file) {
     }
 }
 
-/* Set private key */
-$_SERVER['PRIVATE_KEY'] = 'o8aZw6FIZmSMZq/89DNgxpNZHcgMbEOiU+1TMhNntb4=';
-
 /* Reads first parameter */
 $file = $argv[1];
+$privateKeyFile = $argv[2];
+$privateKey = file_get_contents($privateKeyFile);
+
+/* Set private key */
+$_SERVER['PRIVATE_KEY'] = $privateKey;
 
 /* Initiate the PhpVault Core */
 $core = new Core();
