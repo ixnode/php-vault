@@ -27,6 +27,7 @@
 namespace Ixnode\PhpVault;
 
 use SodiumException;
+use Exception;
 
 class Decrypter
 {
@@ -48,6 +49,7 @@ class Decrypter
      * @param string $data
      * @return false|string
      * @throws SodiumException
+     * @throws Exception
      */
     public function decrypt(string $data)
     {
@@ -57,6 +59,11 @@ class Decrypter
         );
 
         $dataArray = json_decode(base64_decode($data), true);
+
+        /* Check whether the value could be decrypted. */
+        if (gettype($dataArray) !== 'array') {
+            throw new Exception('Unable to decrypt the given value.');
+        }
 
         $nonce = base64_decode($dataArray[0]);
         $encryptedMessage = base64_decode($dataArray[1]);

@@ -1,0 +1,247 @@
+#!/usr/bin/env php
+<?php
+
+# Bootstrap autoloader
+require __DIR__.'/../vendor/autoload.php';
+
+use splitbrain\phpcli\CLI;
+use splitbrain\phpcli\Colors;
+use splitbrain\phpcli\Options;
+use splitbrain\phpcli\TableFormatter;
+use Ixnode\PhpVault\Core;
+
+class CliEnvSecure extends CLI
+{
+    const COMMAND_DISPLAY = 'display';
+
+    const COMMAND_SET = 'set';
+
+    const OPTION_VERSION = 'version';
+
+    const OPTION_PUBLIC_KEY = 'public-key';
+
+    const OPTION_PRIVATE_KEY = 'private-key';
+
+    const OPTION_ENV_FILE = 'env-file';
+
+    const OPTION_DISPLAY_DECRYPTED = 'display-decrypted';
+
+    const OPTION_LOAD_ENCRYPTED = 'load-encrypted';
+
+    const SETTING_MAX_WIDTH = 200;
+
+    const LIST_NAME = 'Name';
+
+    const LIST_VALUE = 'Value';
+
+    const LIST_DESCRIPTION = 'Description';
+
+    const LIST_NAME_WIDTH = '25%';
+
+    const LIST_VALUE_WIDTH = '25%';
+
+    const LIST_DESCRIPTION_WIDTH = '*';
+
+    const LB = "\n";
+
+    /**
+     * Register options and arguments.
+     *
+     * @param Options $options
+     */
+    protected function setup(Options $options)
+    {
+        /* Set help message */
+        $options->setHelp('Manages encrypted environment files.');
+
+        /* Register commands */
+        $options->registerCommand(self::COMMAND_DISPLAY, 'Displays the environment variables.');
+        $options->registerCommand(self::COMMAND_SET, 'Sets or updates a new variable.');
+
+        /* Register options */
+        $options->registerOption(self::OPTION_VERSION, 'Print version.', 'v');
+
+        /* Register display options */
+        $options->registerOption(self::OPTION_PUBLIC_KEY, 'Specifies the public key.', null, self::OPTION_PUBLIC_KEY, self::COMMAND_DISPLAY);
+        $options->registerOption(self::OPTION_PRIVATE_KEY, 'Specifies the private key.', null, self::OPTION_PRIVATE_KEY, self::COMMAND_DISPLAY);
+        $options->registerOption(self::OPTION_ENV_FILE, 'Specifies the env files.', null, self::OPTION_ENV_FILE, self::COMMAND_DISPLAY);
+        $options->registerOption(self::OPTION_DISPLAY_DECRYPTED, 'Specifies to show decrypted the contents.', null, false, self::COMMAND_DISPLAY);
+        $options->registerOption(self::OPTION_LOAD_ENCRYPTED, 'Specifies to load encrypted contents.', null, false, self::COMMAND_DISPLAY);
+    }
+
+    /**
+     * Bootstrap function.
+     *
+     * @param Options $options
+     * @throws SodiumException
+     */
+    protected function main(Options $options)
+    {
+        if ($options->getOpt('version')) {
+            $this->info(Core::VERSION);
+            return;
+        }
+
+        /* Execute the command part. */
+        switch ($options->getCmd()) {
+            case self::COMMAND_DISPLAY: $this->mainDisplay($options); break;
+            case self::COMMAND_SET: $this->mainSet($options); break;
+            default: $this->displayUnknownOrEmptyCommand($options);
+        }
+    }
+
+    /**
+     * Bootstrap display function.
+     *
+     * @param Options $options
+     * @throws SodiumException
+     * @throws Exception
+     */
+    protected function mainDisplay(Options $options)
+    {
+        /* Check that the env file was given. */
+        if ($options->getOpt(self::OPTION_ENV_FILE, null) === null) {
+            $this->displayNoEnvFileGiven($options);
+            return;
+        }
+
+        /* Check that the given env file exists. */
+        if (!file_exists($options->getOpt(self::OPTION_ENV_FILE))) {
+            $this->displayFileNotFound($options, $options->getOpt(self::OPTION_ENV_FILE));
+            return;
+        }
+
+        /* Initiate the PhpVault Core */
+        $core = new Core(false);
+
+        /* Check that at least one key was given. */
+        if ($options->getOpt(self::OPTION_PRIVATE_KEY, null) !== null) {
+            $core->getKeyPair()->loadPrivateKeyFromFile($options->getOpt(self::OPTION_PRIVATE_KEY));
+        }
+
+        /* Load env file */
+        $core->getVault()->getReader()->addFileToVault($options->getOpt(self::OPTION_ENV_FILE), $options->getOpt(self::OPTION_LOAD_ENCRYPTED));
+
+        /* Displays the vault */
+        $this->displayEnvVariables($options, $core);
+    }
+
+    /**
+     * Bootstrap set function.
+     *
+     * @param Options $options
+     */
+    protected function mainSet(Options $options)
+    {
+        /* Check that at least one key was given */
+        if ($options->getOpt(self::OPTION_PUBLIC_KEY, null) === null && $options->getOpt(self::OPTION_PRIVATE_KEY, null) === null) {
+            $this->displayNoKeyGiven($options);
+            return;
+        }
+    }
+
+    /**
+     * Displays all environment variables.
+     *
+     * @param Options $options
+     * @param Core $core
+     * @throws Exception
+     */
+    protected function displayEnvVariables(Options $options, Core $core)
+    {
+        /* Initialize the table formatter. */
+        $tableFormatter = new TableFormatter($this->colors);
+        $tableFormatter->setMaxWidth(self::SETTING_MAX_WIDTH);
+        $tableFormatter->setBorder(' | ');
+
+        /* Displays the header. */
+        echo self::LB;
+        echo $tableFormatter->format(
+            array(self::LIST_NAME_WIDTH, self::LIST_VALUE_WIDTH, self::LIST_DESCRIPTION_WIDTH),
+            array(self::LIST_NAME, self::LIST_VALUE, self::LIST_DESCRIPTION)
+        );
+
+        /* A line across the whole width */
+        echo str_pad('', $tableFormatter->getMaxWidth(), '-') . "\n";
+
+        /* Displays the content. */
+        foreach ($core->getVault()->getAll(false, true, $options->getOpt(self::OPTION_DISPLAY_DECRYPTED)) as $key => $data) {
+            echo $tableFormatter->format(
+                array(self::LIST_NAME_WIDTH, self::LIST_VALUE_WIDTH, self::LIST_DESCRIPTION_WIDTH),
+                array($key, $data->value, $data->description),
+                array(Colors::C_CYAN, Colors::C_RED, Colors::C_GREEN)
+            );
+        }
+    }
+
+    /**
+     * Indicates that the command is unknown.
+     *
+     * @param Options $options
+     */
+    protected function displayUnknownOrEmptyCommand(Options $options)
+    {
+        $this->error('Unknown or empty command.');
+        $this->showHelp($options, true);
+    }
+
+    /**
+     * Indicates that no key was given.
+     *
+     * @param Options $options
+     */
+    protected function displayNoKeyGiven(Options $options)
+    {
+        $this->error('No key was given. Please specify one.');
+        $this->showHelp($options, true);
+    }
+
+    /**
+     * Indicates that no private key was given.
+     *
+     * @param Options $options
+     */
+    protected function displayNoPrivateKeyGiven(Options $options)
+    {
+        $this->error('No private key was given. Please specify one.');
+        $this->showHelp($options, true);
+    }
+
+    /**
+     * Indicates that no env file was given.
+     *
+     * @param Options $options
+     */
+    protected function displayNoEnvFileGiven(Options $options)
+    {
+        $this->error('No env file was given. Please specify one.');
+        $this->showHelp($options, true);
+    }
+
+    /**
+     * Indicates that given file was not found.
+     *
+     * @param Options $options
+     * @param string $file
+     */
+    protected function displayFileNotFound(Options $options, string $file)
+    {
+        $this->error('The given file "{file}" was not found.', array('file' => $file, ));
+        $this->showHelp($options, true);
+    }
+
+    /**
+     * Displays the help.
+     *
+     * @param Options $options
+     * @param bool $withLineBreak
+     */
+    protected function showHelp(Options $options, bool $withLineBreak = false)
+    {
+        echo sprintf('%s%s', $withLineBreak ? self::LB : '', $options->help());
+    }
+}
+
+/* Start */
+$cli = new CliEnvSecure();
+$cli->run();

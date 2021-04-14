@@ -52,7 +52,10 @@ class KeyPair
     {
         $this->core = $core;
 
-        $this->renew($forceCreateNew, $privateKey, $publicKey);
+        /* Renew key if given. */
+        if ($forceCreateNew || $privateKey !== null || $publicKey !== null) {
+            $this->renew($forceCreateNew, $privateKey, $publicKey);
+        }
     }
 
     /**
@@ -123,6 +126,38 @@ class KeyPair
         if ($this->keyPair === null) {
             throw new Exception('No private or public key found.');
         }
+    }
+
+    /**
+     * Loads private key from file.
+     *
+     * @param string $privateKey
+     * @throws SodiumException
+     */
+    public function loadPrivateKeyFromFile(string $privateKey)
+    {
+        /* Check that given file exists. */
+        if (!file_exists($privateKey)) {
+            throw new Exception(sprintf('The given private key does not exists.', $privateKey));
+        }
+
+        $this->renew(false, file_get_contents($privateKey));
+    }
+
+    /**
+     * Loads public key from file.
+     *
+     * @param string $publicKey
+     * @throws SodiumException
+     */
+    public function loadPublicKeyFromFile(string $publicKey)
+    {
+        /* Check that given file exists. */
+        if (!file_exists($publicKey)) {
+            throw new Exception(sprintf('The given private key does not exists.', $publicKey));
+        }
+
+        $this->renew(false, null, file_get_contents($publicKey));
     }
 
     /**
