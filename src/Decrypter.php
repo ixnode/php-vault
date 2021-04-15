@@ -51,7 +51,7 @@ class Decrypter
      * @throws SodiumException
      * @throws Exception
      */
-    public function decrypt(string $data)
+    public function decrypt(string $data): bool|string
     {
         $key = sodium_crypto_box_keypair_from_secretkey_and_publickey(
             base64_decode($this->core->getKeyPair()->getPrivate()),
@@ -62,7 +62,7 @@ class Decrypter
 
         /* Check whether the value could be decrypted. */
         if (gettype($dataArray) !== 'array') {
-            throw new Exception('Unable to decrypt the given value.');
+            throw new Exception('Decrypter::decrypt: Unable to decrypt the given data block.');
         }
 
         $nonce = base64_decode($dataArray[0]);

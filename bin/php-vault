@@ -12,6 +12,8 @@ use Ixnode\PhpVault\Core;
 
 class CliEnvSecure extends CLI
 {
+    const COMMAND_GENERATE_KEYS = 'generate-keys';
+
     const COMMAND_DISPLAY = 'display';
 
     const COMMAND_SET = 'set';
@@ -28,7 +30,15 @@ class CliEnvSecure extends CLI
 
     const OPTION_LOAD_ENCRYPTED = 'load-encrypted';
 
+    const ARGUMENT_NAME = 'name';
+
+    const ARGUMENT_VALUE = 'value';
+
+    const ARGUMENT_DESCRIPTION = 'description';
+
     const SETTING_MAX_WIDTH = 200;
+
+    const SETTING_MAX_WIDTH_PPK = 74;
 
     const LIST_NAME = 'Name';
 
@@ -36,11 +46,19 @@ class CliEnvSecure extends CLI
 
     const LIST_DESCRIPTION = 'Description';
 
+    const LIST_PPK_NAME = 'Name';
+
+    const LIST_PPK_KEY = 'Key';
+
     const LIST_NAME_WIDTH = '25%';
 
     const LIST_VALUE_WIDTH = '25%';
 
     const LIST_DESCRIPTION_WIDTH = '*';
+
+    const LIST_PPK_NAME_WIDTH = '12';
+
+    const LIST_PPK_KEY_WIDTH = '*';
 
     const LB = "\n";
 
@@ -55,18 +73,26 @@ class CliEnvSecure extends CLI
         $options->setHelp('Manages encrypted environment files.');
 
         /* Register commands */
+        $options->registerCommand(self::COMMAND_GENERATE_KEYS, 'Generates and displays a private and public key.');
         $options->registerCommand(self::COMMAND_DISPLAY, 'Displays the environment variables.');
         $options->registerCommand(self::COMMAND_SET, 'Sets or updates a new variable.');
 
         /* Register options */
         $options->registerOption(self::OPTION_VERSION, 'Print version.', 'v');
 
-        /* Register display options */
-        $options->registerOption(self::OPTION_PUBLIC_KEY, 'Specifies the public key.', null, self::OPTION_PUBLIC_KEY, self::COMMAND_DISPLAY);
-        $options->registerOption(self::OPTION_PRIVATE_KEY, 'Specifies the private key.', null, self::OPTION_PRIVATE_KEY, self::COMMAND_DISPLAY);
-        $options->registerOption(self::OPTION_ENV_FILE, 'Specifies the env files.', null, self::OPTION_ENV_FILE, self::COMMAND_DISPLAY);
-        $options->registerOption(self::OPTION_DISPLAY_DECRYPTED, 'Specifies to show decrypted the contents.', null, false, self::COMMAND_DISPLAY);
-        $options->registerOption(self::OPTION_LOAD_ENCRYPTED, 'Specifies to load encrypted contents.', null, false, self::COMMAND_DISPLAY);
+        /* Register display and set options */
+        foreach ([self::COMMAND_DISPLAY, self::COMMAND_SET] as $command) {
+            $options->registerOption(self::OPTION_PUBLIC_KEY, 'Specifies the public key.', null, self::OPTION_PUBLIC_KEY, $command);
+            $options->registerOption(self::OPTION_PRIVATE_KEY, 'Specifies the private key.', null, self::OPTION_PRIVATE_KEY, $command);
+            $options->registerOption(self::OPTION_ENV_FILE, 'Specifies the env files.', null, self::OPTION_ENV_FILE, $command);
+            $options->registerOption(self::OPTION_DISPLAY_DECRYPTED, 'Specifies to show decrypted the contents.', null, false, $command);
+            $options->registerOption(self::OPTION_LOAD_ENCRYPTED, 'Specifies to load encrypted contents.', null, false, $command);
+        }
+
+        /* Register set arguments */
+        $options->registerArgument(self::ARGUMENT_NAME, 'The name of the new variable.', true, self::COMMAND_SET);
+        $options->registerArgument(self::ARGUMENT_VALUE, 'The value of the new variable.', true, self::COMMAND_SET);
+        $options->registerArgument(self::ARGUMENT_DESCRIPTION, 'The description of the new variable.', false, self::COMMAND_SET);
     }
 
     /**
@@ -84,10 +110,20 @@ class CliEnvSecure extends CLI
 
         /* Execute the command part. */
         switch ($options->getCmd()) {
+            case self::COMMAND_GENERATE_KEYS: $this->mainGenerateKeys($options); break;
             case self::COMMAND_DISPLAY: $this->mainDisplay($options); break;
             case self::COMMAND_SET: $this->mainSet($options); break;
             default: $this->displayUnknownOrEmptyCommand($options);
         }
+    }
+
+    protected function mainGenerateKeys(Options $options)
+    {
+        /* Initiate the PhpVault Core */
+        $core = new Core(true);
+
+        /* Display the private and public key */
+        $this->displayPrivateAndPublicKeys($options, $core);
     }
 
     /**
@@ -115,6 +151,11 @@ class CliEnvSecure extends CLI
         $core = new Core(false);
 
         /* Check that at least one key was given. */
+        if ($options->getOpt(self::OPTION_PUBLIC_KEY, null) !== null) {
+            $core->getKeyPair()->loadPublicKeyFromFile($options->getOpt(self::OPTION_PUBLIC_KEY));
+        }
+
+        /* Check that at least one key was given. */
         if ($options->getOpt(self::OPTION_PRIVATE_KEY, null) !== null) {
             $core->getKeyPair()->loadPrivateKeyFromFile($options->getOpt(self::OPTION_PRIVATE_KEY));
         }
@@ -130,14 +171,80 @@ class CliEnvSecure extends CLI
      * Bootstrap set function.
      *
      * @param Options $options
+     * @throws SodiumException
+     * @throws Exception
      */
     protected function mainSet(Options $options)
     {
-        /* Check that at least one key was given */
-        if ($options->getOpt(self::OPTION_PUBLIC_KEY, null) === null && $options->getOpt(self::OPTION_PRIVATE_KEY, null) === null) {
-            $this->displayNoKeyGiven($options);
+        /* Check that the env file was given. */
+        if ($options->getOpt(self::OPTION_ENV_FILE, null) === null) {
+            $this->displayNoEnvFileGiven($options);
             return;
         }
+
+        /* Check that the given env file exists. */
+        if (!file_exists($options->getOpt(self::OPTION_ENV_FILE))) {
+            $this->displayFileNotFound($options, $options->getOpt(self::OPTION_ENV_FILE));
+            return;
+        }
+
+        /* Initiate the PhpVault Core */
+        $core = new Core(false);
+
+        /* Check that at least one key was given. */
+        if ($options->getOpt(self::OPTION_PUBLIC_KEY, null) !== null) {
+            $core->getKeyPair()->loadPublicKeyFromFile($options->getOpt(self::OPTION_PUBLIC_KEY));
+        }
+
+        /* Check that at least one key was given. */
+        if ($options->getOpt(self::OPTION_PRIVATE_KEY, null) !== null) {
+            $core->getKeyPair()->loadPrivateKeyFromFile($options->getOpt(self::OPTION_PRIVATE_KEY));
+        }
+
+        /* Load env file */
+        $core->getVault()->getReader()->addFileToVault($options->getOpt(self::OPTION_ENV_FILE), $options->getOpt(self::OPTION_LOAD_ENCRYPTED));
+
+        /* set new name value set */
+        $args = $options->getArgs();
+        $name = $args[0];
+        $value = $args[1];
+        $description = count($args) > 2 ? $args[2] : null;
+        $core->getVault()->add($name, $value, $description);
+
+        /* Displays the vault */
+        $this->displayEnvVariables($options, $core);
+    }
+
+    protected function displayPrivateAndPublicKeys(Options $options, Core $core)
+    {
+        /* Initialize the table formatter. */
+        $tableFormatter = new TableFormatter($this->colors);
+        $tableFormatter->setMaxWidth(self::SETTING_MAX_WIDTH_PPK);
+        $tableFormatter->setBorder(' | ');
+
+        /* Displays the header. */
+        echo self::LB;
+        echo $tableFormatter->format(
+            array(self::LIST_PPK_NAME_WIDTH, self::LIST_PPK_KEY_WIDTH),
+            array(self::LIST_PPK_NAME, self::LIST_PPK_KEY)
+        );
+
+        /* A line across the whole width */
+        echo str_pad('', $tableFormatter->getMaxWidth(), '-') . "\n";
+
+        /* Displays the private key */
+        echo $tableFormatter->format(
+            array(self::LIST_PPK_NAME_WIDTH, self::LIST_PPK_KEY_WIDTH),
+            array('Private Key', $core->getKeyPair()->getPrivate()),
+            array(Colors::C_CYAN, Colors::C_RED, Colors::C_GREEN)
+        );
+
+        /* Displays the public key */
+        echo $tableFormatter->format(
+            array(self::LIST_PPK_NAME_WIDTH, self::LIST_PPK_KEY_WIDTH),
+            array('Public Key', $core->getKeyPair()->getPublic()),
+            array(Colors::C_CYAN, Colors::C_RED, Colors::C_GREEN)
+        );
     }
 
     /**

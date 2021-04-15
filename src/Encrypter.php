@@ -31,6 +31,8 @@ use SodiumException;
 
 class Encrypter
 {
+    const PATTERN_ALREADY_DECRYPTED = '~^Wy[IJ][A-Za-z0-9]+[=]*$~';
+
     protected Core $core;
 
     /**
@@ -52,8 +54,13 @@ class Encrypter
      * @throws SodiumException
      * @throws Exception
      */
-    public function encrypt(string $message, string $nonce = null)
+    public function encrypt(string $message, string $nonce = null): string
     {
+        /* Check whether the message is already encrypted. */
+        if (preg_match(self::PATTERN_ALREADY_DECRYPTED, $message)) {
+            throw new Exception(sprintf('Encrypter::encrypt: The given message "%s" seems to be encrypted.', $message));
+        }
+
         if ($nonce === null) {
             $nonce = Nonce::getNewNonce();
         }
