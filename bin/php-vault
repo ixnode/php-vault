@@ -191,6 +191,9 @@ class CliEnvSecure extends CLI
 
         /* Displays the vault */
         $this->displayEnvVariables($options, $core);
+
+        /* Writes the vault */
+        $this->writeEnvVariables($options, $core);
     }
 
     /**
@@ -311,6 +314,39 @@ class CliEnvSecure extends CLI
                 array(Colors::C_CYAN, Colors::C_RED, Colors::C_GREEN)
             );
         }
+    }
+
+    /**
+     * Writes all environment variables to file.
+     *
+     * @param Options $options
+     * @param Core $core
+     * @throws Exception
+     */
+    protected function writeEnvVariables(Options $options, Core $core)
+    {
+        /* Check if option was given to write a file. */
+        if ($options->getOpt(self::OPTION_WRITE_FILE, null) === null) {
+            return;
+        }
+
+        /* Check that the given env file exists. */
+        if (file_exists($options->getOpt(self::OPTION_WRITE_FILE))) {
+            throw new Exception(sprintf('File "%s" already exist. Abort.', $options->getOpt(self::OPTION_WRITE_FILE)));
+        }
+
+        /* Write file */
+        $envFileString = $core->getVault()->getWriter()->getEnvString($options->getOpt(self::OPTION_DISPLAY_DECRYPTED), true);
+        file_put_contents($options->getOpt(self::OPTION_WRITE_FILE), $envFileString);
+
+        /* Check that the given env file was written. */
+        if (!file_exists($options->getOpt(self::OPTION_WRITE_FILE))) {
+            throw new Exception(sprintf('An error occurred while trying to write the env file "%s".', $options->getOpt(self::OPTION_WRITE_FILE)));
+        }
+
+        /* Print success */
+        print "\n";
+        $this->info(sprintf('The file was successfully written to "%s".', $options->getOpt(self::OPTION_WRITE_FILE)));
     }
 
     /**
