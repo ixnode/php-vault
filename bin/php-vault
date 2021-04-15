@@ -14,6 +14,8 @@ class CliEnvSecure extends CLI
 {
     const COMMAND_GENERATE_KEYS = 'generate-keys';
 
+    const COMMAND_DISPLAY_ENV = 'display-env';
+
     const COMMAND_DISPLAY = 'display';
 
     const COMMAND_SET = 'set';
@@ -29,6 +31,8 @@ class CliEnvSecure extends CLI
     const OPTION_DISPLAY_DECRYPTED = 'display-decrypted';
 
     const OPTION_LOAD_ENCRYPTED = 'load-encrypted';
+
+    const OPTION_WRITE_FILE = 'write-file';
 
     const ARGUMENT_NAME = 'name';
 
@@ -60,6 +64,10 @@ class CliEnvSecure extends CLI
 
     const LIST_PPK_KEY_WIDTH = '*';
 
+    const LIST_WIDTH_30 = '30';
+
+    const LIST_WIDTH_ALL = '*';
+
     const LB = "\n";
 
     /**
@@ -74,7 +82,8 @@ class CliEnvSecure extends CLI
 
         /* Register commands */
         $options->registerCommand(self::COMMAND_GENERATE_KEYS, 'Generates and displays a private and public key.');
-        $options->registerCommand(self::COMMAND_DISPLAY, 'Displays the environment variables.');
+        $options->registerCommand(self::COMMAND_DISPLAY_ENV, 'Displays the environment variables from server.');
+        $options->registerCommand(self::COMMAND_DISPLAY, 'Displays the environment variables from given file.');
         $options->registerCommand(self::COMMAND_SET, 'Sets or updates a new variable.');
 
         /* Register options */
@@ -87,6 +96,7 @@ class CliEnvSecure extends CLI
             $options->registerOption(self::OPTION_ENV_FILE, 'Specifies the env files.', null, self::OPTION_ENV_FILE, $command);
             $options->registerOption(self::OPTION_DISPLAY_DECRYPTED, 'Specifies to show decrypted the contents.', null, false, $command);
             $options->registerOption(self::OPTION_LOAD_ENCRYPTED, 'Specifies to load encrypted contents.', null, false, $command);
+            $options->registerOption(self::OPTION_WRITE_FILE, 'Writes the output also to given file.', null, self::OPTION_WRITE_FILE, $command);
         }
 
         /* Register set arguments */
@@ -111,12 +121,18 @@ class CliEnvSecure extends CLI
         /* Execute the command part. */
         switch ($options->getCmd()) {
             case self::COMMAND_GENERATE_KEYS: $this->mainGenerateKeys($options); break;
+            case self::COMMAND_DISPLAY_ENV: $this->mainDisplayEnv($options); break;
             case self::COMMAND_DISPLAY: $this->mainDisplay($options); break;
             case self::COMMAND_SET: $this->mainSet($options); break;
             default: $this->displayUnknownOrEmptyCommand($options);
         }
     }
 
+    /**
+     * Bootstrap generated keys function.
+     *
+     * @param Options $options
+     */
     protected function mainGenerateKeys(Options $options)
     {
         /* Initiate the PhpVault Core */
@@ -124,6 +140,16 @@ class CliEnvSecure extends CLI
 
         /* Display the private and public key */
         $this->displayPrivateAndPublicKeys($options, $core);
+    }
+
+    /**
+     * Bootstrap display environment function.
+     *
+     * @param Options $options
+     */
+    protected function mainDisplayEnv(Options $options)
+    {
+        $this->displayServerEnvVariables($options);
     }
 
     /**
@@ -215,6 +241,12 @@ class CliEnvSecure extends CLI
         $this->displayEnvVariables($options, $core);
     }
 
+    /**
+     * Displays the private and public keys.
+     *
+     * @param Options $options
+     * @param Core $core
+     */
     protected function displayPrivateAndPublicKeys(Options $options, Core $core)
     {
         /* Initialize the table formatter. */
@@ -277,6 +309,43 @@ class CliEnvSecure extends CLI
                 array(self::LIST_NAME_WIDTH, self::LIST_VALUE_WIDTH, self::LIST_DESCRIPTION_WIDTH),
                 array($key, $data->value, $data->description),
                 array(Colors::C_CYAN, Colors::C_RED, Colors::C_GREEN)
+            );
+        }
+    }
+
+    /**
+     * Displays all server environment variables.
+     *
+     * @param Options $options
+     * @throws Exception
+     */
+    protected function displayServerEnvVariables(Options $options)
+    {
+        /* Initialize the table formatter. */
+        $tableFormatter = new TableFormatter($this->colors);
+        $tableFormatter->setMaxWidth(self::SETTING_MAX_WIDTH);
+        $tableFormatter->setBorder(' | ');
+
+        /* Displays the header. */
+        echo self::LB;
+        echo $tableFormatter->format(
+            array(self::LIST_WIDTH_30, self::LIST_WIDTH_ALL),
+            array(self::LIST_NAME, self::LIST_VALUE)
+        );
+
+        /* A line across the whole width */
+        echo str_pad('', $tableFormatter->getMaxWidth(), '-') . "\n";
+
+        /* Print all environment variables */
+        foreach ($_SERVER as $key => $value) {
+            if (gettype($value) !== 'string') {
+                continue;
+            }
+
+            echo $tableFormatter->format(
+                array(self::LIST_WIDTH_30, self::LIST_WIDTH_ALL),
+                array($key, $value),
+                array(Colors::C_CYAN, Colors::C_GREEN)
             );
         }
     }
