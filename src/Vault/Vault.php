@@ -144,15 +144,20 @@ class Vault
      * @param string $value
      * @param ?string $description
      * @param ?string $nonce
+     * @param bool $alreadyEncrypted
      * @throws SodiumException
-     * @throws Exception
      */
-    public function add(string $key, string $value, string $description = null, string $nonce = null): void
+    public function add(string $key, string $value, string $description = null, string $nonce = null, bool $alreadyEncrypted = false): void
     {
-        $encryptedValue = $this->core->getEncrypter()->encrypt($value, $nonce);
-        $encryptedDescription = $description === null ?
-            null :
-            $this->core->getEncrypter()->encrypt($description, $nonce);
+        if ($alreadyEncrypted) {
+            $encryptedValue = $value;
+            $encryptedDescription = $description;
+        } else {
+            $encryptedValue = $this->core->getEncrypter()->encrypt($value, $nonce);
+            $encryptedDescription = $description === null ?
+                null :
+                $this->core->getEncrypter()->encrypt($description, $nonce);
+        }
 
         $this->vault[$key] = (object) [
             'value' => $encryptedValue,

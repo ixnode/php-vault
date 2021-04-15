@@ -56,6 +56,11 @@ class Encrypter
      */
     public function encrypt(string $message, string $nonce = null): string
     {
+        /* Check mode */
+        if ($this->core->getMode() < Mode::MODE_ENCRYPT) {
+            throw new Exception('Encrypter::encrypt: The Encrypter class is not able to encrypt strings. Please load at least a public key to do this.');
+        }
+
         /* Check whether the message is already encrypted. */
         if (preg_match(self::PATTERN_ALREADY_DECRYPTED, $message)) {
             throw new Exception(sprintf('Encrypter::encrypt: The given message "%s" seems to be encrypted.', $message));

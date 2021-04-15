@@ -27,6 +27,7 @@
 namespace Ixnode\PhpVault;
 
 use Exception;
+use JetBrains\PhpStorm\Pure;
 use SodiumException;
 
 class KeyPair
@@ -53,9 +54,7 @@ class KeyPair
         $this->core = $core;
 
         /* Renew key if given. */
-        if ($forceCreateNew || $privateKey !== null || $publicKey !== null) {
-            $this->renew($forceCreateNew, $privateKey, $publicKey);
-        }
+        $this->init($forceCreateNew, $privateKey, $publicKey);
     }
 
     /**
@@ -79,15 +78,29 @@ class KeyPair
     }
 
     /**
-     * Renews the saved public private key.
+     * Init the KeyPair class.
      *
      * @param bool $forceCreateNew
      * @param string|null $privateKey
      * @param string|null $publicKey
      * @throws SodiumException
+     */
+    public function init(bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null)
+    {
+        $this->renew($forceCreateNew, $privateKey, $publicKey, false);
+    }
+
+    /**
+     * Renews the saved public private key.
+     *
+     * @param bool $forceCreateNew
+     * @param string|null $privateKey
+     * @param string|null $publicKey
+     * @param bool $throwException
+     * @throws SodiumException
      * @throws Exception
      */
-    public function renew(bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null): void
+    public function renew(bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null, bool $throwException = true): void
     {
         /* Force create new key pair */
         if ($this->keyPair === null && $forceCreateNew) {
@@ -123,9 +136,19 @@ class KeyPair
 
 
         /* No key was found. */
-        if ($this->keyPair === null) {
+        if ($this->keyPair === null && $throwException) {
             throw new Exception('No private or public key found.');
         }
+    }
+
+    /**
+     * Checks if a private or public key exists within the environment ($_SERVER).
+     *
+     * @return bool
+     */
+    public function keyExistsWithinEnvironment(): bool
+    {
+        return array_key_exists(self::SERVER_PRIVATE_KEY_NAME, $_SERVER) || array_key_exists(self::SERVER_PUBLIC_KEY_NAME, $_SERVER);
     }
 
     /**

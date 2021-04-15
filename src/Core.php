@@ -94,10 +94,6 @@ class Core
      */
     public function getEncrypter()
     {
-        if ($this->getMode() < Mode::MODE_ENCRYPT) {
-            throw new Exception('This class is not able to encrypt strings. Please load at least a public key to do this.');
-        }
-
         return $this->encrypter;
     }
 
@@ -109,10 +105,6 @@ class Core
      */
     public function getDecrypter()
     {
-        if ($this->getMode() < Mode::MODE_DECRYPT) {
-            throw new Exception('This class is not able to decrypt strings. Please load a private key to do this.');
-        }
-
         return $this->decrypter;
     }
 

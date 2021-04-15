@@ -53,6 +53,11 @@ class Decrypter
      */
     public function decrypt(string $data): bool|string
     {
+        /* Check mode */
+        if ($this->core->getMode() < Mode::MODE_DECRYPT) {
+            throw new Exception('Decrypter::decrypt: The Decrypter class is not able to decrypt strings. Please load a private key to do this.');
+        }
+
         $key = sodium_crypto_box_keypair_from_secretkey_and_publickey(
             base64_decode($this->core->getKeyPair()->getPrivate()),
             base64_decode(Core::CORE_PUBLIC_KEY)

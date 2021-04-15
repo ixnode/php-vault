@@ -128,7 +128,7 @@ class Reader
      */
     public function addStreamToVault(string $stream, bool $decrypt = false)
     {
-        $this->addArrayToVault($this->convertStreamToArray($stream, $decrypt));
+        $this->addArrayToVault($this->convertStreamToArray($stream, false), null, $decrypt);
     }
 
     /**
@@ -136,12 +136,13 @@ class Reader
      *
      * @param array $array
      * @param string|null $nonce
+     * @param bool $alreadyEncrypted
      * @throws SodiumException
      */
-    public function addArrayToVault(array $array, string $nonce = null)
+    public function addArrayToVault(array $array, string $nonce = null, bool $alreadyEncrypted = false)
     {
         foreach ($array as $name => $data) {
-            $this->vault->add($name, $data->value, $data->description, $nonce);
+            $this->vault->add($name, $data->value, $data->description, $nonce, $alreadyEncrypted);
         }
     }
 }
