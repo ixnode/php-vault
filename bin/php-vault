@@ -34,6 +34,8 @@ class CliEnvSecure extends CLI
 
     const OPTION_WRITE_FILE = 'write-file';
 
+    const ARGUMENT_ENV_FILE = 'env-file';
+
     const ARGUMENT_NAME = 'name';
 
     const ARGUMENT_VALUE = 'value';
@@ -70,6 +72,8 @@ class CliEnvSecure extends CLI
 
     const LB = "\n";
 
+    protected array $opt = array();
+
     /**
      * Register options and arguments.
      *
@@ -89,17 +93,20 @@ class CliEnvSecure extends CLI
         /* Register options */
         $options->registerOption(self::OPTION_VERSION, 'Print version.', 'v');
 
-        /* Register display and set options */
-        foreach ([self::COMMAND_DISPLAY, self::COMMAND_SET] as $command) {
-            $options->registerOption(self::OPTION_PUBLIC_KEY, 'Specifies the public key.', null, self::OPTION_PUBLIC_KEY, $command);
-            $options->registerOption(self::OPTION_PRIVATE_KEY, 'Specifies the private key.', null, self::OPTION_PRIVATE_KEY, $command);
-            $options->registerOption(self::OPTION_ENV_FILE, 'Specifies the env files.', null, self::OPTION_ENV_FILE, $command);
-            $options->registerOption(self::OPTION_DISPLAY_DECRYPTED, 'Specifies to show decrypted the contents.', null, false, $command);
-            $options->registerOption(self::OPTION_LOAD_ENCRYPTED, 'Specifies to load encrypted contents.', null, false, $command);
-            $options->registerOption(self::OPTION_WRITE_FILE, 'Writes the output also to given file.', null, self::OPTION_WRITE_FILE, $command);
-        }
+        /* Register display options */
+        $options->registerOption(self::OPTION_PUBLIC_KEY, 'Specifies the public key.', null, self::OPTION_PUBLIC_KEY, self::COMMAND_DISPLAY);
+        $options->registerOption(self::OPTION_PRIVATE_KEY, 'Specifies the private key.', null, self::OPTION_PRIVATE_KEY, self::COMMAND_DISPLAY);
+        $options->registerOption(self::OPTION_ENV_FILE, 'Specifies the env file.', null, self::OPTION_ENV_FILE, self::COMMAND_DISPLAY);
+        $options->registerOption(self::OPTION_DISPLAY_DECRYPTED, 'Specifies to show decrypted the contents.', null, false, self::COMMAND_DISPLAY);
+        $options->registerOption(self::OPTION_LOAD_ENCRYPTED, 'Specifies to load encrypted contents.', null, false, self::COMMAND_DISPLAY);
+        $options->registerOption(self::OPTION_WRITE_FILE, 'Writes the output also to given file.', null, self::OPTION_WRITE_FILE, self::COMMAND_DISPLAY);
+
+        /* Register set options */
+        $options->registerOption(self::OPTION_PUBLIC_KEY, 'Specifies the public key.', null, self::OPTION_PUBLIC_KEY, self::COMMAND_SET);
+        $options->registerOption(self::OPTION_PRIVATE_KEY, 'Specifies the private key.', null, self::OPTION_PRIVATE_KEY, self::COMMAND_SET);
 
         /* Register set arguments */
+        $options->registerArgument(self::ARGUMENT_ENV_FILE, 'Specifies the env file.', true, self::COMMAND_SET);
         $options->registerArgument(self::ARGUMENT_NAME, 'The name of the new variable.', true, self::COMMAND_SET);
         $options->registerArgument(self::ARGUMENT_VALUE, 'The value of the new variable.', true, self::COMMAND_SET);
         $options->registerArgument(self::ARGUMENT_DESCRIPTION, 'The description of the new variable.', false, self::COMMAND_SET);
@@ -113,7 +120,7 @@ class CliEnvSecure extends CLI
      */
     protected function main(Options $options)
     {
-        if ($options->getOpt('version')) {
+        if ($this->getOpt($options, 'version')) {
             $this->info(Core::VERSION);
             return;
         }
@@ -146,6 +153,7 @@ class CliEnvSecure extends CLI
      * Bootstrap display environment function.
      *
      * @param Options $options
+     * @throws Exception
      */
     protected function mainDisplayEnv(Options $options)
     {
@@ -162,14 +170,14 @@ class CliEnvSecure extends CLI
     protected function mainDisplay(Options $options)
     {
         /* Check that the env file was given. */
-        if ($options->getOpt(self::OPTION_ENV_FILE, null) === null) {
+        if ($this->getOpt($options, self::OPTION_ENV_FILE, null) === null) {
             $this->displayNoEnvFileGiven($options);
             return;
         }
 
         /* Check that the given env file exists. */
-        if (!file_exists($options->getOpt(self::OPTION_ENV_FILE))) {
-            $this->displayFileNotFound($options, $options->getOpt(self::OPTION_ENV_FILE));
+        if (!file_exists($this->getOpt($options, self::OPTION_ENV_FILE))) {
+            $this->displayFileNotFound($options, $this->getOpt($options, self::OPTION_ENV_FILE));
             return;
         }
 
@@ -177,17 +185,17 @@ class CliEnvSecure extends CLI
         $core = new Core(false);
 
         /* Check that at least one key was given. */
-        if ($options->getOpt(self::OPTION_PUBLIC_KEY, null) !== null) {
-            $core->getKeyPair()->loadPublicKeyFromFile($options->getOpt(self::OPTION_PUBLIC_KEY));
+        if ($this->getOpt($options, self::OPTION_PUBLIC_KEY, null) !== null) {
+            $core->getKeyPair()->loadPublicKeyFromFile($this->getOpt($options, self::OPTION_PUBLIC_KEY));
         }
 
         /* Check that at least one key was given. */
-        if ($options->getOpt(self::OPTION_PRIVATE_KEY, null) !== null) {
-            $core->getKeyPair()->loadPrivateKeyFromFile($options->getOpt(self::OPTION_PRIVATE_KEY));
+        if ($this->getOpt($options, self::OPTION_PRIVATE_KEY, null) !== null) {
+            $core->getKeyPair()->loadPrivateKeyFromFile($this->getOpt($options, self::OPTION_PRIVATE_KEY));
         }
 
         /* Load env file */
-        $core->getVault()->getReader()->addFileToVault($options->getOpt(self::OPTION_ENV_FILE), $options->getOpt(self::OPTION_LOAD_ENCRYPTED));
+        $core->getVault()->getReader()->addFileToVault($this->getOpt($options, self::OPTION_ENV_FILE), $this->getOpt($options, self::OPTION_LOAD_ENCRYPTED));
 
         /* Displays the vault */
         $this->displayEnvVariables($options, $core);
@@ -205,43 +213,46 @@ class CliEnvSecure extends CLI
      */
     protected function mainSet(Options $options)
     {
-        /* Check that the env file was given. */
-        if ($options->getOpt(self::OPTION_ENV_FILE, null) === null) {
-            $this->displayNoEnvFileGiven($options);
-            return;
-        }
+        /* Reads the arguments */
+        $envFile = $this->getArg($options, 0);
+        $name = $this->getArg($options, 1);
+        $value = $this->getArg($options, 2);
+        $description = $this->getArg($options, 3);
+
+        /* Set options */
+        $this->setOpt(self::OPTION_LOAD_ENCRYPTED, true);
+        $this->setOpt(self::OPTION_WRITE_FILE, $envFile);
 
         /* Check that the given env file exists. */
-        if (!file_exists($options->getOpt(self::OPTION_ENV_FILE))) {
-            $this->displayFileNotFound($options, $options->getOpt(self::OPTION_ENV_FILE));
+        if (!file_exists($envFile)) {
+            $this->displayFileNotFound($options, $this->getOpt($options, self::OPTION_ENV_FILE));
             return;
         }
 
         /* Initiate the PhpVault Core */
-        $core = new Core(false);
+        $core = new Core();
 
         /* Check that at least one key was given. */
-        if ($options->getOpt(self::OPTION_PUBLIC_KEY, null) !== null) {
-            $core->getKeyPair()->loadPublicKeyFromFile($options->getOpt(self::OPTION_PUBLIC_KEY));
+        if ($this->getOpt($options, self::OPTION_PUBLIC_KEY, null) !== null) {
+            $core->getKeyPair()->loadPublicKeyFromFile($this->getOpt($options, self::OPTION_PUBLIC_KEY));
         }
 
         /* Check that at least one key was given. */
-        if ($options->getOpt(self::OPTION_PRIVATE_KEY, null) !== null) {
-            $core->getKeyPair()->loadPrivateKeyFromFile($options->getOpt(self::OPTION_PRIVATE_KEY));
+        if ($this->getOpt($options, self::OPTION_PRIVATE_KEY, null) !== null) {
+            $core->getKeyPair()->loadPrivateKeyFromFile($this->getOpt($options, self::OPTION_PRIVATE_KEY));
         }
 
         /* Load env file */
-        $core->getVault()->getReader()->addFileToVault($options->getOpt(self::OPTION_ENV_FILE), $options->getOpt(self::OPTION_LOAD_ENCRYPTED));
+        $core->getVault()->getReader()->addFileToVault($envFile, $this->getOpt($options, self::OPTION_LOAD_ENCRYPTED));
 
         /* set new name value set */
-        $args = $options->getArgs();
-        $name = $args[0];
-        $value = $args[1];
-        $description = count($args) > 2 ? $args[2] : null;
         $core->getVault()->add($name, $value, $description);
 
         /* Displays the vault */
         $this->displayEnvVariables($options, $core);
+
+        /* Writes the vault */
+        $this->writeEnvVariables($options, $core, true);
     }
 
     /**
@@ -307,7 +318,7 @@ class CliEnvSecure extends CLI
         echo str_pad('', $tableFormatter->getMaxWidth(), '-') . "\n";
 
         /* Displays the content. */
-        foreach ($core->getVault()->getAll(false, true, $options->getOpt(self::OPTION_DISPLAY_DECRYPTED)) as $key => $data) {
+        foreach ($core->getVault()->getAll(true, true, $this->getOpt($options, self::OPTION_DISPLAY_DECRYPTED)) as $key => $data) {
             echo $tableFormatter->format(
                 array(self::LIST_NAME_WIDTH, self::LIST_VALUE_WIDTH, self::LIST_DESCRIPTION_WIDTH),
                 array($key, $data->value, $data->description),
@@ -321,32 +332,33 @@ class CliEnvSecure extends CLI
      *
      * @param Options $options
      * @param Core $core
+     * @param bool $ignoreExistingFile
      * @throws Exception
      */
-    protected function writeEnvVariables(Options $options, Core $core)
+    protected function writeEnvVariables(Options $options, Core $core, bool $ignoreExistingFile = false)
     {
         /* Check if option was given to write a file. */
-        if ($options->getOpt(self::OPTION_WRITE_FILE, null) === null) {
+        if ($this->getOpt($options, self::OPTION_WRITE_FILE, null) === null) {
             return;
         }
 
         /* Check that the given env file exists. */
-        if (file_exists($options->getOpt(self::OPTION_WRITE_FILE))) {
-            throw new Exception(sprintf('File "%s" already exist. Abort.', $options->getOpt(self::OPTION_WRITE_FILE)));
+        if (!$ignoreExistingFile && file_exists($this->getOpt($options, self::OPTION_WRITE_FILE))) {
+            throw new Exception(sprintf('File "%s" already exist. Abort.', $this->getOpt($options, self::OPTION_WRITE_FILE)));
         }
 
         /* Write file */
-        $envFileString = $core->getVault()->getWriter()->getEnvString($options->getOpt(self::OPTION_DISPLAY_DECRYPTED), true);
-        file_put_contents($options->getOpt(self::OPTION_WRITE_FILE), $envFileString);
+        $envFileString = $core->getVault()->getWriter()->getEnvString($this->getOpt($options, self::OPTION_DISPLAY_DECRYPTED), true);
+        file_put_contents($this->getOpt($options, self::OPTION_WRITE_FILE), $envFileString);
 
         /* Check that the given env file was written. */
-        if (!file_exists($options->getOpt(self::OPTION_WRITE_FILE))) {
-            throw new Exception(sprintf('An error occurred while trying to write the env file "%s".', $options->getOpt(self::OPTION_WRITE_FILE)));
+        if (!file_exists($this->getOpt($options, self::OPTION_WRITE_FILE))) {
+            throw new Exception(sprintf('An error occurred while trying to write the env file "%s".', $this->getOpt($options, self::OPTION_WRITE_FILE)));
         }
 
         /* Print success */
         print "\n";
-        $this->info(sprintf('The file was successfully written to "%s".', $options->getOpt(self::OPTION_WRITE_FILE)));
+        $this->info(sprintf('The file was successfully written to "%s".', $this->getOpt($options, self::OPTION_WRITE_FILE)));
     }
 
     /**
@@ -451,6 +463,48 @@ class CliEnvSecure extends CLI
     protected function showHelp(Options $options, bool $withLineBreak = false)
     {
         echo sprintf('%s%s', $withLineBreak ? self::LB : '', $options->help());
+    }
+
+    /**
+     * Returns the argument from command line.
+     *
+     * @param Options $options
+     * @param int $index
+     * @return mixed|null
+     */
+    protected function getArg(Options $options, int $index)
+    {
+        $args = $options->getArgs();
+
+        return count($args) > $index ? $args[$index] : null;
+    }
+
+    /**
+     * Sets a value to internal options array.
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    protected function setOpt(string $name, mixed $value)
+    {
+        $this->opt[$name] = $value;
+    }
+
+    /**
+     * Returns an option from command line or internal $options array.
+     *
+     * @param Options $options
+     * @param string $name
+     * @param ?bool|string $default
+     * @return mixed
+     */
+    protected function getOpt(Options $options, string $name, $default = false): mixed
+    {
+        if (array_key_exists($name, $this->opt)) {
+            return $this->opt[$name];
+        }
+
+        return $options->getOpt($name, $default);
     }
 }
 

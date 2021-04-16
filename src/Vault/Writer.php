@@ -80,7 +80,7 @@ class Writer
                 $envString .= $withDescription ? "\n\n" : "\n";
             }
 
-            if ($withDescription) {
+            if ($withDescription && $vaultItem->description !== null) {
                 $envString .= sprintf(self::TEMPLATE_ENV_DESCRIPTION, $vaultItem->description)."\n";
             }
 

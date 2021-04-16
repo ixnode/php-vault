@@ -65,7 +65,7 @@ class Reader
             'description' => null,
         ];
 
-        $current = $default;
+        $current = clone $default;
         foreach ($lines as $line) {
             $matches = array();
 
