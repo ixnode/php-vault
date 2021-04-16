@@ -20,6 +20,10 @@ class CliEnvSecure extends CLI
 
     const COMMAND_SET = 'set';
 
+    const COMMAND_ENCRYPT_FILE = 'encrypt-file';
+
+    const COMMAND_DECRYPT_FILE = 'decrypt-file';
+
     const OPTION_VERSION = 'version';
 
     const OPTION_PUBLIC_KEY = 'public-key';
@@ -88,7 +92,9 @@ class CliEnvSecure extends CLI
         $options->registerCommand(self::COMMAND_GENERATE_KEYS, 'Generates and displays a private and public key.');
         $options->registerCommand(self::COMMAND_DISPLAY_ENV, 'Displays the environment variables from server.');
         $options->registerCommand(self::COMMAND_DISPLAY, 'Displays the environment variables from given file.');
-        $options->registerCommand(self::COMMAND_SET, 'Sets or updates a new variable.');
+        $options->registerCommand(self::COMMAND_SET, 'Sets or updates a new variable. Needs a public key.');
+        $options->registerCommand(self::COMMAND_ENCRYPT_FILE, 'Encrypts a given file. Needs a public key.');
+        $options->registerCommand(self::COMMAND_DECRYPT_FILE, 'Decrypts a given file. Needs a private key.');
 
         /* Register options */
         $options->registerOption(self::OPTION_VERSION, 'Print version.', 'v');
@@ -110,6 +116,12 @@ class CliEnvSecure extends CLI
         $options->registerArgument(self::ARGUMENT_NAME, 'The name of the new variable.', true, self::COMMAND_SET);
         $options->registerArgument(self::ARGUMENT_VALUE, 'The value of the new variable.', true, self::COMMAND_SET);
         $options->registerArgument(self::ARGUMENT_DESCRIPTION, 'The description of the new variable.', false, self::COMMAND_SET);
+
+        /* Register encrypt file arguments  */
+        $options->registerArgument(self::ARGUMENT_ENV_FILE, 'Specifies the decrypted env file.', false, self::COMMAND_ENCRYPT_FILE);
+
+        /* Register decrypt file arguments  */
+        $options->registerArgument(self::ARGUMENT_ENV_FILE, 'Specifies the encrypted env file.', false, self::COMMAND_DECRYPT_FILE);
     }
 
     /**
@@ -131,6 +143,8 @@ class CliEnvSecure extends CLI
             case self::COMMAND_DISPLAY_ENV: $this->mainDisplayEnv($options); break;
             case self::COMMAND_DISPLAY: $this->mainDisplay($options); break;
             case self::COMMAND_SET: $this->mainSet($options); break;
+            case self::COMMAND_ENCRYPT_FILE: $this->mainEncryptFile($options); break;
+            case self::COMMAND_DECRYPT_FILE: $this->mainDecryptFile($options); break;
             default: $this->displayUnknownOrEmptyCommand($options);
         }
     }
@@ -225,7 +239,7 @@ class CliEnvSecure extends CLI
 
         /* Check that the given env file exists. */
         if (!file_exists($envFile)) {
-            $this->displayFileNotFound($options, $this->getOpt($options, self::OPTION_ENV_FILE));
+            $this->displayFileNotFound($options, $envFile);
             return;
         }
 
@@ -253,6 +267,51 @@ class CliEnvSecure extends CLI
 
         /* Writes the vault */
         $this->writeEnvVariables($options, $core, true);
+    }
+
+    /**
+     * Encrypts the given decrypted file.
+     *
+     * @param Options $options
+     * @throws SodiumException
+     * @throws Exception
+     */
+    protected function mainEncryptFile(Options $options)
+    {
+        /* Reads the arguments */
+        $envFileDecrypted = $this->getArg($options, 0);
+        $envFileEncrypted = sprintf('%s.enc', $envFileDecrypted);
+
+        /* Set options */
+        $this->setOpt(self::OPTION_WRITE_FILE, $envFileEncrypted);
+        $this->setOpt(self::OPTION_DISPLAY_DECRYPTED, false);
+
+        /* Check if already encrypted */
+        if (preg_match('~.+\.enc$~', $envFileDecrypted)) {
+            $this->displayFileAlreadyEncrypted()
+            $this->warning(sprintf('The given file "%s" seems already be encrypted. Abort.', $envFileDecrypted));
+            return;
+        }
+
+        /* Check that the given env file exists. */
+        if (!file_exists($envFileDecrypted)) {
+            $this->displayFileNotFound($options, $envFileDecrypted);
+            return;
+        }
+
+        /* Initiate the PhpVault Core */
+        $core = new Core();
+
+        /* Load env decrypted file */
+        $core->getVault()->getReader()->addFileToVault($envFileDecrypted, false);
+
+        /* Writes the vault */
+        $this->writeEnvVariables($options, $core);
+    }
+
+    protected function mainDecryptFile(Options $options)
+    {
+
     }
 
     /**
@@ -449,6 +508,18 @@ class CliEnvSecure extends CLI
      * @param string $file
      */
     protected function displayFileNotFound(Options $options, string $file)
+    {
+        $this->error('The given file "{file}" was not found.', array('file' => $file, ));
+        $this->showHelp($options, true);
+    }
+
+    /**
+     * Indicates that given file was already encrypted.
+     *
+     * @param Options $options
+     * @param string $file
+     */
+    protected function displayFileAlreadyEncrypted(Options $options, string $file)
     {
         $this->error('The given file "{file}" was not found.', array('file' => $file, ));
         $this->showHelp($options, true);
