@@ -288,8 +288,7 @@ class CliEnvSecure extends CLI
 
         /* Check if already encrypted */
         if (preg_match('~.+\.enc$~', $envFileDecrypted)) {
-            $this->displayFileAlreadyEncrypted()
-            $this->warning(sprintf('The given file "%s" seems already be encrypted. Abort.', $envFileDecrypted));
+            $this->displayFileAlreadyEncrypted($options, $envFileDecrypted);
             return;
         }
 
@@ -311,7 +310,11 @@ class CliEnvSecure extends CLI
 
     protected function mainDecryptFile(Options $options)
     {
+        /* Reads the arguments */
+        $envFileEncrypted = $this->getArg($options, 0);
 
+
+        print $envFileEncrypted;
     }
 
     /**
@@ -521,8 +524,7 @@ class CliEnvSecure extends CLI
      */
     protected function displayFileAlreadyEncrypted(Options $options, string $file)
     {
-        $this->error('The given file "{file}" was not found.', array('file' => $file, ));
-        $this->showHelp($options, true);
+        $this->warning('The given file "{file}" seems already be encrypted. Abort.', array('file' => $file, ));
     }
 
     /**
