@@ -41,6 +41,8 @@ class CliEnvSecure extends CLI
 
     const OPTION_WRITE_FILE = 'write-file';
 
+    const OPTION_PERSIST = 'persist';
+
 
     const ARGUMENT_ENV_FILE = 'env-file';
 
@@ -86,6 +88,8 @@ class CliEnvSecure extends CLI
 
     protected array $opt = array();
 
+    protected string $root;
+
     /**
      * Register options and arguments.
      *
@@ -107,6 +111,9 @@ class CliEnvSecure extends CLI
 
         /* Register options */
         $options->registerOption(self::OPTION_VERSION, 'Print version.', 'v');
+
+        /* Register generate key options */
+        $options->registerOption(self::OPTION_PERSIST, 'Persists generated keys.', null, false, self::COMMAND_GENERATE_KEYS);
 
         /* Register display options */
         $options->registerOption(self::OPTION_PUBLIC_KEY, 'Specifies the public key.', null, self::OPTION_PUBLIC_KEY, self::COMMAND_DISPLAY);
@@ -131,6 +138,9 @@ class CliEnvSecure extends CLI
 
         /* Register decrypt file arguments  */
         $options->registerArgument(self::ARGUMENT_ENV_FILE, 'Specifies the encrypted env file.', false, self::COMMAND_DECRYPT_FILE);
+
+        /* Set root path */
+        $this->root = dirname(dirname(__FILE__));
     }
 
     /**
@@ -138,6 +148,7 @@ class CliEnvSecure extends CLI
      *
      * @param Options $options
      * @throws SodiumException
+     * @throws Exception
      */
     protected function main(Options $options)
     {
@@ -171,6 +182,9 @@ class CliEnvSecure extends CLI
 
         /* Display the private and public key */
         $this->displayPrivateAndPublicKeys($options, $core);
+
+        /* Persist keys */
+        $this->persistKeys($options, $core);
     }
 
     /**
@@ -492,6 +506,54 @@ class CliEnvSecure extends CLI
         /* Print success */
         print "\n";
         $this->info(sprintf('The file was successfully written to "%s".', $this->getOpt($options, self::OPTION_WRITE_FILE)));
+    }
+
+    /**
+     * Persist keys.
+     *
+     * @param Options $options
+     * @param Core $core
+     */
+    protected function persistKeys(Options $options, Core $core)
+    {
+        $keyFolder = '.keys';
+        $keyFolderAbsolute = sprintf('%s/%s', $this->root, $keyFolder);
+
+        /* Check if persist option exists. */
+        if ($this->getOpt($options, self::OPTION_PERSIST, null) === null) {
+            return;
+        }
+
+        /* Check if target is a directory. */
+        if (file_exists($keyFolderAbsolute)) {
+            print "\n";
+            $this->error('Path {path} already exists. If you want to persist the data, delete the folder.', array('path' => $keyFolderAbsolute));
+            return;
+        }
+
+        /* Create key folder */
+        mkdir($keyFolderAbsolute);
+
+        /* private key */
+        $privateKey = 'private.key';
+        $privateKeyAbsolute = sprintf('%s/%s', $keyFolderAbsolute, $privateKey);
+
+        /* public key */
+        $publicKey = 'public.key';
+        $publicKeyAbsolute = sprintf('%s/%s', $keyFolderAbsolute, $publicKey);
+
+        /* gitignore */
+        $gitignoreContent = <<<CONTENT
+# ignore private key
+/$privateKey
+CONTENT;
+        $gitignore = '.gitignore';
+        $gitignoreAbsolute = sprintf('%s/%s', $keyFolderAbsolute, $gitignore);
+
+        /* Write files */
+        file_put_contents($privateKeyAbsolute, $core->getKeyPair()->getPrivate());
+        file_put_contents($publicKeyAbsolute, $core->getKeyPair()->getPublic());
+        file_put_contents($gitignoreAbsolute, $gitignoreContent);
     }
 
     /**
