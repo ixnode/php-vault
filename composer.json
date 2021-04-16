@@ -24,6 +24,6 @@
         "phpunit/phpunit": "^9"
     },
     "bin": [
-        "bin/generate-key-pair"
+        "bin/php-vault"
     ]
 }
