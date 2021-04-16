@@ -308,13 +308,45 @@ class CliEnvSecure extends CLI
         $this->writeEnvVariables($options, $core);
     }
 
+    /**
+     * Decrypts the given encrypted file.
+     *
+     * @param Options $options
+     * @throws SodiumException
+     * @throws Exception
+     */
     protected function mainDecryptFile(Options $options)
     {
         /* Reads the arguments */
         $envFileEncrypted = $this->getArg($options, 0);
 
+        /* Check the name of given file. */
+        if (!preg_match('~\.enc$~', $envFileEncrypted)) {
+            $this->displayFileEncryptedWrongFormat($options, $envFileEncrypted);
+            return;
+        }
 
-        print $envFileEncrypted;
+        /* Builds decrypted file name */
+        $envFileDecrypted = preg_replace('~\.enc$~', '', $envFileEncrypted);
+
+        /* Set options */
+        $this->setOpt(self::OPTION_WRITE_FILE, $envFileDecrypted);
+        $this->setOpt(self::OPTION_DISPLAY_DECRYPTED, true);
+
+        /* Check that the given env file exists. */
+        if (!file_exists($envFileEncrypted)) {
+            $this->displayFileNotFound($options, $envFileEncrypted);
+            return;
+        }
+
+        /* Initiate the PhpVault Core */
+        $core = new Core();
+
+        /* Load env decrypted file */
+        $core->getVault()->getReader()->addFileToVault($envFileEncrypted, true);
+
+        /* Writes the vault */
+        $this->writeEnvVariables($options, $core);
     }
 
     /**
@@ -525,6 +557,17 @@ class CliEnvSecure extends CLI
     protected function displayFileAlreadyEncrypted(Options $options, string $file)
     {
         $this->warning('The given file "{file}" seems already be encrypted. Abort.', array('file' => $file, ));
+    }
+
+    /**
+     * Indicates that given file has the wrong format.
+     *
+     * @param Options $options
+     * @param string $file
+     */
+    protected function displayFileEncryptedWrongFormat(Options $options, string $file)
+    {
+        $this->warning('The given file "{file}" must have the following format: "*.enc". Abort.', array('file' => $file, ));
     }
 
     /**
