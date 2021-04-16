@@ -60,9 +60,9 @@ class KeyPair
     /**
      * Returns the base64 encoded private string.
      *
-     * @return string
+     * @return ?string
      */
-    public function getPrivate(): string
+    public function getPrivate(): ?string
     {
         return $this->keyPair->private;
     }
@@ -70,9 +70,9 @@ class KeyPair
     /**
      * Returns the base64 decoded public string.
      *
-     * @return string
+     * @return ?string
      */
-    public function getPublic(): string
+    public function getPublic(): ?string
     {
         return $this->keyPair->public;
     }

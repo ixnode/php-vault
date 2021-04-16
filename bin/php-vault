@@ -24,6 +24,9 @@ class CliEnvSecure extends CLI
 
     const COMMAND_DECRYPT_FILE = 'decrypt-file';
 
+    const COMMAND_INFO = 'info';
+
+
     const OPTION_VERSION = 'version';
 
     const OPTION_PUBLIC_KEY = 'public-key';
@@ -38,6 +41,7 @@ class CliEnvSecure extends CLI
 
     const OPTION_WRITE_FILE = 'write-file';
 
+
     const ARGUMENT_ENV_FILE = 'env-file';
 
     const ARGUMENT_NAME = 'name';
@@ -46,9 +50,11 @@ class CliEnvSecure extends CLI
 
     const ARGUMENT_DESCRIPTION = 'description';
 
+
     const SETTING_MAX_WIDTH = 200;
 
     const SETTING_MAX_WIDTH_PPK = 74;
+
 
     const LIST_NAME = 'Name';
 
@@ -74,7 +80,9 @@ class CliEnvSecure extends CLI
 
     const LIST_WIDTH_ALL = '*';
 
+
     const LB = "\n";
+
 
     protected array $opt = array();
 
@@ -95,6 +103,7 @@ class CliEnvSecure extends CLI
         $options->registerCommand(self::COMMAND_SET, 'Sets or updates a new variable. Needs a public key.');
         $options->registerCommand(self::COMMAND_ENCRYPT_FILE, 'Encrypts a given file. Needs a public key.');
         $options->registerCommand(self::COMMAND_DECRYPT_FILE, 'Decrypts a given file. Needs a private key.');
+        $options->registerCommand(self::COMMAND_INFO, 'Shows information.');
 
         /* Register options */
         $options->registerOption(self::OPTION_VERSION, 'Print version.', 'v');
@@ -145,6 +154,7 @@ class CliEnvSecure extends CLI
             case self::COMMAND_SET: $this->mainSet($options); break;
             case self::COMMAND_ENCRYPT_FILE: $this->mainEncryptFile($options); break;
             case self::COMMAND_DECRYPT_FILE: $this->mainDecryptFile($options); break;
+            case self::COMMAND_INFO: $this->mainShowInformation($options); break;
             default: $this->displayUnknownOrEmptyCommand($options);
         }
     }
@@ -347,6 +357,35 @@ class CliEnvSecure extends CLI
 
         /* Writes the vault */
         $this->writeEnvVariables($options, $core);
+    }
+
+    /**
+     * Bootstrap show information function.
+     *
+     * @param Options $options
+     */
+    protected function mainShowInformation(Options $options)
+    {
+        /* Initiate the PhpVault Core */
+        $core = new Core();
+
+        /* No key was loaded */
+        if (!$core->getKeyPair()->keyExistsWithinEnvironment()) {
+            $this->displayNoKeyLoaded($options);
+            return;
+        }
+
+        /* Private key was loaded */
+        if ($core->getKeyPair()->getPrivate()) {
+            $this->displayPrivateKeyLoaded($options, $core);
+            return;
+        }
+
+        /* Private key was loaded */
+        if ($core->getKeyPair()->getPublic()) {
+            $this->displayPublicKeyLoaded($options, $core);
+            return;
+        }
     }
 
     /**
@@ -568,6 +607,41 @@ class CliEnvSecure extends CLI
     protected function displayFileEncryptedWrongFormat(Options $options, string $file)
     {
         $this->warning('The given file "{file}" must have the following format: "*.enc". Abort.', array('file' => $file, ));
+    }
+
+    /**
+     * Indicates that no key was loaded.
+     *
+     * @param Options $options
+     */
+    protected function displayNoKeyLoaded(Options $options)
+    {
+        print "\n";
+        $this->info('No key was loaded.');
+    }
+
+    /**
+     * Indicates that a private key was loaded.
+     *
+     * @param Options $options
+     * @param Core $core
+     */
+    protected function displayPrivateKeyLoaded(Options $options, Core $core)
+    {
+        print "\n";
+        $this->info('Private key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPrivate())));
+    }
+
+    /**
+     * Indicates that a public key was loaded.
+     *
+     * @param Options $options
+     * @param Core $core
+     */
+    protected function displayPublicKeyLoaded(Options $options, Core $core)
+    {
+        print "\n";
+        $this->info('Public key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPublic())));
     }
 
     /**
