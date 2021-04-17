@@ -1,8 +1,13 @@
 #!/usr/bin/env php
 <?php
 
-# Bootstrap autoloader
-require __DIR__.'/../vendor/autoload.php';
+# Bootstrap autoloader (start autoloader from outside or inside the vendor folder)
+foreach ([__DIR__.'/../../../autoload.php', __DIR__.'/../vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
 
 use splitbrain\phpcli\CLI;
 use splitbrain\phpcli\Colors;
@@ -140,7 +145,7 @@ class CliEnvSecure extends CLI
         $options->registerArgument(self::ARGUMENT_ENV_FILE, 'Specifies the encrypted env file.', false, self::COMMAND_DECRYPT_FILE);
 
         /* Set root path */
-        $this->root = dirname(dirname(__FILE__));
+        $this->root = $this->getComposerJsonRootPath();
     }
 
     /**
@@ -152,6 +157,7 @@ class CliEnvSecure extends CLI
      */
     protected function main(Options $options)
     {
+        /* Show version of this package. */
         if ($this->getOpt($options, 'version')) {
             $this->info(Core::VERSION);
             return;
@@ -527,7 +533,7 @@ class CliEnvSecure extends CLI
         /* Check if target is a directory. */
         if (file_exists($keyFolderAbsolute)) {
             print "\n";
-            $this->error('Path {path} already exists. If you want to persist the data, delete the folder.', array('path' => $keyFolderAbsolute));
+            $this->error('Path "{path}" already exists. If you want to persist the generated keys, delete the existing folder.', array('path' => $keyFolderAbsolute));
             return;
         }
 
@@ -757,6 +763,18 @@ CONTENT;
         }
 
         return $options->getOpt($name, $default);
+    }
+
+    /**
+     * Returns the composer.json root path (project path).
+     *
+     * @return string
+     */
+    protected function getComposerJsonRootPath(): string
+    {
+        $reflection = new \ReflectionClass(\Composer\Autoload\ClassLoader::class);
+
+        return dirname($reflection->getFileName(), 3);
     }
 }
 
