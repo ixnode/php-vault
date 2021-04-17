@@ -2,9 +2,13 @@
 <?php
 
 # Bootstrap autoloader (start autoloader from outside or inside the vendor folder)
-foreach ([__DIR__.'/../../../autoload.php', __DIR__.'/../vendor/autoload.php'] as $file) {
-    if (file_exists($file)) {
-        require $file;
+$autoloaderPaths = [
+    dirname(__DIR__, 3).'/autoload.php',
+    dirname(__DIR__).'/vendor/autoload.php',
+];
+foreach ($autoloaderPaths as $autoloaderPath) {
+    if (file_exists($autoloaderPath)) {
+        require $autoloaderPath;
         break;
     }
 }
