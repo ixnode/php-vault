@@ -5,88 +5,70 @@
 ### Generate keys
 
 ```bash
-$ bin/php-vault generate-keys
+$ bin/php-vault generate-keys --persist
 
-Name         | Key
---------------------------------------------------------------------------
-Private Key  | IGQXjiqwEdKI8eiLVYI+dK32E1JNNAtCKWG2kjgjPJU=
-Public Key   | puNWWBXa9++lH6v5sSbc8x4XGzbCArM1A2QoNWdlQXM=
+The key pair is written to folder ".keys"
 ```
 
 * **Attention!**:
-	* Keep the private key safe for the productive system.
-	* Use the public key on the development system.
+	* Keep the private key safe for the productive systems.
+	* Use the public key on development and local systems.
 
-### Export the public key to environment variables
 
-```bash
-$ export PUBLIC_KEY=$(cat examples/public.key)
-```
 
-### If needed: Delete the exported environment
+### Create environment file
 
 ```bash
-$ unset PUBLIC_KEY
+$ bin/php-vault set .env.enc USER secret.user "DB Configs" --public-key --create
+$ bin/php-vault set .env.enc PASS secret.pass --public-key
+$ bin/php-vault set .env.enc HOST secret.host --public-key
+$ bin/php-vault set .env.enc NAME secret.name --public-key
 ```
 
-### Create raw environment file
+### Display the environment file
 
 ```bash
-$ vi env
+$ bin/php-vault display .env.enc --load-encrypted --public-key
+...
 ```
-
-```bash
-# DB values
-USER=secret.user
-PASS=secret.pass
-HOST=secret.host
-NAME=secret.name
-```
-
-### Encrypt environment file
-
-```bash
-$ bin/php-vault encrypt-file .env
-```
-
-```bash
-$ cat .env.enc
-# WyJ0WW5QcVp1TDNKUUE5OGtzd1BcLzIzVkdHMWttWkM5dVUiLCI3UVp6cEZXXC82aWNCU1ltb1dDVm54VHh5VUk5amRLbUVVUT09Il0=
-USER="WyJUU21ocFg2XC9qQ3hqSVAzd2RkeVNmNTFDYlJIMGU1VG4iLCJ0cmxwbnFleFFiemxwOWZ4cHFXRFwvbm9jRVZFRGl6SVhSa2xiIl0="
-PASS="WyJsXC9KODRcLzF5S1lNQ011eGFVQmNpOHFNK09Hcmp4c1FhIiwiWnlsTnRJdzNKcHNTZGViZTJ3UCswSDltRmdmNmdcL1oySW82VSJd"
-HOST="WyIyVG1sRWx1bXp5K2RpemNXZnJyOVo1bzZZZXd0cTM4cCIsIlB1Vmo2UHBGWk10XC9mQ3BPVWNXVCtIa2RtSDI5T0FcL1dJMVFMIl0="
-NAME="WyJ0U2hRMUJ1RmF6KzZyOElLZkxwekN0bmcwZ1RCS1FBMSIsIklKWUJzc29Yb01LYUo0blRhUUpXSmR3VHhna3dyakVJTHJJdSJd"
-```
-
-### Adds values to encrypted file
-
-```bash
-$ bin/php-vault set .env.enc PORT 3307 Description
-```
-
-### Displays the encrypted file
-
-```bash
-$ bin/php-vault display --env-file .env.enc --load-encrypted
-```
-
 
 ## On production system
 
 ### Export the private key to environment variables
 
-```bash
-$ export PRIVATE_KEY=$(cat examples/private.key)
-```
-
-### Displays an encrypted file
+### Display an encrypted file
 
 ```bash
-$ bin/php-vault display --env-file .env.enc --load-encrypted --display-decrypted
+$ bin/php-vault display .env.enc --load-encrypted --display-decrypted --private-key
++------+-------------+-------------+
+| Key  | Value       | Description |
++------+-------------+-------------+
+| USER | secret.user | DB Configs  |
+| PASS | secret.pass |             |
+| HOST | secret.host |             |
+| NAME | secret.name |             |
++------+-------------+-------------+
 ```
 
 ### Decrypt encrypted file
 
 ```bash
-$ bin/php-vault decrypt-file .env.test.enc
+$ bin/php-vault decrypt-file .env.enc --private-key
+
+The file was successfully written to ".env".
 ```
+
+### Display the decrypted file
+
+```bash
+$ bin/php-vault display .env --display-decrypted --private-key
++------+-------------+-------------+
+| Key  | Value       | Description |
++------+-------------+-------------+
+| USER | secret.user | DB Configs  |
+| PASS | secret.pass |             |
+| HOST | secret.host |             |
+| NAME | secret.name |             |
++------+-------------+-------------+
+```
+

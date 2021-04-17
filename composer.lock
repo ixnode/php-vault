@@ -4,35 +4,32 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1f66234878141e0e38ea41b8b550b5aa",
+    "content-hash": "e88a26590dfc7065b3074aace03d9eb0",
     "packages": [
         {
-            "name": "splitbrain/php-cli",
-            "version": "1.1.8",
+            "name": "adhocore/cli",
+            "version": "0.9.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/splitbrain/php-cli.git",
-                "reference": "8c2c001b1b55d194402cf18aad2757049ac6d575"
+                "url": "https://github.com/adhocore/php-cli.git",
+                "reference": "319c7dd0092c0346d9ad03366cc13d3491b57e34"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/splitbrain/php-cli/zipball/8c2c001b1b55d194402cf18aad2757049ac6d575",
-                "reference": "8c2c001b1b55d194402cf18aad2757049ac6d575",
+                "url": "https://api.github.com/repos/adhocore/php-cli/zipball/319c7dd0092c0346d9ad03366cc13d3491b57e34",
+                "reference": "319c7dd0092c0346d9ad03366cc13d3491b57e34",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": ">=7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^8"
-            },
-            "suggest": {
-                "psr/log": "Allows you to make the CLI available as PSR-3 logger"
+                "phpunit/phpunit": "^6.0"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "splitbrain\\phpcli\\": "src"
+                    "Ahc\\Cli\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -41,25 +38,39 @@
             ],
             "authors": [
                 {
-                    "name": "Andreas Gohr",
-                    "email": "andi@splitbrain.org"
+                    "name": "Jitendra Adhikari",
+                    "email": "jiten.adhikary@gmail.com"
                 }
             ],
-            "description": "Easy command line scripts for PHP with opt parsing and color output. No dependencies",
+            "description": "Command line interface library for PHP",
             "keywords": [
-                "argparse",
+                "PHP7",
+                "argument-parser",
+                "argv-parser",
                 "cli",
-                "command line",
+                "cli-action",
+                "cli-app",
+                "cli-color",
+                "cli-option",
+                "cli-writer",
+                "command",
                 "console",
-                "getopt",
-                "optparse",
-                "terminal"
+                "console-app",
+                "php-cli",
+                "stream-input",
+                "stream-output"
             ],
             "support": {
-                "issues": "https://github.com/splitbrain/php-cli/issues",
-                "source": "https://github.com/splitbrain/php-cli/tree/1.1.8"
+                "issues": "https://github.com/adhocore/php-cli/issues",
+                "source": "https://github.com/adhocore/php-cli/tree/0.9.0"
             },
-            "time": "2021-02-05T12:02:46+00:00"
+            "funding": [
+                {
+                    "url": "https://paypal.me/ji10",
+                    "type": "custom"
+                }
+            ],
+            "time": "2021-01-06T00:25:50+00:00"
         }
     ],
     "packages-dev": [
