@@ -1,4 +1,7 @@
 # PHPVault
+PHPVault creates, reads and builds `.env` environment files. The corresponding values are encrypted with a
+public key and decrypted with a private key. Private keys are only available on the production system.
+Public keys are available on other systems. Ideal for allowing a secure deployment process.
 
 ## On development system
 
@@ -18,6 +21,8 @@ The key pair is written to folder ".keys"
 
 ### Create environment file
 
+* Use public key
+
 ```bash
 $ bin/php-vault set .env.enc USER secret.user "DB Configs" --public-key --create
 $ bin/php-vault set .env.enc PASS secret.pass --public-key
@@ -26,6 +31,8 @@ $ bin/php-vault set .env.enc NAME secret.name --public-key
 ```
 
 ### Display the environment file
+
+* Use public key
 
 ```bash
 $ bin/php-vault display .env.enc --load-encrypted --public-key
@@ -37,6 +44,8 @@ $ bin/php-vault display .env.enc --load-encrypted --public-key
 ### Export the private key to environment variables
 
 ### Display an encrypted file
+
+* Use private key
 
 ```bash
 $ bin/php-vault display .env.enc --load-encrypted --display-decrypted --private-key
@@ -52,6 +61,8 @@ $ bin/php-vault display .env.enc --load-encrypted --display-decrypted --private-
 
 ### Decrypt encrypted file
 
+* Use private key
+
 ```bash
 $ bin/php-vault decrypt-file .env.enc --private-key
 
@@ -59,6 +70,8 @@ The file was successfully written to ".env".
 ```
 
 ### Display the decrypted file
+
+* Use private key
 
 ```bash
 $ bin/php-vault display .env --display-decrypted --private-key
