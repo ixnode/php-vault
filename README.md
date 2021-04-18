@@ -25,8 +25,8 @@ The basis of all operations is the command line tool `bin/php-vault`.  Help can 
 
 ```bash
 $ bin/php-vault --help
-phpVault command line interpreter.
-PHPVault, version 1.0.0
+PHPVault command line interpreter.
+PHPVault, version v1.0.1
 
 Commands:
   decrypt-file  df    Decrypts a given file. Requires a private key.
