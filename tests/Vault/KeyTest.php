@@ -24,6 +24,8 @@
  * SOFTWARE.
  */
 
+namespace Test\Ixnode\PhpVault\Vault;
+
 use PHPUnit\Framework\TestCase;
 use Ixnode\PhpVault\Core;
 

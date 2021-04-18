@@ -87,7 +87,7 @@ class BaseCommand extends Command
      * @param bool $replaceWithDefaultIfTrue
      * @return mixed
      */
-    protected function getOption(string $option, $default = null, bool $replaceWithDefaultIfTrue = false): mixed
+    protected function getOption(string $option, $default = null, bool $replaceWithDefaultIfTrue = false)
     {
         $option = $this->convertToCamelCase($option);
 
@@ -107,7 +107,7 @@ class BaseCommand extends Command
      * @param null $default
      * @return mixed
      */
-    protected function getArgument(string $argument, $default = null): mixed
+    protected function getArgument(string $argument, $default = null)
     {
         $arguments = $this->args();
 

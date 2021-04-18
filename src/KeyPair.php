@@ -27,7 +27,6 @@
 namespace Ixnode\PhpVault;
 
 use Exception;
-use JetBrains\PhpStorm\Pure;
 use SodiumException;
 
 class KeyPair
@@ -156,12 +155,13 @@ class KeyPair
      *
      * @param string $privateKey
      * @throws SodiumException
+     * @throws Exception
      */
     public function loadPrivateKeyFromFile(string $privateKey)
     {
         /* Check that given file exists. */
         if (!file_exists($privateKey)) {
-            throw new Exception(sprintf('The given private key does not exists.', $privateKey));
+            throw new Exception(sprintf('The given private key "%s" does not exists.', $privateKey));
         }
 
         $this->renew(false, file_get_contents($privateKey));
@@ -172,12 +172,13 @@ class KeyPair
      *
      * @param string $publicKey
      * @throws SodiumException
+     * @throws Exception
      */
     public function loadPublicKeyFromFile(string $publicKey)
     {
         /* Check that given file exists. */
         if (!file_exists($publicKey)) {
-            throw new Exception(sprintf('The given private key does not exists.', $publicKey));
+            throw new Exception(sprintf('The given private key "%s" does not exists.', $publicKey));
         }
 
         $this->renew(false, null, file_get_contents($publicKey));
@@ -189,7 +190,7 @@ class KeyPair
      * @return object
      * @throws SodiumException
      */
-    static public function getNewPair()
+    static public function getNewPair(): object
     {
         $keyPair = sodium_crypto_box_keypair();
 
@@ -206,7 +207,7 @@ class KeyPair
      * @return object
      * @throws SodiumException
      */
-    static public function getPairFromPrivateKey(string $privateKey)
+    static public function getPairFromPrivateKey(string $privateKey): object
     {
         return (object) [
             'public' => base64_encode(sodium_crypto_box_publickey_from_secretkey(base64_decode($privateKey))),
@@ -220,7 +221,7 @@ class KeyPair
      * @param string $publicKey
      * @return object
      */
-    static public function getPairFromPublicKey(string $publicKey)
+    static public function getPairFromPublicKey(string $publicKey): object
     {
         return (object) [
             'public' => $publicKey,

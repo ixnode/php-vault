@@ -83,7 +83,7 @@ class Core
      *
      * @return int
      */
-    public function getMode()
+    public function getMode(): int
     {
         return $this->mode->get();
     }
@@ -94,7 +94,7 @@ class Core
      * @return Encrypter
      * @throws Exception
      */
-    public function getEncrypter()
+    public function getEncrypter(): Encrypter
     {
         return $this->encrypter;
     }
@@ -105,7 +105,7 @@ class Core
      * @return Decrypter
      * @throws Exception
      */
-    public function getDecrypter()
+    public function getDecrypter(): Decrypter
     {
         return $this->decrypter;
     }
@@ -115,7 +115,7 @@ class Core
      *
      * @return KeyPair
      */
-    public function getKeyPair()
+    public function getKeyPair(): KeyPair
     {
         return $this->keyPair;
     }
@@ -125,7 +125,7 @@ class Core
      *
      * @return Vault
      */
-    public function getVault()
+    public function getVault(): Vault
     {
         return $this->vault;
     }

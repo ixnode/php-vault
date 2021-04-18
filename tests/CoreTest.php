@@ -24,8 +24,12 @@
  * SOFTWARE.
  */
 
+namespace Test\Ixnode\PhpVault;
+
 use PHPUnit\Framework\TestCase;
 use Ixnode\PhpVault\Core;
+use Exception;
+use SodiumException;
 
 final class CoreTest extends TestCase
 {

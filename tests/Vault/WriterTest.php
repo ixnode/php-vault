@@ -24,9 +24,11 @@
  * SOFTWARE.
  */
 
+namespace Test\Ixnode\PhpVault\Vault;
+
 use Ixnode\PhpVault\Vault\Vault;
 use Ixnode\PhpVault\Vault\Writer;
-use Test\Ixnode\PhpVault\Vault\VaultTestCase;
+use Exception;
 
 final class WriterTest extends VaultTestCase
 {

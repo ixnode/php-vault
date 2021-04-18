@@ -24,9 +24,12 @@
  * SOFTWARE.
  */
 
+namespace Test\Ixnode\PhpVault\Vault;
+
 use Ixnode\PhpVault\Core;
 use Ixnode\PhpVault\Vault\Vault;
-use Test\Ixnode\PhpVault\Vault\VaultTestCase;
+use Exception;
+use SodiumException;
 
 final class VaultTest extends VaultTestCase
 {

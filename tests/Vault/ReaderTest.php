@@ -24,10 +24,12 @@
  * SOFTWARE.
  */
 
+namespace Test\Ixnode\PhpVault\Vault;
+
 use Ixnode\PhpVault\Vault\Vault;
 use Ixnode\PhpVault\Vault\Reader;
-use JetBrains\PhpStorm\ArrayShape;
-use Test\Ixnode\PhpVault\Vault\VaultTestCase;
+use Exception;
+use SodiumException;
 
 final class ReaderTest extends VaultTestCase
 {
@@ -121,6 +123,7 @@ final class ReaderTest extends VaultTestCase
      * @param array $decrypted
      * @param array $encrypted
      * @throws SodiumException
+     * @throws Exception
      */
     public function testReaderAddArrayToVaultEncryptedFromDecrypted(string $stream, array $decrypted, array $encrypted)
     {
@@ -145,6 +148,7 @@ final class ReaderTest extends VaultTestCase
      * @param array $decrypted
      * @param array $encrypted
      * @throws SodiumException
+     * @throws Exception
      */
     public function testReaderAddArrayToVaultEncryptedFromEncrypted(string $stream, array $decrypted, array $encrypted)
     {
@@ -169,6 +173,7 @@ final class ReaderTest extends VaultTestCase
      * @param array $decrypted
      * @param array $encrypted
      * @throws SodiumException
+     * @throws Exception
      */
     public function testReaderAddArrayToVaultDecrytedFromDecrypted(string $stream, array $decrypted, array $encrypted)
     {
@@ -193,6 +198,7 @@ final class ReaderTest extends VaultTestCase
      * @param array $decrypted
      * @param array $encrypted
      * @throws SodiumException
+     * @throws Exception
      */
     public function testReaderAddArrayToVaultDecrytedFromEncrypted(string $stream, array $decrypted, array $encrypted)
     {
@@ -501,7 +507,7 @@ final class ReaderTest extends VaultTestCase
      * @param array|null $description
      * @return object[]
      */
-    #[ArrayShape(['decrypted' => "object", 'encrypted' => "object"])] protected function getConfigArray(array $value, array $description = null): array
+    protected function getConfigArray(array $value, array $description = null): array
     {
         return array(
             'decrypted' => $this->getValueDescriptionObject($value[0], $description === null ? null : $description[0]),

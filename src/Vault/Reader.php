@@ -53,6 +53,7 @@ class Reader
      * @param string $stream
      * @param bool $decrypt
      * @return array[]
+     * @throws Exception
      */
     public function convertStreamToArray(string $stream, bool $decrypt = false): array
     {
@@ -109,6 +110,7 @@ class Reader
      * @param string $file
      * @param bool $decrypt
      * @throws SodiumException
+     * @throws Exception
      */
     public function addFileToVault(string $file, bool $decrypt = false)
     {
@@ -125,10 +127,11 @@ class Reader
      * @param string $stream
      * @param bool $decrypt
      * @throws SodiumException
+     * @throws Exception
      */
     public function addStreamToVault(string $stream, bool $decrypt = false)
     {
-        $this->addArrayToVault($this->convertStreamToArray($stream, false), null, $decrypt);
+        $this->addArrayToVault($this->convertStreamToArray($stream), null, $decrypt);
     }
 
     /**

@@ -99,7 +99,7 @@ class Vault
      * @return object|string
      * @throws Exception
      */
-    public function get(string $key, bool $allProperties = false): string|object
+    public function get(string $key, bool $allProperties = false)
     {
         if (!array_key_exists($key, $this->vault)) {
             throw new Exception('Unknown given key name.');
@@ -117,7 +117,7 @@ class Vault
      * @throws SodiumException
      * @throws Exception
      */
-    public function decrypt(string $key, bool $allProperties = false): string|object
+    public function decrypt(string $key, bool $allProperties = false)
     {
         $data = $this->get($key, $allProperties);
 
@@ -146,6 +146,7 @@ class Vault
      * @param ?string $nonce
      * @param bool $alreadyEncrypted
      * @throws SodiumException
+     * @throws Exception
      */
     public function add(string $key, string $value, string $description = null, string $nonce = null, bool $alreadyEncrypted = false): void
     {
@@ -197,10 +198,8 @@ class Vault
         /* Remove _ at the beginning */
         $keyName = preg_replace('~^_~', '', $keyName);
 
-        /* Transform all letters to  */
-        $keyName = strtoupper($keyName);
-
-        return $keyName;
+        /* Transform all letters to upper */
+        return strtoupper($keyName);
     }
 
     /**
@@ -209,6 +208,7 @@ class Vault
      * @param string $string
      * @param bool $decrypt
      * @return string
+     * @throws Exception
      */
     public function convertString(string $string, bool $decrypt = false): string
     {

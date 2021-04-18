@@ -51,7 +51,7 @@ class Decrypter
      * @throws SodiumException
      * @throws Exception
      */
-    public function decrypt(string $data): bool|string
+    public function decrypt(string $data)
     {
         /* Check mode */
         if ($this->core->getMode() < Mode::MODE_DECRYPT) {
