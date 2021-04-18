@@ -19,12 +19,20 @@ files and allows them to be checked into the code repository. To decrypt and use
 simply exchange the private key. This approach is great for providing secure and automated deployment processes
 ([CI/CD](https://en.wikipedia.org/wiki/CI/CD), etc.).
 
-## Command line command `bin/php-vault`
-
-The basis of all operations is the command line tool `bin/php-vault`.  Help can be displayed at any time:
+To start simply run:
 
 ```bash
-$ bin/php-vault --help
+$ composer require ixnode/php-vault
+```
+
+This requires [Composer](https://getcomposer.org/), a dependency manager for PHP.
+
+## Command line command `vendor/bin/php-vault`
+
+The basis of all operations is the command line tool `vendor/bin/php-vault`.  Help can be displayed at any time:
+
+```bash
+$ vendor/bin/php-vault --help
 PHPVault command line interpreter.
 PHPVault, version v1.0.1
 
@@ -49,7 +57,7 @@ the key is loaded from the `.keys` directory (`--public-key`).
 ### Generate keys
 
 ```bash
-$ bin/php-vault generate-keys --persist
+$ vendor/bin/php-vault generate-keys --persist
 
 The key pair is written to folder ".keys"
 
@@ -71,11 +79,11 @@ Never add the private key to the repository!
 
 ```bash
 # Create file .env.enc
-$ bin/php-vault set .env.enc USER secret.user "DB Configs" --public-key --create
+$ vendor/bin/php-vault set .env.enc USER secret.user "DB Configs" --public-key --create
 # Adds values to .env.enc
-$ bin/php-vault set .env.enc PASS secret.pass --public-key
-$ bin/php-vault set .env.enc HOST secret.host --public-key
-$ bin/php-vault set .env.enc NAME secret.name --public-key
+$ vendor/bin/php-vault set .env.enc PASS secret.pass --public-key
+$ vendor/bin/php-vault set .env.enc HOST secret.host --public-key
+$ vendor/bin/php-vault set .env.enc NAME secret.name --public-key
 ```
 
 ### Display the environment file
@@ -84,7 +92,7 @@ $ bin/php-vault set .env.enc NAME secret.name --public-key
 * Use public key (`--public-key` → read from `.keys/public.key`).
 
 ```bash
-$ bin/php-vault display .env.enc --load-encrypted --public-key
+$ vendor/bin/php-vault display .env.enc --load-encrypted --public-key
 ...
 ```
 
@@ -99,7 +107,7 @@ the key is loaded from the `.keys` directory (`--private-key`).
 * Use private key (`--private-key` → read from `.keys/private.key`).
 
 ```bash
-$ bin/php-vault display .env.enc --load-encrypted --display-decrypted --private-key
+$ vendor/bin/php-vault display .env.enc --load-encrypted --display-decrypted --private-key
 +------+-------------+-------------+
 | Key  | Value       | Description |
 +------+-------------+-------------+
@@ -116,7 +124,7 @@ $ bin/php-vault display .env.enc --load-encrypted --display-decrypted --private-
 * Use private key (`--private-key` → load from `.keys/private.key`).
 
 ```bash
-$ bin/php-vault decrypt-file .env.enc --private-key
+$ vendor/bin/php-vault decrypt-file .env.enc --private-key
 
 The file was successfully written to ".env".
 ```
@@ -126,7 +134,7 @@ The file was successfully written to ".env".
 * Use private key (`--private-key` → load from `.keys/private.key`).
 
 ```bash
-$ bin/php-vault display .env --display-decrypted --private-key
+$ vendor/bin/php-vault display .env --display-decrypted --private-key
 +------+-------------+-------------+
 | Key  | Value       | Description |
 +------+-------------+-------------+
