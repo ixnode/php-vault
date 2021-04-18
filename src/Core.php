@@ -34,7 +34,7 @@ class Core
 {
     const NAME = 'PHPVault';
 
-    const VERSION = '1.0.0';
+    const VERSION = 'v1.0.0';
 
     const CORE_PUBLIC_KEY = 'zodfptod/VHjzzgdPgT2vk7RThdowsYXLiPP+eNI6D4=';
 
