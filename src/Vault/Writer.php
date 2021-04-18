@@ -49,12 +49,12 @@ class Writer
     /**
      * Saves all decrypted vault values to $_ENV array.
      *
-     * @return array
+     * @return string[]
      * @throws Exception
      */
     public function saveToEnv(): array
     {
-        foreach ($this->vault->getAllDecrypted(true) as $key => $value) {
+        foreach ($this->vault->getAllDecryptedValues(true) as $key => $value) {
             $_ENV[$key] = $value;
         }
 
@@ -64,12 +64,12 @@ class Writer
     /**
      * Saves all decrypted vault values to $_SERVER array.
      *
-     * @return array
+     * @return string[]
      * @throws Exception
      */
     public function saveToServer(): array
     {
-        foreach ($this->vault->getAllDecrypted(true) as $key => $value) {
+        foreach ($this->vault->getAllDecryptedValues(true) as $key => $value) {
             $_SERVER[$key] = $value;
         }
 
@@ -79,16 +79,14 @@ class Writer
     /**
      * Saves all decrypted vault values to putenv.
      *
-     * @return array
+     * @return void
      * @throws Exception
      */
-    public function putEnv(): array
+    public function putEnv(): void
     {
-        foreach ($this->vault->getAllDecrypted(true) as $key => $value) {
+        foreach ($this->vault->getAllDecryptedValues(true) as $key => $value) {
             putenv(sprintf('%s=%s', $key, $value));
         }
-
-        return $_SERVER;
     }
 
     /**
@@ -101,7 +99,7 @@ class Writer
      */
     public function getEnvString(bool $decrypted = false, bool $withDescription = false): string
     {
-        $data = $this->vault->getAll(true, true, $decrypted);
+        $data = $this->vault->getAllObjects(true, $decrypted);
 
         $envString = '';
 

@@ -33,7 +33,9 @@ class KeyPair
 {
     private PHPVault $core;
 
-    private ?object $keyPair = null;
+    private ?string $privateKey = null;
+
+    private ?string $publicKey = null;
 
     const SERVER_PUBLIC_KEY_NAME = 'PUBLIC_KEY';
 
@@ -57,23 +59,70 @@ class KeyPair
     }
 
     /**
-     * Returns the base64 encoded private string.
+     * Deletes the key pair.
      *
-     * @return ?string
+     * @return void
+     * @throws Exception
      */
-    public function getPrivate(): ?string
+    protected function deleteKeyPair(): void
     {
-        return $this->keyPair->private;
+        $this->setPrivateKey(null);
+        $this->setPublicKey(null);
+        $this->core->setMode(Mode::MODE_NONE);
+    }
+
+    /**
+     * Sets private key pair from given array.
+     *
+     * @param array{'private': string|null, 'public': string} $keyPair
+     * @return void
+     */
+    protected function setKeyPair(array $keyPair): void
+    {
+        $this->setPrivateKey($keyPair['private']);
+        $this->setPublicKey($keyPair['public']);
+    }
+
+    /**
+     * Returns the base64 encoded private key string.
+     *
+     * @return string|null
+     */
+    public function getPrivateKey(): ?string
+    {
+        return $this->privateKey;
+    }
+
+    /**
+     * Sets the base64 encoded private key string.
+     *
+     * @param string|null $privateKey
+     * @return void
+     */
+    public function setPrivateKey(?string $privateKey): void
+    {
+        $this->privateKey = $privateKey;
     }
 
     /**
      * Returns the base64 decoded public string.
      *
-     * @return ?string
+     * @return string|null
      */
-    public function getPublic(): ?string
+    public function getPublicKey(): ?string
     {
-        return $this->keyPair->public;
+        return $this->publicKey;
+    }
+
+    /**
+     * Sets the base64 decoded public string.
+     *
+     * @param string|null $publicKey
+     * @return void
+     */
+    public function setPublicKey(?string $publicKey): void
+    {
+        $this->publicKey = $publicKey;
     }
 
     /**
@@ -82,9 +131,10 @@ class KeyPair
      * @param bool $forceCreateNew
      * @param string|null $privateKey
      * @param string|null $publicKey
+     * @return void
      * @throws SodiumException
      */
-    public function init(bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null)
+    public function init(bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null): void
     {
         $this->renew($forceCreateNew, $privateKey, $publicKey, false);
     }
@@ -96,46 +146,50 @@ class KeyPair
      * @param string|null $privateKey
      * @param string|null $publicKey
      * @param bool $throwException
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
     public function renew(bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null, bool $throwException = true): void
     {
+        /* Delete key pair. */
+        $this->deleteKeyPair();
+
         /* Force create new key pair */
-        if ($this->keyPair === null && $forceCreateNew) {
-            $this->keyPair = self::getNewPair();
+        if ($this->core->getMode() === Mode::MODE_NONE && $forceCreateNew) {
+            $this->setKeyPair(self::getNewPair());
             $this->core->setMode(Mode::MODE_DECRYPT);
         }
 
 
         /* Read private key from input parameter */
-        if ($this->keyPair === null && $privateKey !== null) {
-            $this->keyPair = self::getPairFromPrivateKey($privateKey);
+        if ($this->core->getMode() === Mode::MODE_NONE && $privateKey !== null) {
+            $this->setKeyPair(self::getPairFromPrivateKey($privateKey));
             $this->core->setMode(Mode::MODE_DECRYPT);
         }
 
         /* Read private key from $_SERVER variable. */
-        if ($this->keyPair === null && array_key_exists(self::SERVER_PRIVATE_KEY_NAME, $_SERVER)) {
-            $this->keyPair = self::getPairFromPrivateKey($_SERVER[self::SERVER_PRIVATE_KEY_NAME]);
+        if ($this->core->getMode() === Mode::MODE_NONE && array_key_exists(self::SERVER_PRIVATE_KEY_NAME, $_SERVER)) {
+            $this->setKeyPair(self::getPairFromPrivateKey($_SERVER[self::SERVER_PRIVATE_KEY_NAME]));
             $this->core->setMode(Mode::MODE_DECRYPT);
         }
 
 
         /* Read public key from input parameter */
-        if ($this->keyPair === null && $publicKey !== null) {
-            $this->keyPair = self::getPairFromPublicKey($publicKey);
+        if ($this->core->getMode() === Mode::MODE_NONE && $publicKey !== null) {
+            $this->setKeyPair(self::getPairFromPublicKey($publicKey));
             $this->core->setMode(Mode::MODE_ENCRYPT);
         }
 
         /* Read private key from $_SERVER variable. */
-        if ($this->keyPair === null && array_key_exists(self::SERVER_PUBLIC_KEY_NAME, $_SERVER)) {
-            $this->keyPair = self::getPairFromPublicKey($_SERVER[self::SERVER_PUBLIC_KEY_NAME]);
+        if ($this->core->getMode() === Mode::MODE_NONE && array_key_exists(self::SERVER_PUBLIC_KEY_NAME, $_SERVER)) {
+            $this->setKeyPair(self::getPairFromPublicKey($_SERVER[self::SERVER_PUBLIC_KEY_NAME]));
             $this->core->setMode(Mode::MODE_ENCRYPT);
         }
 
 
         /* No key was found. */
-        if ($this->keyPair === null && $throwException) {
+        if ($this->core->getMode() === Mode::MODE_NONE && $throwException) {
             throw new Exception('No private or public key found.');
         }
     }
@@ -154,47 +208,65 @@ class KeyPair
      * Loads private key from file.
      *
      * @param string $privateKey
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function loadPrivateKeyFromFile(string $privateKey)
+    public function loadPrivateKeyFromFile(string $privateKey): void
     {
         /* Check that given file exists. */
         if (!file_exists($privateKey)) {
             throw new Exception(sprintf('The given private key "%s" does not exists.', $privateKey));
         }
 
-        $this->renew(false, file_get_contents($privateKey));
+        /* Load key */
+        $privateKeyString = file_get_contents($privateKey);
+
+        /* Check loaded key */
+        if ($privateKeyString === false) {
+            throw new Exception(sprintf('The given private key "%s" could not be loaded.', $privateKey));
+        }
+
+        $this->renew(false, $privateKeyString);
     }
 
     /**
      * Loads public key from file.
      *
      * @param string $publicKey
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function loadPublicKeyFromFile(string $publicKey)
+    public function loadPublicKeyFromFile(string $publicKey): void
     {
         /* Check that given file exists. */
         if (!file_exists($publicKey)) {
-            throw new Exception(sprintf('The given private key "%s" does not exists.', $publicKey));
+            throw new Exception(sprintf('The given public key "%s" does not exists.', $publicKey));
         }
 
-        $this->renew(false, null, file_get_contents($publicKey));
+        /* Load key */
+        $publicKeyString = file_get_contents($publicKey);
+
+        /* Check loaded key */
+        if ($publicKeyString === false) {
+            throw new Exception(sprintf('The given public key "%s" could not be loaded.', $publicKey));
+        }
+
+        $this->renew(false, null, $publicKey);
     }
 
     /**
      * Returns a new public private key object (static function).
      *
-     * @return object
+     * @return array{'private': string, 'public': string}
      * @throws SodiumException
      */
-    static public function getNewPair(): object
+    static public function getNewPair(): array
     {
         $keyPair = sodium_crypto_box_keypair();
 
-        return (object) [
+        return [
             'public' => base64_encode(sodium_crypto_box_publickey($keyPair)),
             'private' => base64_encode(sodium_crypto_box_secretkey($keyPair))
         ];
@@ -204,12 +276,12 @@ class KeyPair
      * Returns a public private key object from given base64 encoded private key (static function).
      *
      * @param string $privateKey
-     * @return object
+     * @return array{'private': string, 'public': string}
      * @throws SodiumException
      */
-    static public function getPairFromPrivateKey(string $privateKey): object
+    static public function getPairFromPrivateKey(string $privateKey): array
     {
-        return (object) [
+        return [
             'public' => base64_encode(sodium_crypto_box_publickey_from_secretkey(base64_decode($privateKey))),
             'private' => $privateKey
         ];
@@ -219,11 +291,11 @@ class KeyPair
      * Returns a public private key object from given base64 encoded public key (static function).
      *
      * @param string $publicKey
-     * @return object
+     * @return array{'private': null, 'public': string}
      */
-    static public function getPairFromPublicKey(string $publicKey): object
+    static public function getPairFromPublicKey(string $publicKey): array
     {
-        return (object) [
+        return [
             'public' => $publicKey,
             'private' => null
         ];

@@ -47,8 +47,9 @@ final class KeyTest extends TestCase
      * @dataProvider dataProvider
      * @param string $key
      * @param string $expected
+     * @return void
      */
-    public function testKeys(string $key, string $expected)
+    public function testKeys(string $key, string $expected): void
     {
         /* Arrange */
         /* comes from @dataProvider */

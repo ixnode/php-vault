@@ -32,12 +32,16 @@ use Ixnode\PhpVault\PHPVault;
 
 class Vault
 {
+    /** @var PHPVault $core */
     private PHPVault $core;
 
+    /** @var Reader $reader */
     private Reader $reader;
 
+    /** @var Writer $writer */
     private Writer $writer;
 
+    /** @var object[] $vault  */
     private array $vault = [];
 
     /**
@@ -55,15 +59,39 @@ class Vault
     }
 
     /**
-     * Gets the whole vault.
+     * Gets the whole decrypted or encrypted vault as value array.
      *
      * @param bool $underscored
-     * @param bool $allProperties
      * @param bool $decrypt
-     * @return array
+     * @return string[]
+     * @throws SodiumException
      * @throws Exception
      */
-    public function getAll(bool $underscored = false, bool $allProperties = false, bool $decrypt = false): array
+    public function getAllValues(bool $underscored = false, bool $decrypt = false): array
+    {
+        $vault = [];
+
+        foreach (array_keys($this->vault) as $key) {
+            $keyArray = $underscored ? $this->getUnderscoredKey($key) : $key;
+
+            $value = $decrypt ? $this->getDecryptedValue($key) : $this->getValue($key);
+
+            $vault[$keyArray] = $value === false ? null : $value;
+        }
+
+        return $vault;
+    }
+
+    /**
+     * Gets the whole decrypted or encrypted vault as object array.
+     *
+     * @param bool $underscored
+     * @param bool $decrypt
+     * @return object[]
+     * @throws SodiumException
+     * @throws Exception
+     */
+    public function getAllObjects(bool $underscored = false, bool $decrypt = false): array
     {
         $vault = [];
 
@@ -71,70 +99,100 @@ class Vault
             $keyArray = $underscored ? $this->getUnderscoredKey($key) : $key;
 
             $vault[$keyArray] = $decrypt ?
-                $this->decrypt($key, $allProperties) :
-                $this->get($key, $allProperties);
+                $this->getDecryptedObject($key) :
+                $this->getObject($key);
         }
 
         return $vault;
     }
 
     /**
-     * Gets the whole decrypted vault.
+     * Gets the whole decrypted vault as values.
      *
      * @param bool $underscored
-     * @param bool $allProperties
-     * @return array
-     * @throws Exception
+     * @return string[]
+     * @throws SodiumException
      */
-    public function getAllDecrypted(bool $underscored = false, bool $allProperties = false): array
+    public function getAllDecryptedValues(bool $underscored = false): array
     {
-        return $this->getAll($underscored, $allProperties, true);
+        return $this->getAllValues($underscored, true);
     }
 
     /**
-     * Gets a single vault entry.
+     * Gets the whole decrypted vault as objects.
+     *
+     * @param bool $underscored
+     * @return object[]
+     * @throws SodiumException
+     */
+    public function getAllDecryptedObjects(bool $underscored = false): array
+    {
+        return $this->getAllObjects($underscored, true);
+    }
+
+    /**
+     * Gets the value of a single vault entry.
      *
      * @param string $key
-     * @param bool $allProperties
-     * @return object|string
+     * @return string
      * @throws Exception
      */
-    public function get(string $key, bool $allProperties = false)
+    public function getValue(string $key): string
     {
         if (!array_key_exists($key, $this->vault)) {
             throw new Exception('Unknown given key name.');
         }
 
-        return $allProperties ? $this->vault[$key] : $this->vault[$key]->value;
+        return $this->vault[$key]->value;
     }
 
     /**
-     * Gets a single vault entry encrypted.
+     * Gets a single vault entry as object.
      *
      * @param string $key
-     * @param bool $allProperties
-     * @return object|string
+     * @return object
+     * @throws Exception
+     */
+    public function getObject(string $key): object
+    {
+        if (!array_key_exists($key, $this->vault)) {
+            throw new Exception('Unknown given key name.');
+        }
+
+        return $this->vault[$key];
+    }
+
+    /**
+     * Gets a decrypted single value vault entry.
+     *
+     * @param string $key
+     * @return false|string
      * @throws SodiumException
      * @throws Exception
      */
-    public function decrypt(string $key, bool $allProperties = false)
+    public function getDecryptedValue(string $key)
     {
-        $data = $this->get($key, $allProperties);
+        return $this->core->getDecrypter()->decrypt($this->getValue($key));
+    }
 
-        switch (gettype($data)) {
-            case 'string':
-                return $this->core->getDecrypter()->decrypt($data);
+    /**
+     * Gets a decrypted single full object vault entry.
+     *
+     * @param string $key
+     * @return object
+     * @throws SodiumException
+     * @throws Exception
+     */
+    public function getDecryptedObject(string $key): object
+    {
+        $data = $this->getObject($key);
+        $return = (object) [];
 
-            case 'object':
-                $return = (object) [];
-                foreach ($data as $key => $encryptedValue) {
-                    $return->{$key} = $data->{$key} === null ? null : $this->core->getDecrypter()->decrypt($data->{$key});
-                }
-                return $return;
-
-            default:
-                throw new Exception('Unknown type given.');
+        foreach ($data as $key => $encryptedValue) {
+            $return->{$key} = $data->{$key} === null ? null : $this->core->getDecrypter()->decrypt($data->{$key});
         }
+
+        return $return;
     }
 
     /**
@@ -168,8 +226,10 @@ class Vault
 
     /**
      * Clears the vault.
+     *
+     * @return void
      */
-    public function clear()
+    public function clear(): void
     {
         $this->vault = [];
     }
@@ -216,6 +276,10 @@ class Vault
 
         if ($decrypt) {
             $string = $this->core->getDecrypter()->decrypt($string);
+        }
+
+        if ($string === false) {
+            $string = null;
         }
 
         return $string;

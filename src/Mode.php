@@ -49,9 +49,10 @@ class Mode
      * Sets the current mode.
      *
      * @param int $mode
+     * @return void
      * @throws Exception
      */
-    public function set(int $mode)
+    public function set(int $mode): void
     {
         if (!in_array($mode, [self::MODE_NONE, self::MODE_ENCRYPT, self::MODE_DECRYPT])) {
             throw new Exception('Unknown mode.');

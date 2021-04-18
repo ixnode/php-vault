@@ -36,9 +36,10 @@ final class ReaderTest extends VaultTestCase
     /**
      * Test reader class exists.
      *
+     * @return void
      * @throws Exception
      */
-    public function testReaderExists()
+    public function testReaderExists(): void
     {
         /* Arrange */
         $expected = Reader::class;
@@ -57,10 +58,12 @@ final class ReaderTest extends VaultTestCase
      *
      * @dataProvider dataProviderArrayFromDecrypted
      * @param string $stream
-     * @param array $decrypted
-     * @param array $encrypted
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @return void
+     * @throws Exception
      */
-    public function testReaderArrayFromDecrypted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderArrayFromDecrypted(string $stream, array $decrypted, array $encrypted): void
     {
         /* Arrange */
         $expected = $decrypted;
@@ -78,10 +81,12 @@ final class ReaderTest extends VaultTestCase
      *
      * @dataProvider dataProviderArrayFromEncrypted
      * @param string $stream
-     * @param array $decrypted
-     * @param array $encrypted
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @return void
+     * @throws Exception
      */
-    public function testReaderArrayFromEncryptedToEncrypted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderArrayFromEncryptedToEncrypted(string $stream, array $decrypted, array $encrypted): void
     {
         /* Arrange */
         $expected = $encrypted;
@@ -99,10 +104,12 @@ final class ReaderTest extends VaultTestCase
      *
      * @dataProvider dataProviderArrayFromEncrypted
      * @param string $stream
-     * @param array $decrypted
-     * @param array $encrypted
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @return void
+     * @throws Exception
      */
-    public function testReaderArrayFromEncryptedToDecrypted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderArrayFromEncryptedToDecrypted(string $stream, array $decrypted, array $encrypted): void
     {
         /* Arrange */
         $expected = $decrypted;
@@ -120,12 +127,13 @@ final class ReaderTest extends VaultTestCase
      *
      * @dataProvider dataProviderArrayFromDecrypted
      * @param string $stream
-     * @param array $decrypted
-     * @param array $encrypted
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function testReaderAddArrayToVaultEncryptedFromDecrypted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderAddArrayToVaultEncryptedFromDecrypted(string $stream, array $decrypted, array $encrypted): void
     {
         /* Arrange */
         $expected = $encrypted;
@@ -134,7 +142,7 @@ final class ReaderTest extends VaultTestCase
         self::$core->clearVault();
         $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAll(true, true, false);
+        $actual = self::$core->getVault()->getAllObjects(true, false);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -145,12 +153,13 @@ final class ReaderTest extends VaultTestCase
      *
      * @dataProvider dataProviderArrayFromEncrypted
      * @param string $stream
-     * @param array $decrypted
-     * @param array $encrypted
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function testReaderAddArrayToVaultEncryptedFromEncrypted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderAddArrayToVaultEncryptedFromEncrypted(string $stream, array $decrypted, array $encrypted): void
     {
         /* Arrange */
         $expected = $encrypted;
@@ -159,7 +168,7 @@ final class ReaderTest extends VaultTestCase
         self::$core->clearVault();
         $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, true);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAll(true, true, false);
+        $actual = self::$core->getVault()->getAllObjects(true, false);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -170,12 +179,13 @@ final class ReaderTest extends VaultTestCase
      *
      * @dataProvider dataProviderArrayFromDecrypted
      * @param string $stream
-     * @param array $decrypted
-     * @param array $encrypted
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function testReaderAddArrayToVaultDecrytedFromDecrypted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderAddArrayToVaultDecrytedFromDecrypted(string $stream, array $decrypted, array $encrypted): void
     {
         /* Arrange */
         $expected = $decrypted;
@@ -184,7 +194,7 @@ final class ReaderTest extends VaultTestCase
         self::$core->clearVault();
         $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAll(true, true, true);
+        $actual = self::$core->getVault()->getAllObjects(true, true);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -195,12 +205,13 @@ final class ReaderTest extends VaultTestCase
      *
      * @dataProvider dataProviderArrayFromEncrypted
      * @param string $stream
-     * @param array $decrypted
-     * @param array $encrypted
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function testReaderAddArrayToVaultDecrytedFromEncrypted(string $stream, array $decrypted, array $encrypted)
+    public function testReaderAddArrayToVaultDecrytedFromEncrypted(string $stream, array $decrypted, array $encrypted): void
     {
         /* Arrange */
         $expected = $decrypted;
@@ -209,7 +220,7 @@ final class ReaderTest extends VaultTestCase
         self::$core->clearVault();
         $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, true);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAll(true, true, true);
+        $actual = self::$core->getVault()->getAllObjects(true, true);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -483,9 +494,9 @@ final class ReaderTest extends VaultTestCase
      * )
      * ---
      *
-     * @param array $config
+     * @param array[] $config
      * @param int $number
-     * @return mixed
+     * @return array[]
      */
     protected function convertConfig(array $config, int $number): array
     {
@@ -503,8 +514,8 @@ final class ReaderTest extends VaultTestCase
     /**
      * Returns a config array from given values and descriptions.
      *
-     * @param array $value
-     * @param array|null $description
+     * @param string[] $value
+     * @param string[]|null $description
      * @return object[]
      */
     protected function getConfigArray(array $value, array $description = null): array

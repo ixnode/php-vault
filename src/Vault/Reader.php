@@ -52,7 +52,7 @@ class Reader
      *
      * @param string $stream
      * @param bool $decrypt
-     * @return array[]
+     * @return object[]
      * @throws Exception
      */
     public function convertStreamToArray(string $stream, bool $decrypt = false): array
@@ -109,16 +109,26 @@ class Reader
      *
      * @param string $file
      * @param bool $encryptedFile
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function addFileToVault(string $file, bool $encryptedFile = false)
+    public function addFileToVault(string $file, bool $encryptedFile = false): void
     {
+        /* Check given file. */
         if (!file_exists($file)) {
             throw new Exception(sprintf('The given file "%s" does not exist.', $file));
         }
 
-        $this->addStreamToVault(file_get_contents($file), $encryptedFile);
+        /* Load file. */
+        $fileContent = file_get_contents($file);
+
+        /* Check loaded file. */
+        if ($fileContent === false) {
+            throw new Exception(sprintf('The given file "%s" could not be loaded.', $file));
+        }
+
+        $this->addStreamToVault($fileContent, $encryptedFile);
     }
 
     /**
@@ -126,10 +136,11 @@ class Reader
      *
      * @param string $stream
      * @param bool $encryptedStream
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function addStreamToVault(string $stream, bool $encryptedStream = false)
+    public function addStreamToVault(string $stream, bool $encryptedStream = false): void
     {
         $this->addArrayToVault($this->convertStreamToArray($stream), null, $encryptedStream);
     }
@@ -137,12 +148,13 @@ class Reader
     /**
      * Adds given array to vault.
      *
-     * @param array $array
+     * @param object[] $array
      * @param string|null $nonce
      * @param bool $encryptedArray
+     * @return void
      * @throws SodiumException
      */
-    public function addArrayToVault(array $array, string $nonce = null, bool $encryptedArray = false)
+    public function addArrayToVault(array $array, string $nonce = null, bool $encryptedArray = false): void
     {
         foreach ($array as $name => $data) {
             $this->vault->add($name, $data->value, $data->description, $nonce, $encryptedArray);

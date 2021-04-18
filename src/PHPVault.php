@@ -71,9 +71,10 @@ class PHPVault
      * Gets the Mode class.
      *
      * @param int $mode
+     * @return void
      * @throws Exception
      */
-    public function setMode(int $mode)
+    public function setMode(int $mode): void
     {
         $this->mode->set($mode);
     }
@@ -132,8 +133,10 @@ class PHPVault
 
     /**
      * Clears the vault.
+     *
+     * @return void
      */
-    public function clearVault()
+    public function clearVault(): void
     {
         $this->vault->clear();
     }
@@ -142,9 +145,10 @@ class PHPVault
      * Loads private key from file.
      *
      * @param string $privateKey
+     * @return void
      * @throws SodiumException
      */
-    public function loadPrivateKeyFromFile(string $privateKey)
+    public function loadPrivateKeyFromFile(string $privateKey): void
     {
         $this->getKeyPair()->loadPrivateKeyFromFile($privateKey);
     }
@@ -153,9 +157,10 @@ class PHPVault
      * Loads public key from file.
      *
      * @param string $publicKey
+     * @return void
      * @throws SodiumException
      */
-    public function loadPublicKeyFromFile(string $publicKey)
+    public function loadPublicKeyFromFile(string $publicKey): void
     {
         $this->getKeyPair()->loadPublicKeyFromFile($publicKey);
     }
@@ -164,10 +169,11 @@ class PHPVault
      * Imports and adds given env file to vault and $_SERVER.
      *
      * @param string $file
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function importEncryptedEnvFile(string $file)
+    public function importEncryptedEnvFile(string $file): void
     {
         $this->getVault()->getReader()->addFileToVault($file, true);
         $this->getVault()->getWriter()->saveToServer();

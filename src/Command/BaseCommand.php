@@ -83,7 +83,7 @@ class BaseCommand extends Command
      * Returns an option from command line.
      *
      * @param string $option
-     * @param null $default
+     * @param string|bool $default
      * @param bool $replaceWithDefaultIfTrue
      * @return mixed
      */
@@ -119,10 +119,10 @@ class BaseCommand extends Command
     /**
      * Converts given string into CamelCase.
      *
-     * @param $value
+     * @param string $value
      * @return string
      */
-    protected function convertToCamelCase($value): string
+    protected function convertToCamelCase(string $value): string
     {
         /* Replace capitals to "-capital". */
         $value = preg_replace('~([A-Z])~', '-$1', $value);
@@ -140,11 +140,15 @@ class BaseCommand extends Command
     /**
      * Returns the composer.json root path (project path).
      *
-     * @return string
+     * @return string|null
      */
-    protected function getComposerJsonRootPath(): string
+    protected function getComposerJsonRootPath(): ?string
     {
         $reflection = new ReflectionClass(ClassLoader::class);
+
+        if ($reflection->getFileName() === false) {
+            return null;
+        }
 
         return dirname($reflection->getFileName(), 3);
     }
@@ -222,9 +226,10 @@ class BaseCommand extends Command
      * @param string|null $envFile
      * @param bool $displayDecrypted
      * @param bool $ignoreExistingFile
+     * @return void
      * @throws Exception
      */
-    protected function writeEnvVariables(PHPVault $core, ?string $envFile = null, bool $displayDecrypted = false, bool $ignoreExistingFile = false)
+    protected function writeEnvVariables(PHPVault $core, ?string $envFile = null, bool $displayDecrypted = false, bool $ignoreExistingFile = false): void
     {
         /* Check if option was given to write a file. */
         if (!$envFile) {

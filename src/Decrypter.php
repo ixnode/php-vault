@@ -59,7 +59,7 @@ class Decrypter
         }
 
         $key = sodium_crypto_box_keypair_from_secretkey_and_publickey(
-            base64_decode($this->core->getKeyPair()->getPrivate()),
+            base64_decode($this->core->getKeyPair()->getPrivateKey()),
             base64_decode(PHPVault::CORE_PUBLIC_KEY)
         );
 

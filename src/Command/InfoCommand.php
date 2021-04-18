@@ -53,9 +53,10 @@ class InfoCommand extends BaseCommand
     /**
      * Bootstrap show information function.
      *
+     * @return void
      * @throws Exception
      */
-    public function execute()
+    public function execute(): void
     {
         /* Initiate the PhpVault Core */
         $core = new PHPVault();
@@ -67,13 +68,13 @@ class InfoCommand extends BaseCommand
         }
 
         /* Private key was loaded */
-        if ($core->getKeyPair()->getPrivate()) {
+        if ($core->getKeyPair()->getPrivateKey()) {
             $this->logger->getDisplay()->privateKeyLoaded($core);
             return;
         }
 
         /* Private key was loaded */
-        if ($core->getKeyPair()->getPublic()) {
+        if ($core->getKeyPair()->getPublicKey()) {
             $this->logger->getDisplay()->publicKeyLoaded($core);
             return;
         }

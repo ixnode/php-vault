@@ -30,47 +30,16 @@ use Exception;
 
 class Nonce
 {
-    private static ?Nonce $instance = null;
-
     private ?string $nonce;
-
-    /**
-     * Gets the instance via lazy initialization.
-     */
-    public static function getInstance(): Nonce
-    {
-        if (static::$instance === null) {
-            static::$instance = new static();
-        }
-
-        return static::$instance;
-    }
 
     /**
      * Nonce constructor.
      *
      * @throws Exception
      */
-    private function __construct()
+    public function __construct()
     {
         $this->nonce = self::getNewNonce();
-    }
-
-    /**
-     * Prevent the instance from being cloned (which would create a second instance of it)
-     */
-    private function __clone()
-    {
-    }
-
-    /**
-     * Prevent from being unserialized (which would create a second instance of it).
-     *
-     * @throws Exception
-     */
-    public function __wakeup()
-    {
-        throw new Exception('Cannot unserialize Nonce class.');
     }
 
     /**

@@ -35,9 +35,10 @@ final class WriterTest extends VaultTestCase
     /**
      * Test writer class exists.
      *
+     * @return void
      * @throws Exception
      */
-    public function testWriterExists()
+    public function testWriterExists(): void
     {
         /* Arrange */
         $expected = Writer::class;

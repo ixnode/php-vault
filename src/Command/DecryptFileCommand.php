@@ -58,9 +58,10 @@ class DecryptFileCommand extends BaseCommand
     /**
      * Bootstrap display environment function.
      *
+     * @return void
      * @throws Exception
      */
-    public function execute()
+    public function execute(): void
     {
         /* Reads the arguments */
         $envFileEncrypted = $this->getArgument(self::ARGUMENT_ENV_FILE);

@@ -75,9 +75,10 @@ class DisplayCommand extends BaseCommand
     /**
      * Bootstrap display function.
      *
+     * @return void
      * @throws Exception
      */
-    public function execute()
+    public function execute(): void
     {
         /* Load arguments and options */
         $envFile = $this->getArgument(self::ARGUMENT_ENV_FILE);

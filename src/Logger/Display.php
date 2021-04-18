@@ -45,9 +45,11 @@ class Display
 
     /**
      * Indicates that no key was loaded.
+     *
+     * @return void
      * @throws Exception
      */
-    public function noKeyLoaded()
+    public function noKeyLoaded(): void
     {
         $this->logger->info('No key was loaded.', [], true, true);
     }
@@ -56,31 +58,34 @@ class Display
      * Indicates that a private key was loaded.
      *
      * @param PHPVault $core
+     * @return void
      * @throws Exception
      */
-    public function privateKeyLoaded(PHPVault $core)
+    public function privateKeyLoaded(PHPVault $core): void
     {
-        $this->logger->info('Private key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPrivate())), true, true);
+        $this->logger->info('Private key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPrivateKey())), true, true);
     }
 
     /**
      * Indicates that a public key was loaded.
      *
      * @param PHPVault $core
+     * @return void
      * @throws Exception
      */
-    public function publicKeyLoaded(PHPVault $core)
+    public function publicKeyLoaded(PHPVault $core): void
     {
-        $this->logger->info('Public key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPublic())), true, true);
+        $this->logger->info('Public key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPublicKey())), true, true);
     }
 
     /**
      * Indicates that given file was not found.
      *
      * @param string $file
+     * @return void
      * @throws Exception
      */
-    public function fileNotFound(string $file)
+    public function fileNotFound(string $file): void
     {
         $this->logger->error('The given file "{file}" was not found.', array('file' => $file, ), true, true);
     }
@@ -88,9 +93,10 @@ class Display
     /**
      * Indicates that no env file was given.
      *
+     * @return void
      * @throws Exception
      */
-    public function noEnvFileGiven()
+    public function noEnvFileGiven(): void
     {
         $this->logger->error('No env file was given. Please specify one.', [], true, true);
     }
@@ -99,9 +105,10 @@ class Display
      * Indicates that the given file already exists.
      *
      * @param string $file
+     * @return void
      * @throws Exception
      */
-    public function fileAlreadyExists(string $file)
+    public function fileAlreadyExists(string $file): void
     {
         $this->logger->error('File "{file}" already exist. Abort.', ['file' => $file, ], true, true);
     }
@@ -110,9 +117,10 @@ class Display
      * Indicates that an error occurred while trying to write the given file.
      *
      * @param string $file
+     * @return void
      * @throws Exception
      */
-    public function writeFileErrorOccurred(string $file)
+    public function writeFileErrorOccurred(string $file): void
     {
         $this->logger->error('An error occurred while trying to write the env file "{file}".', ['file' => $file, ], true, true);
     }
@@ -121,9 +129,10 @@ class Display
      * Indicates that the given file was successfully written.
      *
      * @param string $file
+     * @return void
      * @throws Exception
      */
-    public function fileSuccessfullyWritten(string $file)
+    public function fileSuccessfullyWritten(string $file): void
     {
         $this->logger->info('The file was successfully written to "{file}".', ['file' => $file, ], true, true);
     }
@@ -132,9 +141,10 @@ class Display
      * Indicates that given file was already encrypted.
      *
      * @param string $file
+     * @return void
      * @throws Exception
      */
-    public function fileAlreadyEncrypted(string $file)
+    public function fileAlreadyEncrypted(string $file): void
     {
         $this->logger->warn('The given file "{file}" seems already be encrypted. Abort.', array('file' => $file, ));
     }
@@ -143,9 +153,10 @@ class Display
      * Indicates that given file has the wrong format.
      *
      * @param string $file
+     * @return void
      * @throws Exception
      */
-    public function fileEncryptedWrongFormat(string $file)
+    public function fileEncryptedWrongFormat(string $file): void
     {
         $this->logger->warn('The given file "{file}" must have the following format: "*.enc". Abort.', array('file' => $file, ));
     }
@@ -154,12 +165,13 @@ class Display
      * Displays the private and public keys.
      *
      * @param PHPVault $core
+     * @return void
      */
-    public function privateAndPublicKeys(PHPVault $core)
+    public function privateAndPublicKeys(PHPVault $core): void
     {
         $this->logger->getWriter()->table([
-            ['name' => 'private key', 'value' => $core->getKeyPair()->getPrivate()],
-            ['name' => 'public key', 'value' => $core->getKeyPair()->getPublic()],
+            ['name' => 'private key', 'value' => $core->getKeyPair()->getPrivateKey()],
+            ['name' => 'public key', 'value' => $core->getKeyPair()->getPublicKey()],
         ]);
     }
 
@@ -168,14 +180,15 @@ class Display
      *
      * @param PHPVault $core
      * @param bool $displayDecrypted
+     * @return void
      * @throws Exception
      */
-    public function envVariables(PHPVault $core, bool $displayDecrypted = false)
+    public function envVariables(PHPVault $core, bool $displayDecrypted = false): void
     {
         $table = array();
 
         /* Collect all environment variables. */
-        foreach ($core->getVault()->getAll(true, true, $displayDecrypted) as $key => $data) {
+        foreach ($core->getVault()->getAllObjects(true, $displayDecrypted) as $key => $data) {
             $table[] = [
                 'key' => $key,
                 'value' => $data->value,
@@ -196,8 +209,10 @@ class Display
 
     /**
      * Displays all server environment variables.
+     *
+     * @return void
      */
-    public function serverEnvVariables()
+    public function serverEnvVariables(): void
     {
         $table = array();
 

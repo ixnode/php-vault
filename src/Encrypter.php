@@ -50,11 +50,11 @@ class Encrypter
      *
      * @param string $message
      * @param string|null $nonce
-     * @return string
+     * @return string|null
      * @throws SodiumException
      * @throws Exception
      */
-    public function encrypt(string $message, string $nonce = null): string
+    public function encrypt(string $message, string $nonce = null): ?string
     {
         /* Check mode */
         if ($this->core->getMode() < Mode::MODE_ENCRYPT) {
@@ -74,7 +74,7 @@ class Encrypter
 
         $key = sodium_crypto_box_keypair_from_secretkey_and_publickey(
             base64_decode(PHPVault::CORE_PRIVATE_KEY),
-            base64_decode($this->core->getKeyPair()->getPublic())
+            base64_decode($this->core->getKeyPair()->getPublicKey())
         );
 
         $dataArray = array(
@@ -82,6 +82,12 @@ class Encrypter
             base64_encode(sodium_crypto_box($message, $nonce, $key))
         );
 
-        return base64_encode(json_encode($dataArray));
+        $json = json_encode($dataArray);
+
+        if ($json === false) {
+            return null;
+        }
+
+        return base64_encode($json);
     }
 }

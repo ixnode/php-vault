@@ -49,8 +49,10 @@ class DisplayEnvCommand extends BaseCommand
 
     /**
      * Bootstrap display environment function.
+     *
+     * @return void
      */
-    public function execute()
+    public function execute(): void
     {
         $this->logger->getDisplay()->serverEnvVariables();
     }

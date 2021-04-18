@@ -31,7 +31,7 @@ class TypeCheck
     /**
      * Returns whether the given $value is boolean type.
      *
-     * @param $value
+     * @param bool $value
      * @return bool
      */
     static public function isBoolean(bool $value): bool

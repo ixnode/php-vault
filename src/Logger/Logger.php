@@ -81,12 +81,13 @@ class Logger
      * Info logger.
      *
      * @param string $message
-     * @param array $context
-     * @param false $eol
+     * @param string[]|int[] $context
+     * @param bool $eol
      * @param bool $sol
+     * @return void
      * @throws Exception
      */
-    public function info(string $message, array $context = array(), bool $eol = false, bool $sol = false)
+    public function info(string $message, array $context = array(), bool $eol = false, bool $sol = false): void
     {
         $this->log(self::LOG_LEVEL_INFO, $message, $context, $eol, $sol);
     }
@@ -95,12 +96,13 @@ class Logger
      * Ok logger.
      *
      * @param string $message
-     * @param array $context
-     * @param false $eol
+     * @param string[]|int[] $context
+     * @param bool $eol
      * @param bool $sol
+     * @return void
      * @throws Exception
      */
-    public function ok(string $message, array $context = array(), bool $eol = false, bool $sol = false)
+    public function ok(string $message, array $context = array(), bool $eol = false, bool $sol = false): void
     {
         $this->log(self::LOG_LEVEL_OK, $message, $context, $eol, $sol);
     }
@@ -109,12 +111,13 @@ class Logger
      * Warn logger.
      *
      * @param string $message
-     * @param array $context
-     * @param false $eol
+     * @param string[]|int[] $context
+     * @param bool $eol
      * @param bool $sol
+     * @return void
      * @throws Exception
      */
-    public function warn(string $message, array $context = array(), bool $eol = false, bool $sol = false)
+    public function warn(string $message, array $context = array(), bool $eol = false, bool $sol = false): void
     {
         $this->log(self::LOG_LEVEL_WARN, $message, $context, $eol, $sol);
     }
@@ -123,12 +126,13 @@ class Logger
      * Error logger.
      *
      * @param string $message
-     * @param array $context
-     * @param false $eol
+     * @param string[]|int[] $context
+     * @param bool $eol
      * @param bool $sol
+     * @return void
      * @throws Exception
      */
-    public function error(string $message, array $context = array(), bool $eol = false, bool $sol = false)
+    public function error(string $message, array $context = array(), bool $eol = false, bool $sol = false): void
     {
         $this->log(self::LOG_LEVEL_ERROR, $message, $context, $eol, $sol);
     }
@@ -138,12 +142,13 @@ class Logger
      *
      * @param int $level
      * @param string $message
-     * @param array $context
-     * @param false $eol
+     * @param string[]|int[] $context
+     * @param bool $eol
      * @param bool $sol
+     * @return void
      * @throws Exception
      */
-    protected function log(int $level, string $message, array $context = array(), bool $eol = false, bool $sol = false)
+    protected function log(int $level, string $message, array $context = array(), bool $eol = false, bool $sol = false): void
     {
         /* Interpolates the given $message with the given $context. */
         $message = $this->interpolate($message, $context);
@@ -168,7 +173,7 @@ class Logger
      * Interpolates context values into the message placeholders.
      *
      * @param string $message
-     * @param array $context
+     * @param string[]|int[] $context
      * @return string
      */
     protected function interpolate(string $message, array $context = array()): string

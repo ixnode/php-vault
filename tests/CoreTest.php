@@ -39,11 +39,12 @@ final class CoreTest extends TestCase
      * @param string $expected
      * @param string $encrypted
      * @param string $privateKey
+     * @return void
      * @throws SodiumException
      * @throws Exception
      * @dataProvider dataProvider
      */
-    public function testDecryption(string $expected, string $encrypted, string $privateKey)
+    public function testDecryption(string $expected, string $encrypted, string $privateKey): void
     {
         /* Arrange */
         $core = new PHPVault(false, $privateKey);
@@ -59,10 +60,11 @@ final class CoreTest extends TestCase
     /**
      * Test the encryption and decryption test.
      *
+     * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function testEncryptionDecryption()
+    public function testEncryptionDecryption(): void
     {
         /* Arrange */
         $core = new PHPVault(true);

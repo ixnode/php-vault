@@ -64,9 +64,10 @@ class GenerateKeysCommand extends BaseCommand
     /**
      * Bootstrap generated keys function.
      *
+     * @return void
      * @throws Exception
      */
-    public function execute()
+    public function execute(): void
     {
         /* Initiate the PhpVault Core */
         $core = new PHPVault(true);
@@ -87,9 +88,10 @@ class GenerateKeysCommand extends BaseCommand
      * Persist keys.
      *
      * @param PHPVault $core
+     * @return void
      * @throws Exception
      */
-    protected function persistKeys(PHPVault $core)
+    protected function persistKeys(PHPVault $core): void
     {
         /* Check if persist option exists. */
         if (!$this->getOption(self::OPTION_PERSIST)) {
@@ -125,8 +127,8 @@ CONTENT;
         $gitignoreAbsolute = sprintf('%s/%s', $keyFolderAbsolute, $gitignore);
 
         /* Write files. */
-        file_put_contents($privateKeyAbsolute, $core->getKeyPair()->getPrivate());
-        file_put_contents($publicKeyAbsolute, $core->getKeyPair()->getPublic());
+        file_put_contents($privateKeyAbsolute, $core->getKeyPair()->getPrivateKey());
+        file_put_contents($publicKeyAbsolute, $core->getKeyPair()->getPublicKey());
         file_put_contents($gitignoreAbsolute, $gitignoreContent);
 
         /* Check files. */
