@@ -2,7 +2,7 @@
     "name": "ixnode/php-vault",
     "description": "Secure PHP Vault",
     "license": "MIT",
-    "keywords": ["security", "encryption", "decryption", "cipher", "cryptography", "crypto", "env", "environment", "vault"],
+    "keywords": ["security", "encryption", "decryption", "cryptography", "env", "environment", "vault", "dotenv", "deployment", "cicd", "continuous delivery"],
     "authors": [
         {
             "name": "Björn Hempel",
