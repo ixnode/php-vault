@@ -206,7 +206,7 @@ $dbName = getenv('DB_NAME');
 
 If you discover a security vulnerability within this package, please send an email to Björn Hempel at
 bjoern@hempel.li. All security vulnerabilities will be promptly addressed. You may view our full
-security policy [here](https://github.com/ixno/php-vault/security/policy).
+security policy [here](https://github.com/ixnode/php-vault/security/policy).
 
 ## License
 
