@@ -26,7 +26,7 @@
 
 namespace Ixnode\PhpVault\Command;
 
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 use Exception;
 use Ixnode\PhpVault\TypeCheck\TypeCheck;
 
@@ -95,7 +95,7 @@ class SetCommand extends BaseCommand
         }
 
         /* Initiates the PhpVault Core. Loads private or public key from $_SERVER if given. */
-        $core = new Core(false);
+        $core = new PHPVault(false);
 
         /* Loads private or public key. */
         if (!$this->loadPrivateOrPublicKey($core)) {

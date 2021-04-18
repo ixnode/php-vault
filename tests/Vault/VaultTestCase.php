@@ -27,12 +27,12 @@
 namespace Test\Ixnode\PhpVault\Vault;
 
 use PHPUnit\Framework\TestCase;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 use SodiumException;
 
 class VaultTestCase extends TestCase
 {
-    protected static Core $core;
+    protected static PHPVault $core;
 
     protected static string $publicKey = 'rzgp2/3Rtg8t6q/spiMrcEZq7cG75o1qsR/Kux/OC1E=';
 
@@ -46,6 +46,6 @@ class VaultTestCase extends TestCase
      */
     public static function setUpBeforeClass(): void
     {
-        self::$core = new Core(false, self::$privateKey);
+        self::$core = new PHPVault(false, self::$privateKey);
     }
 }

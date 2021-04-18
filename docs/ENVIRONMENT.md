@@ -11,7 +11,7 @@ $ export PUBLIC_KEY=$(cat .keys/public.key)
 or
 
 ```bash
-$ export PUBLIC_KEY=$(cat .keys/private.key)
+$ export PRIVATE_KEY=$(cat .keys/private.key)
 ```
 
 ### List keys

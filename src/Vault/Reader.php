@@ -108,30 +108,30 @@ class Reader
      * Adds given file to vault.
      *
      * @param string $file
-     * @param bool $decrypt
+     * @param bool $encryptedFile
      * @throws SodiumException
      * @throws Exception
      */
-    public function addFileToVault(string $file, bool $decrypt = false)
+    public function addFileToVault(string $file, bool $encryptedFile = false)
     {
         if (!file_exists($file)) {
             throw new Exception(sprintf('The given file "%s" does not exist.', $file));
         }
 
-        $this->addStreamToVault(file_get_contents($file), $decrypt);
+        $this->addStreamToVault(file_get_contents($file), $encryptedFile);
     }
 
     /**
      * Adds given stream to vault.
      *
      * @param string $stream
-     * @param bool $decrypt
+     * @param bool $encryptedStream
      * @throws SodiumException
      * @throws Exception
      */
-    public function addStreamToVault(string $stream, bool $decrypt = false)
+    public function addStreamToVault(string $stream, bool $encryptedStream = false)
     {
-        $this->addArrayToVault($this->convertStreamToArray($stream), null, $decrypt);
+        $this->addArrayToVault($this->convertStreamToArray($stream), null, $encryptedStream);
     }
 
     /**
@@ -139,13 +139,13 @@ class Reader
      *
      * @param array $array
      * @param string|null $nonce
-     * @param bool $alreadyEncrypted
+     * @param bool $encryptedArray
      * @throws SodiumException
      */
-    public function addArrayToVault(array $array, string $nonce = null, bool $alreadyEncrypted = false)
+    public function addArrayToVault(array $array, string $nonce = null, bool $encryptedArray = false)
     {
         foreach ($array as $name => $data) {
-            $this->vault->add($name, $data->value, $data->description, $nonce, $alreadyEncrypted);
+            $this->vault->add($name, $data->value, $data->description, $nonce, $encryptedArray);
         }
     }
 }

@@ -31,14 +31,14 @@ use Exception;
 
 class Decrypter
 {
-    protected Core $core;
+    protected PHPVault $core;
 
     /**
      * Decrypter constructor.
      *
-     * @param Core $core
+     * @param PHPVault $core
      */
-    public function __construct(Core $core)
+    public function __construct(PHPVault $core)
     {
         $this->core = $core;
     }
@@ -60,7 +60,7 @@ class Decrypter
 
         $key = sodium_crypto_box_keypair_from_secretkey_and_publickey(
             base64_decode($this->core->getKeyPair()->getPrivate()),
-            base64_decode(Core::CORE_PUBLIC_KEY)
+            base64_decode(PHPVault::CORE_PUBLIC_KEY)
         );
 
         $dataArray = json_decode(base64_decode($data), true);

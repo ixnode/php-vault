@@ -27,7 +27,7 @@
 namespace Test\Ixnode\PhpVault;
 
 use PHPUnit\Framework\TestCase;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 use Exception;
 use SodiumException;
 
@@ -46,7 +46,7 @@ final class CoreTest extends TestCase
     public function testDecryption(string $expected, string $encrypted, string $privateKey)
     {
         /* Arrange */
-        $core = new Core(false, $privateKey);
+        $core = new PHPVault(false, $privateKey);
 
         /* Act */
         $decrypted = $core->getDecrypter()->decrypt($encrypted);
@@ -65,7 +65,7 @@ final class CoreTest extends TestCase
     public function testEncryptionDecryption()
     {
         /* Arrange */
-        $core = new Core(true);
+        $core = new PHPVault(true);
         $expected = 'db-value-789';
 
         /* Act */

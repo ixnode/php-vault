@@ -27,7 +27,7 @@
 namespace Ixnode\PhpVault\Command;
 
 use Exception;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\TypeCheck\TypeCheck;
 
 class DisplayCommand extends BaseCommand
@@ -98,7 +98,7 @@ class DisplayCommand extends BaseCommand
         }
 
         /* Initiates the PhpVault Core. Loads private or public key from $_SERVER if given. */
-        $core = new Core(false);
+        $core = new PHPVault(false);
 
         /* Loads private or public key. */
         if (!$this->loadPrivateOrPublicKey($core)) {

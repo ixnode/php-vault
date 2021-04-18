@@ -27,7 +27,7 @@
 namespace Ixnode\PhpVault\Command;
 
 use Exception;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\TypeCheck\TypeCheck;
 
 class GenerateKeysCommand extends BaseCommand
@@ -69,7 +69,7 @@ class GenerateKeysCommand extends BaseCommand
     public function execute()
     {
         /* Initiate the PhpVault Core */
-        $core = new Core(true);
+        $core = new PHPVault(true);
 
         /* Load options */
         $persist = $this->getOption(self::OPTION_PERSIST);
@@ -86,10 +86,10 @@ class GenerateKeysCommand extends BaseCommand
     /**
      * Persist keys.
      *
-     * @param Core $core
+     * @param PHPVault $core
      * @throws Exception
      */
-    protected function persistKeys(Core $core)
+    protected function persistKeys(PHPVault $core)
     {
         /* Check if persist option exists. */
         if (!$this->getOption(self::OPTION_PERSIST)) {

@@ -27,7 +27,7 @@
 namespace Ixnode\PhpVault\Command;
 
 use Exception;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 
 class InfoCommand extends BaseCommand
 {
@@ -58,7 +58,7 @@ class InfoCommand extends BaseCommand
     public function execute()
     {
         /* Initiate the PhpVault Core */
-        $core = new Core();
+        $core = new PHPVault();
 
         /* No key was loaded */
         if (!$core->getKeyPair()->keyExistsWithinEnvironment()) {

@@ -62,6 +62,36 @@ class Writer
     }
 
     /**
+     * Saves all decrypted vault values to $_SERVER array.
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function saveToServer(): array
+    {
+        foreach ($this->vault->getAllDecrypted(true) as $key => $value) {
+            $_SERVER[$key] = $value;
+        }
+
+        return $_SERVER;
+    }
+
+    /**
+     * Saves all decrypted vault values to putenv.
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function putEnv(): array
+    {
+        foreach ($this->vault->getAllDecrypted(true) as $key => $value) {
+            putenv(sprintf('%s=%s', $key, $value));
+        }
+
+        return $_SERVER;
+    }
+
+    /**
      * Returns the .env string of decrypted vault values.
      *
      * @param bool $decrypted

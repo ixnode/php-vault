@@ -14,7 +14,7 @@ foreach ($autoloaderPaths as $autoloaderPath) {
 }
 
 use Ahc\Cli\Application;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\Command\BaseCommand;
 use Ixnode\PhpVault\Command\GenerateKeysCommand;
 use Ixnode\PhpVault\Command\DisplayEnvCommand;
@@ -25,7 +25,7 @@ use Ixnode\PhpVault\Command\DecryptFileCommand;
 use Ixnode\PhpVault\Command\InfoCommand;
 
 /* Init App with name and version */
-$app = new Application(Core::NAME, Core::VERSION);
+$app = new Application(PHPVault::NAME, PHPVault::VERSION);
 
 /* Add commands with optional aliases */
 $app->add(new GenerateKeysCommand(), GenerateKeysCommand::ALIAS);

@@ -30,7 +30,7 @@ use Exception;
 use Ixnode\PhpVault\Vault\Vault;
 use SodiumException;
 
-class Core
+class PHPVault
 {
     const NAME = 'PHPVault';
 
@@ -136,5 +136,42 @@ class Core
     public function clearVault()
     {
         $this->vault->clear();
+    }
+
+    /**
+     * Loads private key from file.
+     *
+     * @param string $privateKey
+     * @throws SodiumException
+     */
+    public function loadPrivateKeyFromFile(string $privateKey)
+    {
+        $this->getKeyPair()->loadPrivateKeyFromFile($privateKey);
+    }
+
+    /**
+     * Loads public key from file.
+     *
+     * @param string $publicKey
+     * @throws SodiumException
+     */
+    public function loadPublicKeyFromFile(string $publicKey)
+    {
+        $this->getKeyPair()->loadPublicKeyFromFile($publicKey);
+    }
+
+    /**
+     * Imports and adds given env file to vault and $_SERVER.
+     *
+     * @param string $file
+     * @throws SodiumException
+     * @throws Exception
+     */
+    public function importEncryptedEnvFile(string $file)
+    {
+        $this->getVault()->getReader()->addFileToVault($file, true);
+        $this->getVault()->getWriter()->saveToServer();
+        $this->getVault()->getWriter()->saveToEnv();
+        $this->getVault()->getWriter()->putEnv();
     }
 }

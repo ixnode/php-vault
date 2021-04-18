@@ -50,7 +50,7 @@ Run `<command> --help` for specific help
 
 ## On development system
 
-Normally, you need the public key in this environment. Examples can be found below. There are several
+Usually, you need the *public* key in this environment. Examples can be found below. There are several
 [ways](docs/ENVIRONMENT.md) to pass the public key to the `php-vault` interpreter. In the following,
 the key is loaded from the `.keys` directory (`--public-key`).
 
@@ -71,19 +71,19 @@ Never add the private key to the repository!
 
 ### Create environment file
 
-* Add setting `USER=secret.user` with description `"DB Configs"`
-* Add setting `PASS=secret.pass`
-* Add setting `HOST=secret.host`
-* Add setting `NAME=secret.name`
+* Add key-value pair `DB_USER=secret.user` with description `"DB Configs"`
+* Add key-value pair `DB_PASS=secret.pass`
+* Add key-value pair `DB_HOST=secret.host`
+* Add key-value pair `DB_NAME=secret.name`
 * Use public key (`--public-key` → read from `.keys/public.key`).
 
 ```bash
 # Create file .env.enc
-$ vendor/bin/php-vault set .env.enc USER secret.user "DB Configs" --public-key --create
+$ vendor/bin/php-vault set .env.enc DB_USER secret.user "DB Configs" --public-key --create
 # Adds values to .env.enc
-$ vendor/bin/php-vault set .env.enc PASS secret.pass --public-key
-$ vendor/bin/php-vault set .env.enc HOST secret.host --public-key
-$ vendor/bin/php-vault set .env.enc NAME secret.name --public-key
+$ vendor/bin/php-vault set .env.enc DB_PASS secret.pass --public-key
+$ vendor/bin/php-vault set .env.enc DB_HOST secret.host --public-key
+$ vendor/bin/php-vault set .env.enc DB_NAME secret.name --public-key
 ```
 
 ### Display the environment file
@@ -98,7 +98,7 @@ $ vendor/bin/php-vault display .env.enc --load-encrypted --public-key
 
 ## On production system
 
-Normally, you need the private key in this environment. Examples can be found below. There are several
+Usually, you need the *private* key in this environment. Examples can be found below. There are several
 [ways](docs/ENVIRONMENT.md) to pass the private key to the `php-vault` interpreter. In the following,
 the key is loaded from the `.keys` directory (`--private-key`).
 
@@ -108,14 +108,14 @@ the key is loaded from the `.keys` directory (`--private-key`).
 
 ```bash
 $ vendor/bin/php-vault display .env.enc --load-encrypted --display-decrypted --private-key
-+------+-------------+-------------+
-| Key  | Value       | Description |
-+------+-------------+-------------+
-| USER | secret.user | DB Configs  |
-| PASS | secret.pass |             |
-| HOST | secret.host |             |
-| NAME | secret.name |             |
-+------+-------------+-------------+
++---------+-------------+-------------+
+| Key     | Value       | Description |
++---------+-------------+-------------+
+| DB_USER | secret.user | DB Configs  |
+| DB_PASS | secret.pass |             |
+| DB_HOST | secret.host |             |
+| DB_NAME | secret.name |             |
++---------+-------------+-------------+
 ```
 
 ### Decrypt an encrypted file
@@ -144,3 +144,70 @@ $ vendor/bin/php-vault display .env --display-decrypted --private-key
 | NAME | secret.name |             |
 +------+-------------+-------------+
 ```
+
+## Using the PHPVault class
+
+### Load the private key from a given file
+
+```php
+<?php
+
+require 'vendor/autoload.php';
+
+use Ixnode\PhpVault\PHPVault;
+
+/* Path to private key and .env.enc */
+$pathToPrivateKey = __DIR__.'/.keys/private.key';
+$pathToEncryptedEnv = __DIR__.'/.env.enc';
+
+/* - Initiate PHPVault Core.
+ * - Load private key.
+ * - Load the encrypted env file.
+ */
+$phpVault = new PHPVault();
+$phpVault->loadPrivateKeyFromFile($pathToPrivateKey);
+$phpVault->importEncryptedEnvFile($pathToEncryptedEnv);
+
+/* Usage */
+$dbUser = getenv('DB_USER');
+$dbPass = getenv('DB_PASS');
+$dbHost = getenv('DB_HOST');
+$dbName = getenv('DB_NAME');
+```
+
+### Load the private key from the server environment variable `PRIVATE_KEY`
+
+For options to set the environment variable, see [here](docs/ENVIRONMENT.md).
+
+```php
+<?php
+
+require 'vendor/autoload.php';
+
+use Ixnode\PhpVault\PHPVault;
+
+/* Path to private key and .env.enc */
+$pathToEncryptedEnv = __DIR__.'/.env.enc';
+
+/* - Initiate PHPVault Core and use the PRIVATE_KEY environment variable.
+ * - Load the encrypted env file.
+ */
+$phpVault = new PHPVault();
+$phpVault->importEncryptedEnvFile($pathToEncryptedEnv);
+
+/* Usage */
+$dbUser = getenv('DB_USER');
+$dbPass = getenv('DB_PASS');
+$dbHost = getenv('DB_HOST');
+$dbName = getenv('DB_NAME');
+```
+
+## Security
+
+If you discover a security vulnerability within this package, please send an email to Björn Hempel at
+bjoern@hempel.li. All security vulnerabilities will be promptly addressed. You may view our full
+security policy [here](https://github.com/ixno/php-vault/security/policy).
+
+## License
+
+PHPVault is licensed under [MIT](https://github.com/ixnode/php-vault/blob/master/LICENSE).

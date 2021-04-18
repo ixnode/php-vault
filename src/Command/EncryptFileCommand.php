@@ -27,7 +27,7 @@
 namespace Ixnode\PhpVault\Command;
 
 use Exception;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 
 class EncryptFileCommand extends BaseCommand
 {
@@ -82,7 +82,7 @@ class EncryptFileCommand extends BaseCommand
         }
 
         /* Initiate the PhpVault Core */
-        $core = new Core();
+        $core = new PHPVault();
 
         /* Loads private or public key. */
         if (!$this->loadPrivateOrPublicKey($core)) {

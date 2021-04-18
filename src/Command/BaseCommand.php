@@ -30,7 +30,7 @@ use Ahc\Cli\Application as App;
 use Ahc\Cli\Input\Command;
 use Ahc\Cli\Output\Writer;
 use Composer\Autoload\ClassLoader;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\Logger\Logger;
 use Exception;
 use ReflectionClass;
@@ -176,12 +176,12 @@ class BaseCommand extends Command
     /**
      *
      *
-     * @param Core $core
+     * @param PHPVault $core
      * @return bool
      * @throws SodiumException
      * @throws Exception
      */
-    protected function loadPrivateOrPublicKey(Core $core): bool
+    protected function loadPrivateOrPublicKey(PHPVault $core): bool
     {
         $privateKey = $this->getOption(self::OPTION_PRIVATE_KEY, $this->getPrivateKeyPath(), true);
         $publicKey = $this->getOption(self::OPTION_PUBLIC_KEY, $this->getPublicKeyPath(), true);
@@ -218,13 +218,13 @@ class BaseCommand extends Command
     /**
      * Writes all environment variables from vault to file.
      *
-     * @param Core $core
+     * @param PHPVault $core
      * @param string|null $envFile
      * @param bool $displayDecrypted
      * @param bool $ignoreExistingFile
      * @throws Exception
      */
-    protected function writeEnvVariables(Core $core, ?string $envFile = null, bool $displayDecrypted = false, bool $ignoreExistingFile = false)
+    protected function writeEnvVariables(PHPVault $core, ?string $envFile = null, bool $displayDecrypted = false, bool $ignoreExistingFile = false)
     {
         /* Check if option was given to write a file. */
         if (!$envFile) {

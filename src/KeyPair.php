@@ -31,7 +31,7 @@ use SodiumException;
 
 class KeyPair
 {
-    private Core $core;
+    private PHPVault $core;
 
     private ?object $keyPair = null;
 
@@ -42,13 +42,13 @@ class KeyPair
     /**
      * KeyPair constructor.
      *
-     * @param Core $core
+     * @param PHPVault $core
      * @param bool $forceCreateNew
      * @param string|null $privateKey
      * @param string|null $publicKey
      * @throws SodiumException
      */
-    public function __construct(Core $core, bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null)
+    public function __construct(PHPVault $core, bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null)
     {
         $this->core = $core;
 

@@ -28,11 +28,11 @@ namespace Ixnode\PhpVault\Vault;
 
 use Exception;
 use SodiumException;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 
 class Vault
 {
-    private Core $core;
+    private PHPVault $core;
 
     private Reader $reader;
 
@@ -43,9 +43,9 @@ class Vault
     /**
      * Vault constructor.
      *
-     * @param Core $core
+     * @param PHPVault $core
      */
-    public function __construct(Core $core)
+    public function __construct(PHPVault $core)
     {
         $this->core = $core;
 

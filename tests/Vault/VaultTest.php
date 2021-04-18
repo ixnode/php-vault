@@ -26,7 +26,7 @@
 
 namespace Test\Ixnode\PhpVault\Vault;
 
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\Vault\Vault;
 use Exception;
 use SodiumException;
@@ -105,8 +105,8 @@ TEXT;
         /* nothing to do */
 
         /* Assert */
-        $this->assertClassHasAttribute('vault', Core::class);
-        $this->assertTrue(method_exists(Core::class, 'getVault'), 'Class Core does not have method getVault.');
+        $this->assertClassHasAttribute('vault', PHPVault::class);
+        $this->assertTrue(method_exists(PHPVault::class, 'getVault'), 'Class Core does not have method getVault.');
         $this->assertInstanceOf($expected, self::$core->getVault());
     }
 
@@ -374,6 +374,34 @@ TEXT;
     }
 
     /**
+     * Test: Save vault to $_SERVER.
+     *
+     * @throws Exception
+     */
+    public function testSaveServerArray()
+    {
+        /* Arrange */
+        $expected = array(
+            'NAME_WITHOUT_ENCRYPTION' => self::$data->value,
+            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => self::$data->value,
+            'NAME_WITH_ENCRYPTION' => self::$data->value,
+            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => self::$data->value,
+            'NAME_WITH_AUTO_ENCRYPTION' => self::$data->value,
+            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => self::$data->value,
+        );
+
+        /* Act */
+        self::$core->getVault()->getWriter()->saveToServer();
+        $actual = $_SERVER;
+
+        /* Assert */
+        foreach ($expected as $key => $name) {
+            $this->assertArrayHasKey($key, $actual);
+            $this->assertSame($name, $actual[$key]);
+        }
+    }
+
+    /**
      * Test: Adds new entry and saves vault to $_ENV.
      *
      * @throws SodiumException
@@ -401,7 +429,10 @@ TEXT;
         $actual = $_ENV;
 
         /* Assert */
-        $this->assertSame($expected, $actual);
+        foreach ($expected as $key => $name) {
+            $this->assertArrayHasKey($key, $actual);
+            $this->assertSame($name, $actual[$key]);
+        }
     }
 
     /**

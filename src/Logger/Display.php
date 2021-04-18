@@ -26,7 +26,7 @@
 
 namespace Ixnode\PhpVault\Logger;
 
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 use Exception;
 
 class Display
@@ -55,10 +55,10 @@ class Display
     /**
      * Indicates that a private key was loaded.
      *
-     * @param Core $core
+     * @param PHPVault $core
      * @throws Exception
      */
-    public function privateKeyLoaded(Core $core)
+    public function privateKeyLoaded(PHPVault $core)
     {
         $this->logger->info('Private key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPrivate())), true, true);
     }
@@ -66,10 +66,10 @@ class Display
     /**
      * Indicates that a public key was loaded.
      *
-     * @param Core $core
+     * @param PHPVault $core
      * @throws Exception
      */
-    public function publicKeyLoaded(Core $core)
+    public function publicKeyLoaded(PHPVault $core)
     {
         $this->logger->info('Public key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPublic())), true, true);
     }
@@ -153,9 +153,9 @@ class Display
     /**
      * Displays the private and public keys.
      *
-     * @param Core $core
+     * @param PHPVault $core
      */
-    public function privateAndPublicKeys(Core $core)
+    public function privateAndPublicKeys(PHPVault $core)
     {
         $this->logger->getWriter()->table([
             ['name' => 'private key', 'value' => $core->getKeyPair()->getPrivate()],
@@ -166,11 +166,11 @@ class Display
     /**
      * Displays all environment variables from given file.
      *
-     * @param Core $core
+     * @param PHPVault $core
      * @param bool $displayDecrypted
      * @throws Exception
      */
-    public function envVariables(Core $core, bool $displayDecrypted = false)
+    public function envVariables(PHPVault $core, bool $displayDecrypted = false)
     {
         $table = array();
 

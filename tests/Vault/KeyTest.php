@@ -27,18 +27,18 @@
 namespace Test\Ixnode\PhpVault\Vault;
 
 use PHPUnit\Framework\TestCase;
-use Ixnode\PhpVault\Core;
+use Ixnode\PhpVault\PHPVault;
 
 final class KeyTest extends TestCase
 {
-    protected static Core $core;
+    protected static PHPVault $core;
 
     /**
      * Setup routines for the tests.
      */
     public static function setUpBeforeClass(): void
     {
-        self::$core = new Core(true);
+        self::$core = new PHPVault(true);
     }
 
     /**
