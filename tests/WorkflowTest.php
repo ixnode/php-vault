@@ -31,10 +31,13 @@ use Exception;
 use Ixnode\PhpVault\PHPVault;
 use PHPUnit\Framework\TestCase;
 use Ixnode\PhpVault\Cli;
+use Ixnode\PhpVault\Command\BaseCommand;
 
 final class WorkflowTest extends TestCase
 {
     const TEMP_PREFIX = 'php-vault';
+
+    const PATH_KEY_FOLDER = '.ppk';
 
     /**
      * Check help.
@@ -52,6 +55,24 @@ final class WorkflowTest extends TestCase
 
         /* Assert */
         $this->assertIsInt(strpos($output, $search));
+    }
+
+    /**
+     * Check empty key folder.
+     *
+     * @throws Exception
+     */
+    public function testEmptyKeyFolder(): void
+    {
+        /* Arrange */
+        $base = new BaseCommand('test');
+        $ppkFolder = sprintf('%s/%s', $base->getComposerJsonRootPath(), self::PATH_KEY_FOLDER);
+
+        /* Act */
+        /* Nothing to do. */
+
+        /* Assert */
+        $this->assertTrue(!file_exists($ppkFolder));
     }
 
     /**

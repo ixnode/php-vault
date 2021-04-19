@@ -142,7 +142,7 @@ class BaseCommand extends Command
      *
      * @return string|null
      */
-    protected function getComposerJsonRootPath(): ?string
+    public function getComposerJsonRootPath(): ?string
     {
         $reflection = new ReflectionClass(ClassLoader::class);
 
