@@ -31,7 +31,7 @@ use Ixnode\PhpVault\PHPVault;
 use Exception;
 use SodiumException;
 
-final class CoreTest extends TestCase
+final class PHPVaultTest extends TestCase
 {
     /**
      * Test decryption.

@@ -47,11 +47,11 @@ class Decrypter
      * Decrypts a given message stream with given private key.
      *
      * @param string $data
-     * @return false|string
+     * @return string|null
      * @throws SodiumException
      * @throws Exception
      */
-    public function decrypt(string $data)
+    public function decrypt(string $data): ?string
     {
         /* Check mode */
         if ($this->core->getMode() < Mode::MODE_DECRYPT) {
@@ -73,6 +73,9 @@ class Decrypter
         $nonce = base64_decode($dataArray[0]);
         $encryptedMessage = base64_decode($dataArray[1]);
 
-        return sodium_crypto_box_open($encryptedMessage, $nonce, $key);
+        /* Decrypt message */
+        $decrypted = sodium_crypto_box_open($encryptedMessage, $nonce, $key);
+
+        return $decrypted === false ? null : $decrypted;
     }
 }

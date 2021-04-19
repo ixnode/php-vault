@@ -41,7 +41,7 @@ class Vault
     /** @var Writer $writer */
     private Writer $writer;
 
-    /** @var object[] $vault  */
+    /** @var KeyValuePair[] $vault  */
     private array $vault = [];
 
     /**
@@ -56,6 +56,64 @@ class Vault
         /* Set reader and writer */
         $this->reader = new Reader($this);
         $this->writer = new Writer($this);
+    }
+
+    /**
+     * Gets the value of a single vault entry.
+     *
+     * @param string $key
+     * @return string
+     * @throws Exception
+     */
+    public function getValue(string $key): string
+    {
+        if (!array_key_exists($key, $this->vault)) {
+            throw new Exception('Unknown given key name.');
+        }
+
+        return $this->vault[$key]->getValueEncrypted();
+    }
+
+    /**
+     * Gets a single vault entry as object.
+     *
+     * @param string $key
+     * @return KeyValuePair
+     * @throws Exception
+     */
+    public function getObject(string $key): object
+    {
+        if (!array_key_exists($key, $this->vault)) {
+            throw new Exception('Unknown given key name.');
+        }
+
+        return $this->vault[$key];
+    }
+
+    /**
+     * Gets a decrypted single value vault entry.
+     *
+     * @param string $key
+     * @return false|string
+     * @throws SodiumException
+     * @throws Exception
+     */
+    public function getDecryptedValue(string $key)
+    {
+        return $this->core->getDecrypter()->decrypt($this->getValue($key));
+    }
+
+    /**
+     * Gets a decrypted single full object vault entry.
+     *
+     * @param string $key
+     * @return KeyValuePair
+     * @throws SodiumException
+     * @throws Exception
+     */
+    public function getDecryptedObject(string $key): object
+    {
+        return $this->getObject($key)->decrypt($this->core->getDecrypter());
     }
 
     /**
@@ -87,7 +145,7 @@ class Vault
      *
      * @param bool $underscored
      * @param bool $decrypt
-     * @return object[]
+     * @return KeyValuePair[]
      * @throws SodiumException
      * @throws Exception
      */
@@ -122,77 +180,12 @@ class Vault
      * Gets the whole decrypted vault as objects.
      *
      * @param bool $underscored
-     * @return object[]
+     * @return KeyValuePair[]
      * @throws SodiumException
      */
     public function getAllDecryptedObjects(bool $underscored = false): array
     {
         return $this->getAllObjects($underscored, true);
-    }
-
-    /**
-     * Gets the value of a single vault entry.
-     *
-     * @param string $key
-     * @return string
-     * @throws Exception
-     */
-    public function getValue(string $key): string
-    {
-        if (!array_key_exists($key, $this->vault)) {
-            throw new Exception('Unknown given key name.');
-        }
-
-        return $this->vault[$key]->value;
-    }
-
-    /**
-     * Gets a single vault entry as object.
-     *
-     * @param string $key
-     * @return object
-     * @throws Exception
-     */
-    public function getObject(string $key): object
-    {
-        if (!array_key_exists($key, $this->vault)) {
-            throw new Exception('Unknown given key name.');
-        }
-
-        return $this->vault[$key];
-    }
-
-    /**
-     * Gets a decrypted single value vault entry.
-     *
-     * @param string $key
-     * @return false|string
-     * @throws SodiumException
-     * @throws Exception
-     */
-    public function getDecryptedValue(string $key)
-    {
-        return $this->core->getDecrypter()->decrypt($this->getValue($key));
-    }
-
-    /**
-     * Gets a decrypted single full object vault entry.
-     *
-     * @param string $key
-     * @return object
-     * @throws SodiumException
-     * @throws Exception
-     */
-    public function getDecryptedObject(string $key): object
-    {
-        $data = $this->getObject($key);
-        $return = (object) [];
-
-        foreach ($data as $key => $encryptedValue) {
-            $return->{$key} = $data->{$key} === null ? null : $this->core->getDecrypter()->decrypt($data->{$key});
-        }
-
-        return $return;
     }
 
     /**
@@ -203,10 +196,11 @@ class Vault
      * @param ?string $description
      * @param ?string $nonce
      * @param bool $alreadyEncrypted
+     * @return KeyValuePair[]
      * @throws SodiumException
      * @throws Exception
      */
-    public function add(string $key, string $value, string $description = null, string $nonce = null, bool $alreadyEncrypted = false): void
+    public function add(string $key, string $value, string $description = null, string $nonce = null, bool $alreadyEncrypted = false): array
     {
         if ($alreadyEncrypted) {
             $encryptedValue = $value;
@@ -218,10 +212,9 @@ class Vault
                 $this->core->getEncrypter()->encrypt($description, $nonce);
         }
 
-        $this->vault[$key] = (object) [
-            'value' => $encryptedValue,
-            'description' => $encryptedDescription,
-        ];
+        $this->vault[$key] = new KeyValuePair($key, $encryptedValue, $encryptedDescription);
+
+        return $this->vault;
     }
 
     /**
@@ -265,21 +258,28 @@ class Vault
     /**
      * Removes quotes from string and decrypt if needed.
      *
-     * @param string $string
+     * @param string|null $string $string
      * @param bool $decrypt
-     * @return string
+     * @param bool $encrypt
+     * @param string|null $nonce
+     * @return string|null
+     * @throws SodiumException
      * @throws Exception
      */
-    public function convertString(string $string, bool $decrypt = false): string
+    public function convertString(?string $string, bool $decrypt = false, bool $encrypt = false, string $nonce = null): ?string
     {
+        if ($string === null) {
+            return null;
+        }
+
         $string = preg_replace('~^[\'"]?(.*?)[\'"]?$~', '$1', $string);
 
         if ($decrypt) {
             $string = $this->core->getDecrypter()->decrypt($string);
         }
 
-        if ($string === false) {
-            $string = null;
+        if ($encrypt) {
+            $string = $this->core->getEncrypter()->encrypt($string, $nonce);
         }
 
         return $string;

@@ -26,6 +26,7 @@
 
 namespace Test\Ixnode\PhpVault\Vault;
 
+use Ixnode\PhpVault\Vault\KeyValuePair;
 use Ixnode\PhpVault\Vault\Vault;
 use Ixnode\PhpVault\Vault\Reader;
 use Exception;
@@ -53,47 +54,28 @@ final class ReaderTest extends VaultTestCase
         $this->assertInstanceOf($expected, self::$core->getVault()->getReader());
     }
 
+
+
     /**
      * Test vault reader array.
+     * - Decrypted to Decrypted
      *
      * @dataProvider dataProviderArrayFromDecrypted
      * @param string $stream
      * @param object[] $decrypted
      * @param object[] $encrypted
+     * @param object[] $combined
      * @return void
-     * @throws Exception
+     * @throws SodiumException
      */
-    public function testReaderArrayFromDecrypted(string $stream, array $decrypted, array $encrypted): void
+    public function testReaderArrayFromDecryptedToDecrypted(string $stream, array $decrypted, array $encrypted, array $combined): void
     {
         /* Arrange */
         $expected = $decrypted;
 
         /* Act */
         self::$core->clearVault();
-        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
-
-        /* Assert */
-        $this->assertEquals($expected, $actual);
-    }
-
-    /**
-     * Test vault reader array.
-     *
-     * @dataProvider dataProviderArrayFromEncrypted
-     * @param string $stream
-     * @param object[] $decrypted
-     * @param object[] $encrypted
-     * @return void
-     * @throws Exception
-     */
-    public function testReaderArrayFromEncryptedToEncrypted(string $stream, array $decrypted, array $encrypted): void
-    {
-        /* Arrange */
-        $expected = $encrypted;
-
-        /* Act */
-        self::$core->clearVault();
-        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
+        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_DECRYPTED);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -101,98 +83,102 @@ final class ReaderTest extends VaultTestCase
 
     /**
      * Test vault reader array.
+     * - Encrypted to Encrypted
      *
      * @dataProvider dataProviderArrayFromEncrypted
      * @param string $stream
      * @param object[] $decrypted
      * @param object[] $encrypted
+     * @param object[] $combined
      * @return void
      * @throws Exception
      */
-    public function testReaderArrayFromEncryptedToDecrypted(string $stream, array $decrypted, array $encrypted): void
-    {
-        /* Arrange */
-        $expected = $decrypted;
-
-        /* Act */
-        self::$core->clearVault();
-        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, true);
-
-        /* Assert */
-        $this->assertEquals($expected, $actual);
-    }
-
-    /**
-     * Test add array to vault encrypted.
-     *
-     * @dataProvider dataProviderArrayFromDecrypted
-     * @param string $stream
-     * @param object[] $decrypted
-     * @param object[] $encrypted
-     * @return void
-     * @throws SodiumException
-     * @throws Exception
-     */
-    public function testReaderAddArrayToVaultEncryptedFromDecrypted(string $stream, array $decrypted, array $encrypted): void
+    public function testReaderArrayFromEncryptedToEncrypted(string $stream, array $decrypted, array $encrypted, array $combined): void
     {
         /* Arrange */
         $expected = $encrypted;
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
-        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAllObjects(true, false);
+        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, READER::OUTPUT_TO_ENCRYPTED);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
     }
 
     /**
-     * Test add array to vault encrypted.
+     * Test vault reader array.
+     * - Decrypted to Encrypted
      *
-     * @dataProvider dataProviderArrayFromEncrypted
+     * @dataProvider dataProviderArrayFromDecrypted
      * @param string $stream
      * @param object[] $decrypted
      * @param object[] $encrypted
+     * @param object[] $combined
      * @return void
-     * @throws SodiumException
      * @throws Exception
      */
-    public function testReaderAddArrayToVaultEncryptedFromEncrypted(string $stream, array $decrypted, array $encrypted): void
+    public function testReaderArrayFromDecryptedToEncrypted(string $stream, array $decrypted, array $encrypted, array $combined): void
     {
         /* Arrange */
         $expected = $encrypted;
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, true);
-        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAllObjects(true, false);
+        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, READER::LOAD_FROM_DECRYPTED, READER::OUTPUT_TO_ENCRYPTED, self::$nonce);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
     }
 
     /**
-     * Test add array to vault decrypted.
+     * Test vault reader array.
+     * - Encrypted to Decrypted
      *
-     * @dataProvider dataProviderArrayFromDecrypted
+     * @dataProvider dataProviderArrayFromEncrypted
      * @param string $stream
      * @param object[] $decrypted
      * @param object[] $encrypted
+     * @param object[] $combined
      * @return void
-     * @throws SodiumException
      * @throws Exception
      */
-    public function testReaderAddArrayToVaultDecrytedFromDecrypted(string $stream, array $decrypted, array $encrypted): void
+    public function testReaderArrayFromEncryptedToDecrypted(string $stream, array $decrypted, array $encrypted, array $combined): void
     {
         /* Arrange */
         $expected = $decrypted;
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, false);
+        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, READER::OUTPUT_TO_DECRYPTED);
+
+        /* Assert */
+        $this->assertEquals($expected, $actual);
+    }
+
+
+
+    /**
+     * Test add array to vault.
+     * - Decrypted to Decrypted
+     *
+     * @dataProvider dataProviderArrayFromDecrypted
+     * @param string $stream
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @param object[] $combined
+     * @return void
+     * @throws SodiumException
+     * @throws Exception
+     */
+    public function testReaderAddArrayToVaultFromDecryptedToDecrypted(string $stream, array $decrypted, array $encrypted, array $combined): void
+    {
+        /* Arrange */
+        $expected = $combined;
+
+        /* Act */
+        self::$core->clearVault();
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_DECRYPTED);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
         $actual = self::$core->getVault()->getAllObjects(true, true);
 
@@ -201,30 +187,91 @@ final class ReaderTest extends VaultTestCase
     }
 
     /**
-     * Test add array to vault decrypted.
+     * Test add array to vault.
+     * - Encrypted to Encrypted
      *
      * @dataProvider dataProviderArrayFromEncrypted
      * @param string $stream
      * @param object[] $decrypted
      * @param object[] $encrypted
+     * @param object[] $combined
      * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function testReaderAddArrayToVaultDecrytedFromEncrypted(string $stream, array $decrypted, array $encrypted): void
+    public function testReaderAddArrayToVaultFromEncryptedToEncrypted(string $stream, array $decrypted, array $encrypted, array $combined): void
     {
         /* Arrange */
-        $expected = $decrypted;
+        $expected = $encrypted;
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, true);
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
+        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce, true);
+        $actual = self::$core->getVault()->getAllObjects(true, false);
+
+        /* Assert */
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test add array to vault.
+     * - Decrypted to Encrypted
+     *
+     * @dataProvider dataProviderArrayFromDecrypted
+     * @param string $stream
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @param object[] $combined
+     * @return void
+     * @throws SodiumException
+     * @throws Exception
+     */
+    public function testReaderAddArrayToVaultFromDecryptedToEncrypted(string $stream, array $decrypted, array $encrypted, array $combined): void
+    {
+        /* Arrange */
+        $expected = $encrypted;
+
+        /* Act */
+        self::$core->clearVault();
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_ENCRYPTED, self::$nonce);
+        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce, true);
+        $actual = self::$core->getVault()->getAllObjects(true, false);
+
+        /* Assert */
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test add array to vault.
+     * - Encrypted to Decrypted
+     *
+     * @dataProvider dataProviderArrayFromEncrypted
+     * @param string $stream
+     * @param object[] $decrypted
+     * @param object[] $encrypted
+     * @param object[] $combined
+     * @return void
+     * @throws SodiumException
+     * @throws Exception
+     */
+    public function testReaderAddArrayToVaultFromEncryptedToDecrypted(string $stream, array $decrypted, array $encrypted, array $combined): void
+    {
+        /* Arrange */
+        $expected = $combined;
+
+        /* Act */
+        self::$core->clearVault();
+        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_DECRYPTED);
+
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
         $actual = self::$core->getVault()->getAllObjects(true, true);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
     }
+
+
 
     /**
      * Provides some key variants to be converted.
@@ -266,7 +313,7 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST' => $this->getConfigArray(array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
+                    'TEST' => $this->getConfigArray('TEST', array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
                 )
             ),
 
@@ -282,7 +329,7 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST' => $this->getConfigArray(array('abc', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ==')),
+                    'TEST' => $this->getConfigArray('TEST', array('abc', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ==')),
                 )
             ),
 
@@ -298,7 +345,7 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST' => $this->getConfigArray(array('abc', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ==')),
+                    'TEST' => $this->getConfigArray('TEST', array('abc', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImRwYUp3OG9oekw5T0tDSFN2YW1Yb0hNZmhRPT0iXQ==')),
                 )
             ),
 
@@ -314,7 +361,7 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST_1' => $this->getConfigArray(array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
+                    'TEST_1' => $this->getConfigArray('TEST_1', array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
                 )
             ),
 
@@ -332,8 +379,8 @@ final class ReaderTest extends VaultTestCase
                 ###< STREAM ###
 
                 array(
-                    'TEST_1' => $this->getConfigArray(array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
-                    'TEST_2' => $this->getConfigArray(array('456', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0=')),
+                    'TEST_1' => $this->getConfigArray('TEST_1', array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ==')),
+                    'TEST_2' => $this->getConfigArray('TEST_2', array('456', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0=')),
                 ),
             ),
 
@@ -352,6 +399,7 @@ final class ReaderTest extends VaultTestCase
 
                 array(
                     'TEST' => $this->getConfigArray(
+                        'TEST',
                         array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='),
                         array('A comment with some text.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd')
                     ),
@@ -377,6 +425,7 @@ final class ReaderTest extends VaultTestCase
 
                 array(
                     'TEST' => $this->getConfigArray(
+                        'TEST',
                         array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='),
                         array('A comment with some text.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInN6RmtyVGxKODFFa0tWa1VvVnhsRlZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkdJPSJd')
                     ),
@@ -408,10 +457,12 @@ final class ReaderTest extends VaultTestCase
 
                 array(
                     'TEST_1' => $this->getConfigArray(
+                        'TEST_1',
                         array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='),
                         array('A comment with some text 123.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJSN1RwRzE4WmNFZUE3OHRTNjhmaFZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5SXBaT1AiXQ==')
                     ),
                     'TEST_2' => $this->getConfigArray(
+                        'TEST_2',
                         array('456', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0='),
                         array('A comment with some text 456.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInFVZDZNR3dOZ0NaU0p5U0t6SHBndVZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5Tm9wYVAiXQ==')
                     ),
@@ -451,18 +502,22 @@ final class ReaderTest extends VaultTestCase
 
                 array(
                     'TEST_1' => $this->getConfigArray(
+                        'TEST_1',
                         array('123', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInF1eExIdHVmaVc1UWJzQ3crcUVrTlNOUDFRPT0iXQ=='),
                         array('A comment with some text 123.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJSN1RwRzE4WmNFZUE3OHRTNjhmaFZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5SXBaT1AiXQ==')
                     ),
                     'TEST_2' => $this->getConfigArray(
+                        'TEST_2',
                         array('456', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlFDRXh2T1djZW5TMkp2TGdhaFwvQnBpWkkwQT09Il0='),
                         array('A comment with some text 456.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInFVZDZNR3dOZ0NaU0p5U0t6SHBndVZOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5Tm9wYVAiXQ==')
                     ),
                     'TEST_3' => $this->getConfigArray(
+                        'TEST_3',
                         array('This is a secure value.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIkc5SzhXTDJyM01ycW0rdFpkd1FwdzBZVmo1MWwxeU5VcjZcLzk2XC9tVEN5MjVTMHFcL09mQVMiXQ=='),
                         array('A comment with some text 789.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIlJhb2hRVWRhMjBWUDNGYWVtbWVyNjFOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd5T3I1bVAiXQ==')
                     ),
                     'TEST_4' => $this->getConfigArray(
+                        'TEST_4',
                         array('This is a secure value.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIkc5SzhXTDJyM01ycW0rdFpkd1FwdzBZVmo1MWwxeU5VcjZcLzk2XC9tVEN5MjVTMHFcL09mQVMiXQ=='),
                         array('A comment with some text abc.', 'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsInVENUhYckpyRUFQTjdwbGtLZkl0aTFOZGhZRW8welVhdXFcLzU1KzZPV1R2MlVFN3pPUEJFWkd6WTljT1AiXQ==')
                     ),
@@ -505,6 +560,7 @@ final class ReaderTest extends VaultTestCase
                 $item[$number],
                 array_map(function ($array) { return $array['decrypted']; }, $item[2]),
                 array_map(function ($array) { return $array['encrypted']; }, $item[2]),
+                array_map(function ($array) { return $array['combined']; }, $item[2]),
             );
         });
 
@@ -518,26 +574,12 @@ final class ReaderTest extends VaultTestCase
      * @param string[]|null $description
      * @return object[]
      */
-    protected function getConfigArray(array $value, array $description = null): array
+    protected function getConfigArray(string $name, array $value, array $description = null): array
     {
         return array(
-            'decrypted' => $this->getValueDescriptionObject($value[0], $description === null ? null : $description[0]),
-            'encrypted' => $this->getValueDescriptionObject($value[1], $description === null ? null : $description[1]),
+            'decrypted' => new KeyValuePair($name, null, null, $value[0], $description === null ? null : $description[0]),
+            'encrypted' => new KeyValuePair($name, $value[1], $description === null ? null : $description[1]),
+            'combined'  => new KeyValuePair($name, $value[1], $description === null ? null : $description[1], $value[0], $description === null ? null : $description[0]),
         );
-    }
-
-    /**
-     * Returns a value description object (helper function).
-     *
-     * @param string $value
-     * @param string|null $description
-     * @return object
-     */
-    protected function getValueDescriptionObject(string $value, string $description = null): object
-    {
-        return (object) [
-            'value' => $value,
-            'description' => $description,
-        ];
     }
 }

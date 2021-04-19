@@ -37,6 +37,14 @@ class Reader
 
     const PATTERN_DESCRIPTION = '~^#[ ]?(.+)$~i';
 
+    const LOAD_FROM_ENCRYPTED = false;
+
+    const LOAD_FROM_DECRYPTED = true;
+
+    const OUTPUT_TO_ENCRYPTED = false;
+
+    const OUTPUT_TO_DECRYPTED = true;
+
     /**
      * Writer constructor.
      *
@@ -51,11 +59,13 @@ class Reader
      * Converts given stream to array.
      *
      * @param string $stream
-     * @param bool $decrypt
-     * @return object[]
-     * @throws Exception
+     * @param bool $loadAsDecrypted
+     * @param bool $outputAsDecrypted
+     * @param string|null $nonce
+     * @return KeyValuePair[]
+     * @throws SodiumException
      */
-    public function convertStreamToArray(string $stream, bool $decrypt = false): array
+    public function convertStreamToArray(string $stream, bool $loadAsDecrypted = false, bool $outputAsDecrypted = false, string $nonce = null): array
     {
         $lines = explode("\n", $stream);
         $return = array();
@@ -74,7 +84,7 @@ class Reader
             if (preg_match(self::PATTERN_DESCRIPTION, $line, $matches)) {
 
                 /* add parsed values to current array */
-                $current->description = $this->vault->convertString($matches[1], $decrypt);
+                $current->description = $matches[1];
 
                 /* go to next line */
                 continue;
@@ -88,10 +98,41 @@ class Reader
                 $current->value = $matches[2];
 
                 /* add current array to return array */
-                $return[$this->vault->getUnderscoredKey($current->name)] = (object) [
-                    'value' => $this->vault->convertString($current->value, $decrypt),
-                    'description' => $current->description,
-                ];
+                if ($loadAsDecrypted) {
+                    /* decrypted */
+                    if ($outputAsDecrypted) {
+                        $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
+                            $this->vault->getUnderscoredKey($current->name),
+                            null,
+                            null,
+                            $this->vault->convertString($current->value, false, false),
+                            $this->vault->convertString($current->description, false, false)
+                        );
+                    /* encrypted */
+                    } else {
+                        $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
+                            $this->vault->getUnderscoredKey($current->name),
+                            $this->vault->convertString($current->value, false, true, $nonce),
+                            $this->vault->convertString($current->description, false, true, $nonce)
+                        );
+                    }
+                } else {
+                    if ($outputAsDecrypted) {
+                        $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
+                            $this->vault->getUnderscoredKey($current->name),
+                            null,
+                            null,
+                            $this->vault->convertString($current->value, true, false),
+                            $this->vault->convertString($current->description, true, false)
+                        );
+                    } else {
+                        $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
+                            $this->vault->getUnderscoredKey($current->name),
+                            $this->vault->convertString($current->value, false, false),
+                            $this->vault->convertString($current->description, false, false)
+                        );
+                    }
+                }
 
                 /* create new current array */
                 $current = clone $default;
@@ -148,7 +189,7 @@ class Reader
     /**
      * Adds given array to vault.
      *
-     * @param object[] $array
+     * @param KeyValuePair[] $array
      * @param string|null $nonce
      * @param bool $encryptedArray
      * @return void
@@ -157,7 +198,11 @@ class Reader
     public function addArrayToVault(array $array, string $nonce = null, bool $encryptedArray = false): void
     {
         foreach ($array as $name => $data) {
-            $this->vault->add($name, $data->value, $data->description, $nonce, $encryptedArray);
+            if ($encryptedArray) {
+                $this->vault->add($name, $data->getValueEncrypted(), $data->getDescriptionEncrypted(), $nonce, $encryptedArray);
+            } else {
+                $this->vault->add($name, $data->getValueDecrypted(), $data->getDescriptionDecrypted(), $nonce, $encryptedArray);
+            }
         }
     }
 }

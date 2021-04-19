@@ -191,8 +191,8 @@ class Display
         foreach ($core->getVault()->getAllObjects(true, $displayDecrypted) as $key => $data) {
             $table[] = [
                 'key' => $key,
-                'value' => $data->value,
-                'description' => $data->description,
+                'value' => $data->getValueEncrypted(),
+                'description' => $data->getDescriptionEncrypted(),
             ];
         }
 

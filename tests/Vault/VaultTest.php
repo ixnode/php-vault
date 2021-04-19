@@ -28,7 +28,7 @@ namespace Test\Ixnode\PhpVault\Vault;
 
 use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\Vault\Vault;
-use Ixnode\PhpVault\Vault\Item;
+use Ixnode\PhpVault\Vault\KeyValuePair;
 use Exception;
 use SodiumException;
 
@@ -71,11 +71,11 @@ TEXT;
      * Check some base things.
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      */
-    public function testBase(Item $data, Item $data2): void
+    public function testBase(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = Vault::class;
@@ -93,12 +93,12 @@ TEXT;
      * Test empty vault.
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testEmptyVault(Item $data, Item $data2): void
+    public function testEmptyVault(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = [];
@@ -114,21 +114,21 @@ TEXT;
      * Test add method vault (without encryption).
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testAddVault(Item $data, Item $data2): void
+    public function testAddVault(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $name = 'name-without-encryption';
-        $value = $data->getValue();
-        $description = $data->getDescription();
-        $expected = $data->getValueDecrypted();
+        $valueDecrypted = $data->getValueDecrypted();
+        $descriptionDecrypted = $data->getDescriptionDecrypted();
+        $expected = $data->getValueEncrypted();
 
         /* Act */
-        self::$core->getVault()->add($name, $value, $description, self::$nonce);
+        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
         $vaultValueEncrypted = self::$core->getVault()->getValue($name);
 
         /* Assert */
@@ -139,24 +139,25 @@ TEXT;
      * Test add method vault (without encryption with description).
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testAddVaultWithDescription(Item $data, Item $data2): void
+    public function testAddVaultWithDescription(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $name = 'name-without-encryption-with-description';
-        $value = $data->getValue();
-        $description = $data->getDescription();
-        $expected = (object) [
-            'value' => $data->getValueDecrypted(),
-            'description' => $data->getDescriptionDecrypted(),
-        ];
+        $valueDecrypted = $data->getValueDecrypted();
+        $descriptionDecrypted = $data->getDescriptionDecrypted();
+        $expected = new KeyValuePair(
+            $name,
+            $data->getValueEncrypted(),
+            $data->getDescriptionEncrypted()
+        );
 
         /* Act */
-        self::$core->getVault()->add($name, $value, $description, self::$nonce);
+        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
         $vaultValueEncrypted = self::$core->getVault()->getObject($name);
 
         /* Assert */
@@ -167,22 +168,22 @@ TEXT;
      * Test add method vault (with encryption).
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function testAddVaultEncryption(Item $data, Item $data2): void
+    public function testAddVaultEncryption(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $name = 'name-with-encryption';
-        $value = $data->getValue();
-        $description = $data->getDescription();
-        $expected = $value;
+        $valueDecrypted = $data->getValueDecrypted();
+        $descriptionDecrypted = $data->getDescriptionDecrypted();
+        $expected = $valueDecrypted;
 
         /* Act */
-        self::$core->getVault()->add($name, $value, $description, self::$nonce);
+        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
         $vaultValue = self::$core->getVault()->getValue($name);
         $vaultValueDecrypted = self::$core->getDecrypter()->decrypt($vaultValue);
 
@@ -194,24 +195,29 @@ TEXT;
      * Test add method vault (with auto encryption with description).
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws SodiumException
      */
-    public function testAddVaultEncryptionWithDescription(Item $data, Item $data2): void
+    public function testAddVaultEncryptionWithDescription(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $name = 'name-with-encryption-with-description';
-        $value = $data->getValue();
-        $description = $data->getDescription();
-        $expected = (object) [
-            'value' => $value,
-            'description' => $description
-        ];
+        $valueEncrypted = $data->getValueEncrypted();
+        $descriptionEncrypted = $data->getDescriptionEncrypted();
+        $valueDecrypted = $data->getValueDecrypted();
+        $descriptionDecrypted = $data->getDescriptionDecrypted();
+        $expected = new KeyValuePair(
+            $name,
+            $valueEncrypted,
+            $descriptionEncrypted,
+            $valueDecrypted,
+            $descriptionDecrypted
+        );
 
         /* Act */
-        self::$core->getVault()->add($name, $value, $description, self::$nonce);
+        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
         $vaultValueDecrypted = self::$core->getVault()->getDecryptedObject($name);
 
         /* Assert */
@@ -222,21 +228,21 @@ TEXT;
      * Test add method vault (with auto encryption).
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws SodiumException
      */
-    public function testAddVaultAutoEncryption(Item $data, Item $data2): void
+    public function testAddVaultAutoEncryption(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $name = 'name-with-auto-encryption';
-        $value = $data->getValue();
-        $description = $data->getDescription();
-        $expected = $value;
+        $valueDecrypted = $data->getValueDecrypted();
+        $descriptionDecrypted = $data->getDescriptionDecrypted();
+        $expected = $valueDecrypted;
 
         /* Act */
-        self::$core->getVault()->add($name, $value, $description, self::$nonce);
+        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
         $vaultValueDecrypted = self::$core->getVault()->getDecryptedValue($name);
 
         /* Assert */
@@ -247,21 +253,21 @@ TEXT;
      * Test add method vault (with auto encryption with description).
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws SodiumException
      */
-    public function testAddVaultAutoEncryptionWithDescription(Item $data, Item $data2): void
+    public function testAddVaultAutoEncryptionWithDescription(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $name = 'name-with-auto-encryption-with-description';
-        $value = $data->getValue();
-        $description = $data->getDescription();
-        $expected = $value;
+        $valueDecrypted = $data->getValueDecrypted();
+        $descriptionDecrypted = $data->getDescriptionDecrypted();
+        $expected = $valueDecrypted;
 
         /* Act */
-        self::$core->getVault()->add($name, $value, $description, self::$nonce);
+        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
         $vaultValueDecrypted = self::$core->getVault()->getDecryptedValue($name);
 
         /* Assert */
@@ -272,21 +278,21 @@ TEXT;
      * Test get vault array.
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testGetArray(Item $data, Item $data2): void
+    public function testGetArray(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = array(
-            'name-without-encryption' => $data->getValueDecrypted(),
-            'name-without-encryption-with-description' => $data->getValueDecrypted(),
-            'name-with-encryption' => $data->getValueDecrypted(),
-            'name-with-encryption-with-description' => $data->getValueDecrypted(),
-            'name-with-auto-encryption' => $data->getValueDecrypted(),
-            'name-with-auto-encryption-with-description' => $data->getValueDecrypted(),
+            'name-without-encryption' => $data->getValueEncrypted(),
+            'name-without-encryption-with-description' => $data->getValueEncrypted(),
+            'name-with-encryption' => $data->getValueEncrypted(),
+            'name-with-encryption-with-description' => $data->getValueEncrypted(),
+            'name-with-auto-encryption' => $data->getValueEncrypted(),
+            'name-with-auto-encryption-with-description' => $data->getValueEncrypted(),
         );
 
         /* Act */
@@ -300,21 +306,21 @@ TEXT;
      * Test get vault array decrypted.
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testGetArrayDecrypted(Item $data, Item $data2): void
+    public function testGetArrayDecrypted(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = array(
-            'name-without-encryption' => $data->getValue(),
-            'name-without-encryption-with-description' => $data->getValue(),
-            'name-with-encryption' => $data->getValue(),
-            'name-with-encryption-with-description' => $data->getValue(),
-            'name-with-auto-encryption' => $data->getValue(),
-            'name-with-auto-encryption-with-description' => $data->getValue(),
+            'name-without-encryption' => $data->getValueDecrypted(),
+            'name-without-encryption-with-description' => $data->getValueDecrypted(),
+            'name-with-encryption' => $data->getValueDecrypted(),
+            'name-with-encryption-with-description' => $data->getValueDecrypted(),
+            'name-with-auto-encryption' => $data->getValueDecrypted(),
+            'name-with-auto-encryption-with-description' => $data->getValueDecrypted(),
         );
 
         /* Act */
@@ -328,21 +334,21 @@ TEXT;
      * Test get vault array decrypted.
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testGetArrayDecryptedUnderscored(Item $data, Item $data2): void
+    public function testGetArrayDecryptedUnderscored(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = array(
-            'NAME_WITHOUT_ENCRYPTION' => $data->getValue(),
-            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
-            'NAME_WITH_ENCRYPTION' => $data->getValue(),
-            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
-            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValue(),
-            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
+            'NAME_WITHOUT_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
         );
 
         /* Act */
@@ -356,11 +362,11 @@ TEXT;
      * Test the $_ENV array to be empty.
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      */
-    public function testEmptyEnvArray(Item $data, Item $data2): void
+    public function testEmptyEnvArray(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = array();
@@ -376,21 +382,21 @@ TEXT;
      * Test: Save vault to $_ENV.
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testSaveEnvArray(Item $data, Item $data2): void
+    public function testSaveEnvArray(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = array(
-            'NAME_WITHOUT_ENCRYPTION' => $data->getValue(),
-            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
-            'NAME_WITH_ENCRYPTION' => $data->getValue(),
-            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
-            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValue(),
-            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
+            'NAME_WITHOUT_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
         );
 
         /* Act */
@@ -405,21 +411,21 @@ TEXT;
      * Test: Save vault to $_SERVER.
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testSaveServerArray(Item $data, Item $data2): void
+    public function testSaveServerArray(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = array(
-            'NAME_WITHOUT_ENCRYPTION' => $data->getValue(),
-            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
-            'NAME_WITH_ENCRYPTION' => $data->getValue(),
-            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
-            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValue(),
-            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
+            'NAME_WITHOUT_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
         );
 
         /* Act */
@@ -437,26 +443,26 @@ TEXT;
      * Test: Adds new entry and saves vault to $_ENV.
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function testAddAndSaveEnvArray(Item $data, Item $data2): void
+    public function testAddAndSaveEnvArray(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $name = 'name-new';
-        $value = $data2->getValue();
-        $description = $data2->getDescription();
+        $value = $data2->getValueDecrypted();
+        $description = $data2->getDescriptionDecrypted();
         $expected = array(
-            'NAME_WITHOUT_ENCRYPTION' => $data->getValue(),
-            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
-            'NAME_WITH_ENCRYPTION' => $data->getValue(),
-            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
-            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValue(),
-            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValue(),
-            'NAME_NEW' => $data2->getValue(),
+            'NAME_WITHOUT_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValueDecrypted(),
+            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            'NAME_NEW' => $data2->getValueDecrypted(),
         );
 
         /* Act */
@@ -475,12 +481,79 @@ TEXT;
      * Generates .env.secure file content (encrypted content).
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testGetEnvContent(Item $data, Item $data2): void
+    public function testGetEnvContent(KeyValuePair $data, KeyValuePair $data2): void
+    {
+        /* Arrange */
+        $expected = sprintf(
+            self::TEMPLATE_ENV_WITHOUT_DESCRIPTION,
+            $data->getValueEncrypted(),
+            $data->getValueEncrypted(),
+            $data->getValueEncrypted(),
+            $data->getValueEncrypted(),
+            $data->getValueEncrypted(),
+            $data->getValueEncrypted(),
+            $data2->getValueEncrypted()
+        );
+
+        /* Act */
+        $actual = self::$core->getVault()->getWriter()->getEnvString();
+
+        /* Assert */
+        $this->assertSame($expected, $actual);
+    }
+
+    /**
+     * Generates .env.secure file content with description (encrypted content).
+     *
+     * @dataProvider dataProvider
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
+     * @return void
+     * @throws Exception
+     */
+    public function testGetEnvContentWithDescription(KeyValuePair $data, KeyValuePair $data2): void
+    {
+        /* Arrange */
+        $expected = sprintf(
+            self::TEMPLATE_ENV_WITH_DESCRIPTION,
+            $data->getDescriptionEncrypted(),
+            $data->getValueEncrypted(),
+            $data->getDescriptionEncrypted(),
+            $data->getValueEncrypted(),
+            $data->getDescriptionEncrypted(),
+            $data->getValueEncrypted(),
+            $data->getDescriptionEncrypted(),
+            $data->getValueEncrypted(),
+            $data->getDescriptionEncrypted(),
+            $data->getValueEncrypted(),
+            $data->getDescriptionEncrypted(),
+            $data->getValueEncrypted(),
+            $data2->getDescriptionEncrypted(),
+            $data2->getValueEncrypted()
+        );
+
+        /* Act */
+        $actual = self::$core->getVault()->getWriter()->getEnvString(false, true);
+
+        /* Assert */
+        $this->assertSame($expected, $actual);
+    }
+
+    /**
+     * Generates .env file content (decrypted content).
+     *
+     * @dataProvider dataProvider
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
+     * @return void
+     * @throws Exception
+     */
+    public function testGetEnvContentDecrypted(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = sprintf(
@@ -495,22 +568,22 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString();
+        $actual = self::$core->getVault()->getWriter()->getEnvString(true);
 
         /* Assert */
         $this->assertSame($expected, $actual);
     }
 
     /**
-     * Generates .env.secure file content with description (encrypted content).
+     * Generates .env file content (decrypted content).
      *
      * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
+     * @param KeyValuePair $data
+     * @param KeyValuePair $data2
      * @return void
      * @throws Exception
      */
-    public function testGetEnvContentWithDescription(Item $data, Item $data2): void
+    public function testGetEnvContentDecryptedWithDescription(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
         $expected = sprintf(
@@ -532,73 +605,6 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString(false, true);
-
-        /* Assert */
-        $this->assertSame($expected, $actual);
-    }
-
-    /**
-     * Generates .env file content (decrypted content).
-     *
-     * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
-     * @return void
-     * @throws Exception
-     */
-    public function testGetEnvContentDecrypted(Item $data, Item $data2): void
-    {
-        /* Arrange */
-        $expected = sprintf(
-            self::TEMPLATE_ENV_WITHOUT_DESCRIPTION,
-            $data->getValue(),
-            $data->getValue(),
-            $data->getValue(),
-            $data->getValue(),
-            $data->getValue(),
-            $data->getValue(),
-            $data2->getValue()
-        );
-
-        /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString(true);
-
-        /* Assert */
-        $this->assertSame($expected, $actual);
-    }
-
-    /**
-     * Generates .env file content (decrypted content).
-     *
-     * @dataProvider dataProvider
-     * @param Item $data
-     * @param Item $data2
-     * @return void
-     * @throws Exception
-     */
-    public function testGetEnvContentDecryptedWithDescription(Item $data, Item $data2): void
-    {
-        /* Arrange */
-        $expected = sprintf(
-            self::TEMPLATE_ENV_WITH_DESCRIPTION,
-            $data->getDescription(),
-            $data->getValue(),
-            $data->getDescription(),
-            $data->getValue(),
-            $data->getDescription(),
-            $data->getValue(),
-            $data->getDescription(),
-            $data->getValue(),
-            $data->getDescription(),
-            $data->getValue(),
-            $data->getDescription(),
-            $data->getValue(),
-            $data2->getDescription(),
-            $data2->getValue()
-        );
-
-        /* Act */
         $actual = self::$core->getVault()->getWriter()->getEnvString(true, true);
 
         /* Assert */
@@ -608,23 +614,25 @@ TEXT;
     /**
      * Returns an data provider.
      *
-     * @return Item[][]
+     * @return KeyValuePair[][]
      */
     public function dataProvider(): array
     {
         return array(
             array(
-                'data' => new Item(
-                    '0123456789ABCDEF',
-                    'The value 0123456789ABCDEF was given.',
+                'data' => new KeyValuePair(
+                    'data',
                     'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImJFNXhROVBHUUN4K2FFdnJTY2hOSHlKTTFOMXhpMlpEOXJiUHpObWlQQTQ9Il0=',
-                    'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIk1BdlVWQTRxaEpObllLODhvZTdqcVVZVmc4NHozendCcTYrK3Y2alZUWDJ2Q2hQcURkZFwvVkFuXC90OWZBaG1Lbk9mWFV5YW89Il0='
+                    'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIk1BdlVWQTRxaEpObllLODhvZTdqcVVZVmc4NHozendCcTYrK3Y2alZUWDJ2Q2hQcURkZFwvVkFuXC90OWZBaG1Lbk9mWFV5YW89Il0=',
+                    '0123456789ABCDEF',
+                    'The value 0123456789ABCDEF was given.'
                 ),
-                'data2' => new Item(
-                    'new-value',
-                    'Description of new value.',
+                'data2' => new KeyValuePair(
+                    'data2',
                     'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImVCMjM3YUJoOEdKbFlSTndOK1d2UUh3WWtjTXozendCcXc9PSJd',
-                    'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIk5jTUNjbUJtQURJRyszSDVFcUh1QkZZWWxZMDMxeUFBcCtEZ3J2V0FXU2I4U2d1bExmbEpkV0k9Il0='
+                    'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsIk5jTUNjbUJtQURJRyszSDVFcUh1QkZZWWxZMDMxeUFBcCtEZ3J2V0FXU2I4U2d1bExmbEpkV0k9Il0=',
+                    'new-value',
+                    'Description of new value.'
                 ),
             )
         );

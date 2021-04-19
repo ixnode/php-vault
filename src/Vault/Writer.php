@@ -108,11 +108,11 @@ class Writer
                 $envString .= $withDescription ? "\n\n" : "\n";
             }
 
-            if ($withDescription && $vaultItem->description !== null) {
-                $envString .= sprintf(self::TEMPLATE_ENV_DESCRIPTION, $vaultItem->description)."\n";
+            if ($withDescription && $vaultItem->getDescription($decrypted) !== null) {
+                $envString .= sprintf(self::TEMPLATE_ENV_DESCRIPTION, $vaultItem->getDescription($decrypted))."\n";
             }
 
-            $envString .= sprintf(self::TEMPLATE_ENV_VALUE, $key, $vaultItem->value);
+            $envString .= sprintf(self::TEMPLATE_ENV_VALUE, $key, $vaultItem->getValue($decrypted));
         }
 
         return $envString;
