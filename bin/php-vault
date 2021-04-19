@@ -13,31 +13,8 @@ foreach ($autoloaderPaths as $autoloaderPath) {
     }
 }
 
-use Ahc\Cli\Application;
-use Ixnode\PhpVault\PHPVault;
-use Ixnode\PhpVault\Command\BaseCommand;
-use Ixnode\PhpVault\Command\GenerateKeysCommand;
-use Ixnode\PhpVault\Command\DisplayEnvCommand;
-use Ixnode\PhpVault\Command\DisplayCommand;
-use Ixnode\PhpVault\Command\SetCommand;
-use Ixnode\PhpVault\Command\EncryptFileCommand;
-use Ixnode\PhpVault\Command\DecryptFileCommand;
-use Ixnode\PhpVault\Command\InfoCommand;
+use Ixnode\PhpVault\Cli;
 
-/* Init App with name and version */
-$app = new Application(PHPVault::NAME, PHPVault::VERSION);
-
-/* Add commands with optional aliases */
-$app->add(new GenerateKeysCommand(), GenerateKeysCommand::ALIAS);
-$app->add(new DisplayEnvCommand(), DisplayEnvCommand::ALIAS);
-$app->add(new DisplayCommand(), DisplayCommand::ALIAS);
-$app->add(new SetCommand(), SetCommand::ALIAS);
-$app->add(new EncryptFileCommand(), EncryptFileCommand::ALIAS);
-$app->add(new DecryptFileCommand(), DecryptFileCommand::ALIAS);
-$app->add(new InfoCommand(), InfoCommand::ALIAS);
-
-/* Set logo */
-$app->logo(BaseCommand::LOGO);
-
-/* Handle arguments */
-$app->handle($_SERVER['argv']);
+/* Start cli parser */
+$cli = new Cli();
+$cli->handle();

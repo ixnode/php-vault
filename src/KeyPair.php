@@ -253,7 +253,7 @@ class KeyPair
             throw new Exception(sprintf('The given public key "%s" could not be loaded.', $publicKey));
         }
 
-        $this->renew(false, null, $publicKey);
+        $this->renew(false, null, $publicKeyString);
     }
 
     /**

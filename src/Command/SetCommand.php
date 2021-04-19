@@ -96,7 +96,7 @@ class SetCommand extends BaseCommand
         }
 
         /* Initiates the PhpVault Core. Loads private or public key from $_SERVER if given. */
-        $core = new PHPVault(false);
+        $core = new PHPVault();
 
         /* Loads private or public key. */
         if (!$this->loadPrivateOrPublicKey($core)) {
