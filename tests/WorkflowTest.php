@@ -51,8 +51,16 @@ final class WorkflowTest extends TestCase
 
     const PATH_EXECUTE_PHP_VAULT_PATH = 'vendor/bin/php-vault';
 
+    const VALUE_USER = 'secret.user';
+
+    const VALUE_PASS = 'secret.pass';
+
+    const VALUE_HOST = 'secret.host';
+
+    const VALUE_NAME = 'secret.name';
+
     /**
-     * 1) Check help.
+     * 01) Check help.
      *
      * @return void
      * @throws Exception
@@ -71,7 +79,7 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 2) Check no key loaded (Expected no one).
+     * 02) Check no key loaded (Expected no one).
      *
      * @return void
      * @throws Exception
@@ -90,7 +98,7 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 3) Check empty key folder.
+     * 03) Check empty key folder.
      *
      * @return void
      * @throws Exception
@@ -108,7 +116,7 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 4) Generates a private public key pair.
+     * 04) Generates a private public key pair.
      *
      * @return void
      * @throws Exception
@@ -129,7 +137,7 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 5) Check that the public key will be loaded.
+     * 05) Check that the public key will be loaded.
      *
      * @return void
      * @throws Exception
@@ -151,7 +159,7 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 6) Create .env.enc file with public key.
+     * 06) Create .env.enc file with public key.
      *
      * @return void
      * @throws Exception
@@ -162,10 +170,10 @@ final class WorkflowTest extends TestCase
         $pathAbsoluteEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
         $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PUBLIC_KEY);
         $commands = [
-            sprintf('%s set %s DB_USER secret.user "DB Configs" --public-key %s --create', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
-            sprintf('%s set %s DB_PASS secret.pass --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
-            sprintf('%s set %s DB_HOST secret.host --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
-            sprintf('%s set %s DB_NAME secret.name --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_USER %s "DB Configs" --public-key %s --create', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, self::VALUE_USER, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_PASS %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, self::VALUE_PASS, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_HOST %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, self::VALUE_HOST, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_NAME %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, self::VALUE_NAME, $pathAbsolutePublicKey),
         ];
         $search = 'The file was successfully written to';
 
@@ -182,12 +190,12 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 7) Test display command with public key (encrypted content).
+     * 07) Test display command with public key (encrypted content).
      *
      * @return void
      * @throws Exception
      */
-    public function testDisplayCommand(): void
+    public function testDisplayEncryptedCommand(): void
     {
         /* Arrange */
         $pathAbsoluteEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
@@ -202,6 +210,54 @@ final class WorkflowTest extends TestCase
 
         /* Assert */
         $this->assertSame($expectedEntries, $actualEntries);
+    }
+
+    /**
+     * 08) Check that the private key will be loaded.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testPrivateKeyLoaded(): void
+    {
+        /* Arrange */
+        $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PRIVATE_KEY);
+        $command = sprintf('%s i --private-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsolutePublicKey);
+        $searches = ['Private key was loaded', 'The key was loaded from given file', ];
+
+        /* Act */
+        $output = $this->executeCommand($command);
+
+        /* Assert */
+        foreach ($searches as $search) {
+            $this->assertIsInt(strpos($output, $search));
+        }
+    }
+
+    /**
+     * 09) Test display command with private key (encrypted content).
+     *
+     * @throws Exception
+     */
+    public function testDisplayDecryptedCommand(): void
+    {
+        /* Arrange */
+        $pathAbsoluteEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
+        $pathAbsolutePrivateKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PRIVATE_KEY);
+        $command = sprintf('%s display %s --load-encrypted --display-decrypted --private-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePrivateKey);
+        $overheadLines = 5;
+        $expectedEntries = 4;
+        $searches = [self::VALUE_USER, self::VALUE_PASS, self::VALUE_HOST, self::VALUE_NAME, ];
+
+        /* Act */
+        $output = $this->executeCommand($command);
+        $actualEntries = count(explode(Logger::LB, $output)) - $overheadLines;
+
+        /* Assert */
+        $this->assertSame($expectedEntries, $actualEntries);
+        foreach ($searches as $search) {
+            $this->assertIsInt(strpos($output, $search));
+        }
     }
 
     /**

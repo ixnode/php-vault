@@ -92,12 +92,22 @@ class KeyPair
      * Sets private key pair from given array.
      *
      * @param array{'private': string|null, 'public': string} $keyPair
+     * @param int $mode
+     * @param string $loadedFromSource
+     * @param string|null $loadedFromEnvironment
      * @return void
+     * @throws Exception
      */
-    protected function setKeyPair(array $keyPair): void
+    protected function setKeyPair(array $keyPair, int $mode, string $loadedFromSource, string $loadedFromEnvironment = null): void
     {
+        /* Set private and public key. */
         $this->setPrivateKey($keyPair['private']);
         $this->setPublicKey($keyPair['public']);
+
+        /* Set mode, loaded from source and environment */
+        $this->core->setMode($mode);
+        $this->loadedFromSource = $loadedFromSource;
+        $this->loadedFromEnvironment = $loadedFromEnvironment;
     }
 
     /**
@@ -224,45 +234,55 @@ class KeyPair
 
         /* Force create new key pair */
         if ($forceCreateNew) {
-            $this->setKeyPair(self::getNewPair());
-            $this->core->setMode(Mode::MODE_DECRYPT);
-            $this->loadedFromSource = self::LOADED_FROM_RANDOM_GENERATOR;
+            $this->setKeyPair(
+                self::getNewPair(),
+                Mode::MODE_DECRYPT,
+                self::LOADED_FROM_RANDOM_GENERATOR
+            );
             return true;
         }
 
 
         /* Read private key from input parameter */
         if ($privateKey !== null) {
-            $this->setKeyPair(self::getPairFromPrivateKey($privateKey));
-            $this->core->setMode(Mode::MODE_DECRYPT);
-            $this->loadedFromSource = self::LOADED_FROM_PASSED_STRING;
+            $this->setKeyPair(
+                self::getPairFromPrivateKey($privateKey),
+                Mode::MODE_DECRYPT,
+                self::LOADED_FROM_PASSED_STRING
+            );
             return true;
         }
 
         /* Read private key from $_SERVER variable. */
         if (array_key_exists(self::SERVER_PRIVATE_KEY_NAME, $_SERVER)) {
-            $this->setKeyPair(self::getPairFromPrivateKey($_SERVER[self::SERVER_PRIVATE_KEY_NAME]));
-            $this->core->setMode(Mode::MODE_DECRYPT);
-            $this->loadedFromSource = self::LOADED_FROM_ENVIRONMENT;
-            $this->loadedFromEnvironment = self::SERVER_PRIVATE_KEY_NAME;
+            $this->setKeyPair(
+                self::getPairFromPrivateKey($_SERVER[self::SERVER_PRIVATE_KEY_NAME]),
+                Mode::MODE_DECRYPT,
+                self::LOADED_FROM_ENVIRONMENT,
+                self::SERVER_PRIVATE_KEY_NAME
+            );
             return true;
         }
 
 
         /* Read public key from input parameter */
         if ($publicKey !== null) {
-            $this->setKeyPair(self::getPairFromPublicKey($publicKey));
-            $this->core->setMode(Mode::MODE_ENCRYPT);
-            $this->loadedFromSource = self::LOADED_FROM_PASSED_STRING;
+            $this->setKeyPair(
+                self::getPairFromPublicKey($publicKey),
+                Mode::MODE_ENCRYPT,
+                self::LOADED_FROM_PASSED_STRING
+            );
             return true;
         }
 
         /* Read private key from $_SERVER variable. */
         if (array_key_exists(self::SERVER_PUBLIC_KEY_NAME, $_SERVER)) {
-            $this->setKeyPair(self::getPairFromPublicKey($_SERVER[self::SERVER_PUBLIC_KEY_NAME]));
-            $this->core->setMode(Mode::MODE_ENCRYPT);
-            $this->loadedFromSource = self::LOADED_FROM_ENVIRONMENT;
-            $this->loadedFromEnvironment = self::SERVER_PUBLIC_KEY_NAME;
+            $this->setKeyPair(
+                self::getPairFromPublicKey($_SERVER[self::SERVER_PUBLIC_KEY_NAME]),
+                Mode::MODE_ENCRYPT,
+                self::LOADED_FROM_ENVIRONMENT,
+                self::SERVER_PUBLIC_KEY_NAME
+            );
             return true;
         }
 
