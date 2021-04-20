@@ -29,6 +29,7 @@ namespace Test\Ixnode\PhpVault;
 use Ahc\Cli\IO\Interactor;
 use Exception;
 use Ixnode\PhpVault\Command\GenerateKeysCommand;
+use Ixnode\PhpVault\Logger\Logger;
 use Ixnode\PhpVault\PHPVault;
 use PHPUnit\Framework\TestCase;
 use Ixnode\PhpVault\Cli;
@@ -47,6 +48,7 @@ final class WorkflowTest extends TestCase
     /**
      * 1) Check help.
      *
+     * @return void
      * @throws Exception
      */
     public function testHelp(): void
@@ -65,6 +67,7 @@ final class WorkflowTest extends TestCase
     /**
      * 2) Check no key loaded (Expected no one).
      *
+     * @return void
      * @throws Exception
      */
     public function testNoKeyLoaded(): void
@@ -83,6 +86,7 @@ final class WorkflowTest extends TestCase
     /**
      * 3) Check empty key folder.
      *
+     * @return void
      * @throws Exception
      */
     public function testEmptyKeyFolder(): void
@@ -100,6 +104,7 @@ final class WorkflowTest extends TestCase
     /**
      * 4) Generates a private public key pair.
      *
+     * @return void
      * @throws Exception
      */
     public function testGenerateKeys(): void
@@ -120,6 +125,7 @@ final class WorkflowTest extends TestCase
     /**
      * 5) Check that the public key will be loaded.
      *
+     * @return void
      * @throws Exception
      */
     public function testPublicKeyLoaded(): void
@@ -141,6 +147,7 @@ final class WorkflowTest extends TestCase
     /**
      * 6) Create .env.enc file with public key.
      *
+     * @return void
      * @throws Exception
      */
     public function testSetCommand(): void
@@ -166,15 +173,37 @@ final class WorkflowTest extends TestCase
         foreach ($outputs as $output) {
             $this->assertIsInt(strpos($output, $search));
         }
-
-        // display .test-folder/.env.enc --load-encrypted --public-key .test-folder/public.key
     }
 
     /**
-     * Tidy up.
+     * 7) Test display command with public key (encrypted content).
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testDisplayCommand(): void
+    {
+        /* Arrange */
+        $pathAbsoluteEncFile = $this->getPathTestAbsolute(self::PATH_ENV_ENC);
+        $pathAbsolutePublicKey = $this->getPathTestAbsolute(GenerateKeysCommand::NAME_PUBLIC_KEY);
+        $command = sprintf('%s display %s --load-encrypted --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey);
+        $overheadLines = 5;
+        $expectedEntries = 4;
+
+        /* Act */
+        $output = $this->executeCommand($command);
+        $actualEntries = count(explode(Logger::LB, $output)) - $overheadLines;
+
+        /* Assert */
+        $this->assertSame($expectedEntries, $actualEntries);
+    }
+
+    /**
+     * Tidy up temporary files.
      *
      * - Delete created files and folders.
      *
+     * @return void
      * @throws Exception
      */
     public static function tearDownAfterClass(): void
