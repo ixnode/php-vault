@@ -234,7 +234,10 @@ final class WorkflowTest extends TestCase
     protected static function deleteFoldersAndFiles(string $directory): void
     {
         /* Get all files and folders except . and .. */
-        $files = array_diff(scandir($directory), ['.', '..']);
+        $scannedDirectories = scandir($directory) ?: [];
+
+        /* Remove . and .. folders */
+        $files = array_diff($scannedDirectories, ['.', '..']);
 
         /* Delete each file or folder. */
         foreach ($files as $file) {
