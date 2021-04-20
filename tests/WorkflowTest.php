@@ -167,13 +167,13 @@ final class WorkflowTest extends TestCase
     public function testSetCommand(): void
     {
         /* Arrange */
-        $pathAbsoluteEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
+        $pathAbsoluteEnvEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
         $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PUBLIC_KEY);
         $commands = [
-            sprintf('%s set %s DB_USER %s "DB Configs" --public-key %s --create', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, self::VALUE_USER, $pathAbsolutePublicKey),
-            sprintf('%s set %s DB_PASS %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, self::VALUE_PASS, $pathAbsolutePublicKey),
-            sprintf('%s set %s DB_HOST %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, self::VALUE_HOST, $pathAbsolutePublicKey),
-            sprintf('%s set %s DB_NAME %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, self::VALUE_NAME, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_USER %s "DB Configs" --public-key %s --create', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEnvEncFile, self::VALUE_USER, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_PASS %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEnvEncFile, self::VALUE_PASS, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_HOST %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEnvEncFile, self::VALUE_HOST, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_NAME %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEnvEncFile, self::VALUE_NAME, $pathAbsolutePublicKey),
         ];
         $search = 'The file was successfully written to';
 
@@ -198,9 +198,9 @@ final class WorkflowTest extends TestCase
     public function testDisplayEncryptedCommand(): void
     {
         /* Arrange */
-        $pathAbsoluteEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
+        $pathAbsoluteEnvEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
         $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PUBLIC_KEY);
-        $command = sprintf('%s display %s --load-encrypted --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey);
+        $command = sprintf('%s display %s --load-encrypted --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEnvEncFile, $pathAbsolutePublicKey);
         $overheadLines = 5;
         $expectedEntries = 4;
 
@@ -242,9 +242,9 @@ final class WorkflowTest extends TestCase
     public function testDisplayDecryptedCommand(): void
     {
         /* Arrange */
-        $pathAbsoluteEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
+        $pathAbsoluteEnvEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
         $pathAbsolutePrivateKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PRIVATE_KEY);
-        $command = sprintf('%s display %s --load-encrypted --display-decrypted --private-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePrivateKey);
+        $command = sprintf('%s display %s --load-encrypted --display-decrypted --private-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEnvEncFile, $pathAbsolutePrivateKey);
         $overheadLines = 5;
         $expectedEntries = 4;
         $searches = [self::VALUE_USER, self::VALUE_PASS, self::VALUE_HOST, self::VALUE_NAME, ];
@@ -257,6 +257,33 @@ final class WorkflowTest extends TestCase
         $this->assertSame($expectedEntries, $actualEntries);
         foreach ($searches as $search) {
             $this->assertIsInt(strpos($output, $search));
+        }
+    }
+
+    /**
+     * 10) Test display command with private key (encrypted content).
+     *
+     * @throws Exception
+     */
+    public function testDecryptFileCommand(): void
+    {
+        /* Arrange */
+        $pathAbsoluteEnvEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
+        $pathAbsoluteEnvFile = self::getPathAbsoluteWorking(self::PATH_ENV);
+        $pathAbsolutePrivateKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PRIVATE_KEY);
+        $command = sprintf('%s decrypt-file %s --private-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEnvEncFile, $pathAbsolutePrivateKey);
+        $searches = [self::VALUE_USER, self::VALUE_PASS, self::VALUE_HOST, self::VALUE_NAME, ];
+        $searchCommand = 'The file was successfully written to';
+
+        /* Act */
+        $output = $this->executeCommand($command);
+
+        /* Assert */
+        $this->assertIsInt(strpos($output, $searchCommand));
+        $this->assertTrue(file_exists($pathAbsoluteEnvFile));
+        $envFileContent = file_get_contents($pathAbsoluteEnvFile) ?: "";
+        foreach ($searches as $search) {
+            $this->assertIsInt(strpos($envFileContent, $search));
         }
     }
 
