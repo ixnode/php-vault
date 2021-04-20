@@ -46,7 +46,7 @@ use SodiumException;
  */
 class BaseCommand extends Command
 {
-    const LOGO = 'phpVault command line interpreter.';
+    const LOGO = 'PHPVault command line interpreter.';
 
     const OPTION_PRIVATE_KEY = 'private-key';
 
