@@ -106,24 +106,24 @@ class GenerateKeysCommand extends BaseCommand
         }
 
         /* Get key folder. */
-        $keyFolderAbsolute = sprintf('%s/%s', $this->root, $this->getOption(self::OPTION_PERSIST, self::PATH_DEFAULT_KEY_FOLDER, true));
+        $pathKeys = $this->getOption(self::OPTION_PERSIST, self::PATH_DEFAULT_KEY_FOLDER, true);
 
         /* Check if target is a directory. */
-        if (file_exists($keyFolderAbsolute)) {
-            $this->logger->error('Path "{path}" already exists. If you want to persist the generated keys, delete the existing folder.', array('path' => $keyFolderAbsolute, ), true, true);
+        if (file_exists($pathKeys)) {
+            $this->logger->error('Path "{path}" already exists. If you want to persist the generated keys, delete the existing folder.', array('path' => $pathKeys, ), true, true);
             return;
         }
 
         /* Create key folder. */
-        mkdir($keyFolderAbsolute);
+        mkdir($pathKeys);
 
         /* Build private key path. */
         $privateKey = self::NAME_PRIVATE_KEY;
-        $privateKeyAbsolute = sprintf('%s/%s', $keyFolderAbsolute, $privateKey);
+        $pathPrivateKey = sprintf('%s/%s', $pathKeys, $privateKey);
 
         /* Build public key path. */
         $publicKey = self::NAME_PUBLIC_KEY;
-        $publicKeyAbsolute = sprintf('%s/%s', $keyFolderAbsolute, $publicKey);
+        $pathPublicKey = sprintf('%s/%s', $pathKeys, $publicKey);
 
         /* Build .gitignore path. */
         $gitignoreContent = <<<CONTENT
@@ -131,21 +131,21 @@ class GenerateKeysCommand extends BaseCommand
 /$privateKey
 CONTENT;
         $gitignore = '.gitignore';
-        $gitignoreAbsolute = sprintf('%s/%s', $keyFolderAbsolute, $gitignore);
+        $gitignoreAbsolute = sprintf('%s/%s', $pathKeys, $gitignore);
 
         /* Write files. */
-        file_put_contents($privateKeyAbsolute, $core->getKeyPair()->getPrivateKey());
-        file_put_contents($publicKeyAbsolute, $core->getKeyPair()->getPublicKey());
+        file_put_contents($pathPrivateKey, $core->getKeyPair()->getPrivateKey());
+        file_put_contents($pathPublicKey, $core->getKeyPair()->getPublicKey());
         file_put_contents($gitignoreAbsolute, $gitignoreContent);
 
         /* Check files. */
-        if (!file_exists($privateKeyAbsolute) || !file_exists($publicKeyAbsolute) || !file_exists($gitignoreAbsolute)) {
+        if (!file_exists($pathPrivateKey) || !file_exists($pathPublicKey) || !file_exists($gitignoreAbsolute)) {
             $this->logger->error('An error occurred while writing the keys.', array(), true, true);
             return;
         }
 
         /* Success message. */
-        $this->logger->ok('The key pair is written to folder "{path}"', array('path' => $keyFolderAbsolute, ), true, true);
+        $this->logger->ok('The key pair is written to folder "{path}"', array('path' => $pathKeys, ), true, true);
 
         /* Warn message. */
         $this->logger->warn('Never add the private key to the repository!', [], true, true);

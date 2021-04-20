@@ -39,9 +39,15 @@ final class WorkflowTest extends TestCase
 {
     const TEMP_PREFIX = 'php-vault';
 
-    const PATH_TEST_FOLDER = '.test-folder';
+    const PATH_WORKING = '.working';
+
+    const PATH_KEYS = 'keys';
+
+    const PATH_TMP = '_tmp';
 
     const PATH_ENV_ENC = '.env.enc';
+
+    const PATH_ENV = '.env';
 
     const PATH_EXECUTE_PHP_VAULT_PATH = 'vendor/bin/php-vault';
 
@@ -92,13 +98,13 @@ final class WorkflowTest extends TestCase
     public function testEmptyKeyFolder(): void
     {
         /* Arrange */
-        $pathAbsoluteTestFolder = self::getPathTestAbsolute();
+        $pathAbsoluteKeys = self::getPathAbsoluteKeys();
 
         /* Act */
         /* Nothing to do. */
 
         /* Assert */
-        $this->assertTrue(!file_exists($pathAbsoluteTestFolder));
+        $this->assertTrue(!file_exists($pathAbsoluteKeys));
     }
 
     /**
@@ -110,8 +116,8 @@ final class WorkflowTest extends TestCase
     public function testGenerateKeys(): void
     {
         /* Arrange */
-        $command = sprintf('%s gk --persist %s', self::PATH_EXECUTE_PHP_VAULT_PATH, self::PATH_TEST_FOLDER);
-        $pathAbsoluteTestFolder = self::getPathTestAbsolute();
+        $pathAbsoluteKeys = self::getPathAbsoluteKeys();
+        $command = sprintf('%s gk --persist %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteKeys);
         $search = 'The key pair is written to folder';
 
         /* Act */
@@ -119,7 +125,7 @@ final class WorkflowTest extends TestCase
 
         /* Assert */
         $this->assertIsInt(strpos($output, $search));
-        $this->assertTrue(file_exists($pathAbsoluteTestFolder));
+        $this->assertTrue(file_exists($pathAbsoluteKeys));
     }
 
     /**
@@ -131,7 +137,7 @@ final class WorkflowTest extends TestCase
     public function testPublicKeyLoaded(): void
     {
         /* Arrange */
-        $pathAbsolutePublicKey = $this->getPathTestAbsolute(GenerateKeysCommand::NAME_PUBLIC_KEY);
+        $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PUBLIC_KEY);
         $command = sprintf('%s i --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsolutePublicKey);
         $searches = ['Public key was loaded', 'The key was loaded from given file', ];
 
@@ -153,8 +159,8 @@ final class WorkflowTest extends TestCase
     public function testSetCommand(): void
     {
         /* Arrange */
-        $pathAbsoluteEncFile = $this->getPathTestAbsolute(self::PATH_ENV_ENC);
-        $pathAbsolutePublicKey = $this->getPathTestAbsolute(GenerateKeysCommand::NAME_PUBLIC_KEY);
+        $pathAbsoluteEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
+        $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PUBLIC_KEY);
         $commands = [
             sprintf('%s set %s DB_USER secret.user "DB Configs" --public-key %s --create', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
             sprintf('%s set %s DB_PASS secret.pass --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
@@ -184,8 +190,8 @@ final class WorkflowTest extends TestCase
     public function testDisplayCommand(): void
     {
         /* Arrange */
-        $pathAbsoluteEncFile = $this->getPathTestAbsolute(self::PATH_ENV_ENC);
-        $pathAbsolutePublicKey = $this->getPathTestAbsolute(GenerateKeysCommand::NAME_PUBLIC_KEY);
+        $pathAbsoluteEncFile = self::getPathAbsoluteWorking(self::PATH_ENV_ENC);
+        $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PUBLIC_KEY);
         $command = sprintf('%s display %s --load-encrypted --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey);
         $overheadLines = 5;
         $expectedEntries = 4;
@@ -201,6 +207,7 @@ final class WorkflowTest extends TestCase
     /**
      * Tidy up temporary files.
      *
+     * - Delete keys.a
      * - Delete created files and folders.
      *
      * @return void
@@ -208,32 +215,40 @@ final class WorkflowTest extends TestCase
      */
     public static function tearDownAfterClass(): void
     {
+        $pathAbsoluteWorking = self::getPathAbsoluteWorking();
+
         /* Get absolute path to ppk folder */
-        $pathAbsoluteTestFolder = self::getPathTestAbsolute();
-
-        /* Delete files  */
-        $findFiles = glob(sprintf('%s/*.*', $pathAbsoluteTestFolder));
-        if ($findFiles !== false) {
-            array_map('unlink', $findFiles);
-        }
-
-        /* Delete dot files  */
-        $findDotFiles = glob(sprintf('%s/.git*', $pathAbsoluteTestFolder));
-        if ($findDotFiles !== false) {
-            array_map('unlink', $findDotFiles);
-        }
-        $findDotFiles = glob(sprintf('%s/.env*', $pathAbsoluteTestFolder));
-        if ($findDotFiles !== false) {
-            array_map('unlink', $findDotFiles);
-        }
-
-        /* Delete folder */
-        rmdir($pathAbsoluteTestFolder);
+        self::deleteFoldersAndFiles($pathAbsoluteWorking);
 
         /* An error occurred while trying to delete the ppk folder */
-        if (file_exists($pathAbsoluteTestFolder)) {
-            throw new Exception(sprintf('Unable to delete folder "%s"', $pathAbsoluteTestFolder));
+        if (file_exists($pathAbsoluteWorking)) {
+            throw new Exception(sprintf('Unable to delete folder "%s"', $pathAbsoluteWorking));
         }
+    }
+
+    /**
+     * Deletes the given directory including its files and directories.
+     *
+     * @param string $directory
+     */
+    protected static function deleteFoldersAndFiles(string $directory): void
+    {
+        /* Get all files and folders except . and .. */
+        $files = array_diff(scandir($directory), ['.', '..']);
+
+        /* Delete each file or folder. */
+        foreach ($files as $file) {
+            if (is_dir("$directory/$file")) {
+                /* Delete folder. */
+                self::deleteFoldersAndFiles("$directory/$file");
+            } else {
+                /* Delete file. */
+                unlink("$directory/$file");
+            }
+        }
+
+        /* Delete given directory. */
+        rmdir($directory);
     }
 
     /**
@@ -245,8 +260,15 @@ final class WorkflowTest extends TestCase
      */
     protected function executeCommand(string $command): string
     {
+        $pathAbsoluteTemporary = self::getPathAbsoluteTemporary();
+
+        /* Create temporary path if it does not exists. */
+        if (!file_exists($pathAbsoluteTemporary)) {
+            mkdir($pathAbsoluteTemporary, 0777, true);
+        }
+
         /* Builds path to new writer */
-        $pathWriter = tempnam(sys_get_temp_dir(), self::TEMP_PREFIX);
+        $pathWriter = tempnam($pathAbsoluteTemporary, self::TEMP_PREFIX);
         $pathWriter = $pathWriter === false ? null : $pathWriter;
 
         /* Builds new interactor */
@@ -268,35 +290,76 @@ final class WorkflowTest extends TestCase
      *
      * @return string
      */
-    public static function getComposerJsonRootPath(): string
+    public static function getPathAbsoluteRootComposerJson(): string
     {
         $base = new BaseCommand('test');
         return $base->getComposerJsonRootPath();
     }
 
     /**
-     * Returns the ppk folder of this project.
+     * Returns an absolute path of given fs elements.
      *
-     * @param string $relativePath
      * @return string
      */
-    public static function getPathAbsolute(string $relativePath): string
+    public static function getPathAbsolute(): string
     {
-        return sprintf('%s/%s', self::getComposerJsonRootPath(), $relativePath);
+        /* Get all given fs elements. */
+        $fileSystemElements = func_get_args();
+
+        /* Adds the root path to the beginning. */
+        array_unshift($fileSystemElements, self::getPathAbsoluteRootComposerJson());
+
+        return implode(DIRECTORY_SEPARATOR, $fileSystemElements);
     }
 
     /**
-     * Returns the ppk folder of this project.
+     * Returns an absolute path of given fs elements with .working path at the beginning.
      *
-     * @param string|null $relativePath
      * @return string
      */
-    public static function getPathTestAbsolute(string $relativePath = null): string
+    public static function getPathAbsoluteWorking(): string
     {
-        if ($relativePath !== null) {
-            return sprintf('%s/%s/%s', self::getComposerJsonRootPath(), self::PATH_TEST_FOLDER, $relativePath);
-        } else {
-            return sprintf('%s/%s', self::getComposerJsonRootPath(), self::PATH_TEST_FOLDER);
-        }
+        /* Get all given fs elements. */
+        $fileSystemElements = func_get_args();
+
+        /* Adds working path to the beginning. */
+        array_unshift($fileSystemElements, self::PATH_WORKING);
+
+        /* Calls the static method getPathAbsolute */
+        return call_user_func_array(array(self::class, 'getPathAbsolute'), $fileSystemElements);
+    }
+
+    /**
+     * Returns an absolute path of given fs elements with .keys path at the beginning.
+     *
+     * @return string
+     */
+    public static function getPathAbsoluteKeys(): string
+    {
+        /* Get all given fs elements. */
+        $fileSystemElements = func_get_args();
+
+        /* Adds working path to the beginning. */
+        array_unshift($fileSystemElements, self::PATH_KEYS);
+
+        /* Calls the static method getPathAbsolute */
+        return call_user_func_array(array(self::class, 'getPathAbsoluteWorking'), $fileSystemElements);
+    }
+
+    /**
+     * Returns an absolute path of given fs elements with temporary path at the beginning.
+     *
+     * @return string
+     */
+    public static function getPathAbsoluteTemporary(): string
+    {
+        /* Get all given fs elements. */
+        $fileSystemElements = func_get_args();
+
+        /* Adds working path to the beginning. */
+        array_unshift($fileSystemElements, self::PATH_TMP);
+
+        /* Calls the static method getPathAbsolute */
+        return call_user_func_array(array(self::class, 'getPathAbsoluteWorking'), $fileSystemElements);
     }
 }
