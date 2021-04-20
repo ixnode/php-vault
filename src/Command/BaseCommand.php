@@ -28,6 +28,7 @@ namespace Ixnode\PhpVault\Command;
 
 use Ahc\Cli\Application as App;
 use Ahc\Cli\Input\Command;
+use Ahc\Cli\IO\Interactor;
 use Ahc\Cli\Output\Writer;
 use Composer\Autoload\ClassLoader;
 use Ixnode\PhpVault\PHPVault;
@@ -69,8 +70,11 @@ class BaseCommand extends Command
     {
         parent::__construct($name, $desc, $allowUnknown, $app);
 
+        /** @var Interactor|null $io Gets the Interactor  */
+        $io = $app instanceof App ? $app->io() : null;
+
         /* Initiate Writer */
-        $this->writer = new Writer();
+        $this->writer = $io !== null ? $io->writer() : new Writer();
 
         /* Initiate Logger */
         $this->logger = new Logger($this->writer);

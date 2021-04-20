@@ -155,13 +155,13 @@ class Cli
         }
 
         /* Add commands with optional aliases */
-        $app->add(new GenerateKeysCommand(), GenerateKeysCommand::ALIAS);
-        $app->add(new DisplayEnvCommand(), DisplayEnvCommand::ALIAS);
-        $app->add(new DisplayCommand(), DisplayCommand::ALIAS);
-        $app->add(new SetCommand(), SetCommand::ALIAS);
-        $app->add(new EncryptFileCommand(), EncryptFileCommand::ALIAS);
-        $app->add(new DecryptFileCommand(), DecryptFileCommand::ALIAS);
-        $app->add(new InfoCommand(), InfoCommand::ALIAS);
+        $app->add(new GenerateKeysCommand(false, $app), GenerateKeysCommand::ALIAS);
+        $app->add(new DisplayEnvCommand(false, $app), DisplayEnvCommand::ALIAS);
+        $app->add(new DisplayCommand(false, $app), DisplayCommand::ALIAS);
+        $app->add(new SetCommand(false, $app), SetCommand::ALIAS);
+        $app->add(new EncryptFileCommand(false, $app), EncryptFileCommand::ALIAS);
+        $app->add(new DecryptFileCommand(false, $app), DecryptFileCommand::ALIAS);
+        $app->add(new InfoCommand(false, $app), InfoCommand::ALIAS);
 
         /* Set logo */
         $app->logo(BaseCommand::LOGO);

@@ -26,6 +26,7 @@
 
 namespace Ixnode\PhpVault\Command;
 
+use Ahc\Cli\Application as App;
 use Exception;
 use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\TypeCheck\TypeCheck;
@@ -46,18 +47,20 @@ class GenerateKeysCommand extends BaseCommand
 
     /**
      * GenerateKeysCommand constructor.
+     *
+     * @param bool $allowUnknown
+     * @param App|null $app
      */
-    public function __construct()
+    public function __construct(bool $allowUnknown = false, App $app = null)
     {
-        parent::__construct(self::COMMAND, self::DESCRIPTION);
+        parent::__construct(self::COMMAND, self::DESCRIPTION, $allowUnknown, $app);
 
         $this
-            ->option('-p --persist', 'Persists generated keys to given folder.', function($value) { return TypeCheck::isBoolean($value); }, false)
-            ->option('-f --persist-folder', 'The path to persists the key pair.', null, self::PATH_DEFAULT_KEY_FOLDER)
+            ->option('-p --persist', 'Persists generated keys to given folder', null, false)
             ->usage(
                 '<bold>  $0 generate-keys</end> ## Simply shows the key pair.<eol/>'.
-                '<bold>  $0 generate-keys</end> <comment>--persist</end> ## Also persists key pair to folder ".keys".<eol/>'.
-                '<bold>  $0 generate-keys</end> <comment>--persist --persist-folder .ppk</end> ## Also persists key pair to folder ".ppk".<eol/>'
+                '<bold>  $0 generate-keys</end> <comment>--persist</end> ## Also persists key pair to folder ".keys" (Default path).<eol/>'.
+                '<bold>  $0 generate-keys</end> <comment>--persist .ppk</end> ## Also persists key pair to folder ".ppk".<eol/>'
             );
     }
 
@@ -99,7 +102,7 @@ class GenerateKeysCommand extends BaseCommand
         }
 
         /* Get key folder. */
-        $keyFolderAbsolute = sprintf('%s/%s', $this->root, $this->getOption(self::OPTION_PERSIST_FOLDER));
+        $keyFolderAbsolute = sprintf('%s/%s', $this->root, $this->getOption(self::OPTION_PERSIST, self::PATH_DEFAULT_KEY_FOLDER, true));
 
         /* Check if target is a directory. */
         if (file_exists($keyFolderAbsolute)) {
@@ -139,5 +142,8 @@ CONTENT;
 
         /* Success message. */
         $this->logger->ok('The key pair is written to folder "{path}"', array('path' => $keyFolderAbsolute, ), true, true);
+
+        /* Warn message. */
+        $this->logger->warn('Never add the private key to the repository!', [], true, true);
     }
 }

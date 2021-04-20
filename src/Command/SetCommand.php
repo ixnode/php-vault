@@ -26,6 +26,7 @@
 
 namespace Ixnode\PhpVault\Command;
 
+use Ahc\Cli\Application as App;
 use Ixnode\PhpVault\PHPVault;
 use Exception;
 use Ixnode\PhpVault\TypeCheck\TypeCheck;
@@ -50,10 +51,13 @@ class SetCommand extends BaseCommand
 
     /**
      * GenerateKeysCommand constructor.
+     *
+     * @param bool $allowUnknown
+     * @param App|null $app
      */
-    public function __construct()
+    public function __construct(bool $allowUnknown = false, App $app = null)
     {
-        parent::__construct(self::COMMAND, self::DESCRIPTION);
+        parent::__construct(self::COMMAND, self::DESCRIPTION, $allowUnknown, $app);
 
         $this
             ->argument('<env-file>', 'The environment file to be read (source env file).')
