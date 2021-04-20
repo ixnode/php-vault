@@ -26,6 +26,7 @@
 
 namespace Ixnode\PhpVault\Logger;
 
+use Ixnode\PhpVault\KeyPair;
 use Ixnode\PhpVault\PHPVault;
 use Exception;
 
@@ -76,6 +77,43 @@ class Display
     public function publicKeyLoaded(PHPVault $core): void
     {
         $this->logger->info('Public key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPublicKey())), true, true);
+    }
+
+    /**
+     * Indicates the place where the key was loaded from.
+     *
+     * @param KeyPair $keyPair
+     * @throws Exception
+     */
+    public function keyLoadedFrom(KeyPair $keyPair): void
+    {
+        $templateFile = 'The key was loaded from given file: {from-path}';
+        $templateEnvironment = 'The key was loaded from environment: {from-environment}.';
+        $templatePassedString = 'The key was loaded from passed string.';
+        $templateRandomGenerator = 'The key was loaded from random generator.';
+
+        $setting = array(
+            'from-source' => $keyPair->loadedFromSource() ?: '',
+            'from-path' => $keyPair->loadedFromPath() ?: '',
+            'from-environment' => $keyPair->loadedFromEnvironment() ?: '',
+        );
+
+        switch ($keyPair->loadedFromSource()) {
+            case KeyPair::LOADED_FROM_FILE:
+                    $this->logger->info($templateFile, $setting, true, true);
+                break;
+            case KeyPair::LOADED_FROM_ENVIRONMENT:
+                $this->logger->info($templateEnvironment, $setting, true, true);
+                break;
+            case KeyPair::LOADED_FROM_PASSED_STRING:
+                $this->logger->info($templatePassedString, $setting, true, true);
+                break;
+            case KeyPair::LOADED_FROM_RANDOM_GENERATOR:
+                $this->logger->info($templateRandomGenerator, $setting, true, true);
+                break;
+            default:
+                throw new Exception(sprintf('Unknown source "%s".', $keyPair->loadedFromSource()));
+        }
     }
 
     /**

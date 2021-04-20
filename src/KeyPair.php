@@ -37,9 +37,23 @@ class KeyPair
 
     private ?string $publicKey = null;
 
+    protected ?string $loadedFromSource = null;
+
+    protected ?string $loadedFromPath = null;
+
+    protected ?string $loadedFromEnvironment = null;
+
     const SERVER_PUBLIC_KEY_NAME = 'PUBLIC_KEY';
 
     const SERVER_PRIVATE_KEY_NAME = 'PRIVATE_KEY';
+
+    const LOADED_FROM_FILE = 'FILE';
+
+    const LOADED_FROM_ENVIRONMENT = 'ENVIRONMENT';
+
+    const LOADED_FROM_PASSED_STRING = 'PASSED_STRING';
+
+    const LOADED_FROM_RANDOM_GENERATOR = 'RANDOM_GENERATOR';
 
     /**
      * KeyPair constructor.
@@ -69,6 +83,9 @@ class KeyPair
         $this->setPrivateKey(null);
         $this->setPublicKey(null);
         $this->core->setMode(Mode::MODE_NONE);
+        $this->loadedFromSource = null;
+        $this->loadedFromPath = null;
+        $this->loadedFromEnvironment = null;
     }
 
     /**
@@ -126,6 +143,56 @@ class KeyPair
     }
 
     /**
+     * Returns the location where the key was loaded from (source).
+     *
+     * @return string|null
+     */
+    public function loadedFromSource(): ?string
+    {
+        return $this->loadedFromSource;
+    }
+
+    /**
+     * Returns the location where the key was loaded from (path).
+     *
+     * @return string|null
+     */
+    public function loadedFromPath(): ?string
+    {
+        return $this->loadedFromPath;
+    }
+
+    /**
+     * Returns the location where the key was loaded from (environment).
+     *
+     * @return string|null
+     */
+    public function loadedFromEnvironment(): ?string
+    {
+        return $this->loadedFromEnvironment;
+    }
+
+    /**
+     * Returns that no key was loaded.
+     *
+     * @return bool
+     */
+    public function noKeyIsLoaded(): bool
+    {
+        return $this->loadedFromSource === null;
+    }
+
+    /**
+     * Returns that a key was loaded.
+     *
+     * @return bool
+     */
+    public function keyIsLoaded(): bool
+    {
+        return $this->loadedFromSource !== null;
+    }
+
+    /**
      * Init the KeyPair class.
      *
      * @param bool $forceCreateNew
@@ -146,52 +213,66 @@ class KeyPair
      * @param string|null $privateKey
      * @param string|null $publicKey
      * @param bool $throwException
-     * @return void
+     * @return bool
      * @throws SodiumException
      * @throws Exception
      */
-    public function renew(bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null, bool $throwException = true): void
+    public function renew(bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null, bool $throwException = true): bool
     {
         /* Delete key pair. */
         $this->deleteKeyPair();
 
         /* Force create new key pair */
-        if ($this->core->getMode() === Mode::MODE_NONE && $forceCreateNew) {
+        if ($forceCreateNew) {
             $this->setKeyPair(self::getNewPair());
             $this->core->setMode(Mode::MODE_DECRYPT);
+            $this->loadedFromSource = self::LOADED_FROM_RANDOM_GENERATOR;
+            return true;
         }
 
 
         /* Read private key from input parameter */
-        if ($this->core->getMode() === Mode::MODE_NONE && $privateKey !== null) {
+        if ($privateKey !== null) {
             $this->setKeyPair(self::getPairFromPrivateKey($privateKey));
             $this->core->setMode(Mode::MODE_DECRYPT);
+            $this->loadedFromSource = self::LOADED_FROM_PASSED_STRING;
+            return true;
         }
 
         /* Read private key from $_SERVER variable. */
-        if ($this->core->getMode() === Mode::MODE_NONE && array_key_exists(self::SERVER_PRIVATE_KEY_NAME, $_SERVER)) {
+        if (array_key_exists(self::SERVER_PRIVATE_KEY_NAME, $_SERVER)) {
             $this->setKeyPair(self::getPairFromPrivateKey($_SERVER[self::SERVER_PRIVATE_KEY_NAME]));
             $this->core->setMode(Mode::MODE_DECRYPT);
+            $this->loadedFromSource = self::LOADED_FROM_ENVIRONMENT;
+            $this->loadedFromEnvironment = self::SERVER_PRIVATE_KEY_NAME;
+            return true;
         }
 
 
         /* Read public key from input parameter */
-        if ($this->core->getMode() === Mode::MODE_NONE && $publicKey !== null) {
+        if ($publicKey !== null) {
             $this->setKeyPair(self::getPairFromPublicKey($publicKey));
             $this->core->setMode(Mode::MODE_ENCRYPT);
+            $this->loadedFromSource = self::LOADED_FROM_PASSED_STRING;
+            return true;
         }
 
         /* Read private key from $_SERVER variable. */
-        if ($this->core->getMode() === Mode::MODE_NONE && array_key_exists(self::SERVER_PUBLIC_KEY_NAME, $_SERVER)) {
+        if (array_key_exists(self::SERVER_PUBLIC_KEY_NAME, $_SERVER)) {
             $this->setKeyPair(self::getPairFromPublicKey($_SERVER[self::SERVER_PUBLIC_KEY_NAME]));
             $this->core->setMode(Mode::MODE_ENCRYPT);
+            $this->loadedFromSource = self::LOADED_FROM_ENVIRONMENT;
+            $this->loadedFromEnvironment = self::SERVER_PUBLIC_KEY_NAME;
+            return true;
         }
 
 
         /* No key was found. */
-        if ($this->core->getMode() === Mode::MODE_NONE && $throwException) {
+        if ($throwException) {
             throw new Exception('No private or public key found.');
         }
+
+        return false;
     }
 
     /**
@@ -227,7 +308,11 @@ class KeyPair
             throw new Exception(sprintf('The given private key "%s" could not be loaded.', $privateKey));
         }
 
-        $this->renew(false, $privateKeyString);
+        /* Renew key */
+        if ($this->renew(false, $privateKeyString)) {
+            $this->loadedFromSource = self::LOADED_FROM_FILE;
+            $this->loadedFromPath = $privateKey;
+        }
     }
 
     /**
@@ -253,7 +338,11 @@ class KeyPair
             throw new Exception(sprintf('The given public key "%s" could not be loaded.', $publicKey));
         }
 
-        $this->renew(false, null, $publicKeyString);
+        /* Renew key */
+        if ($this->renew(false, null, $publicKeyString)) {
+            $this->loadedFromSource = self::LOADED_FROM_FILE;
+            $this->loadedFromPath = $publicKey;
+        }
     }
 
     /**

@@ -49,6 +49,8 @@ class InfoCommand extends BaseCommand
         parent::__construct(self::COMMAND, self::DESCRIPTION, $allowUnknown, $app);
 
         $this
+            ->option('-P --private-key', 'Specifies a private key to be loaded.')
+            ->option('-p --public-key', 'Specifies a public key to be loaded.')
             ->usage(
                 '<bold>  $0 info</end> ## Shows information.<eol/>'
             );
@@ -65,8 +67,13 @@ class InfoCommand extends BaseCommand
         /* Initiate the PhpVault Core */
         $core = new PHPVault();
 
+        /* Loads private or public key. */
+        if (!$this->loadPrivateOrPublicKey($core)) {
+            return;
+        }
+
         /* No key was loaded */
-        if (!$core->getKeyPair()->keyExistsWithinEnvironment()) {
+        if ($core->getKeyPair()->noKeyIsLoaded()) {
             $this->logger->getDisplay()->noKeyLoaded();
             return;
         }
@@ -74,12 +81,14 @@ class InfoCommand extends BaseCommand
         /* Private key was loaded */
         if ($core->getKeyPair()->getPrivateKey()) {
             $this->logger->getDisplay()->privateKeyLoaded($core);
+            $this->logger->getDisplay()->keyLoadedFrom($core->getKeyPair());
             return;
         }
 
         /* Private key was loaded */
         if ($core->getKeyPair()->getPublicKey()) {
             $this->logger->getDisplay()->publicKeyLoaded($core);
+            $this->logger->getDisplay()->keyLoadedFrom($core->getKeyPair());
             return;
         }
     }

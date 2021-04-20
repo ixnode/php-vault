@@ -118,7 +118,28 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 5) Create .env.enc file with public key.
+     * 5) Check that the public key will be loaded.
+     *
+     * @throws Exception
+     */
+    public function testPublicKeyLoaded(): void
+    {
+        /* Arrange */
+        $pathAbsolutePublicKey = $this->getPathTestAbsolute(GenerateKeysCommand::NAME_PUBLIC_KEY);
+        $command = sprintf('%s i --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsolutePublicKey);
+        $searches = ['Public key was loaded', 'The key was loaded from given file', ];
+
+        /* Act */
+        $output = $this->executeCommand($command);
+
+        /* Assert */
+        foreach ($searches as $search) {
+            $this->assertIsInt(strpos($output, $search));
+        }
+    }
+
+    /**
+     * 6) Create .env.enc file with public key.
      *
      * @throws Exception
      */
