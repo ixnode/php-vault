@@ -28,6 +28,7 @@ namespace Test\Ixnode\PhpVault;
 
 use Ahc\Cli\IO\Interactor;
 use Exception;
+use Ixnode\PhpVault\Command\GenerateKeysCommand;
 use Ixnode\PhpVault\PHPVault;
 use PHPUnit\Framework\TestCase;
 use Ixnode\PhpVault\Cli;
@@ -37,9 +38,11 @@ final class WorkflowTest extends TestCase
 {
     const TEMP_PREFIX = 'php-vault';
 
-    const PATH_KEY_FOLDER = '.ppk-test-folder';
+    const PATH_TEST_FOLDER = '.test-folder';
 
-    const PATH_EXECUTE_PHP_VAULT_PATH = 'bin/php-vault';
+    const PATH_ENV_ENC = '.env.enc';
+
+    const PATH_EXECUTE_PHP_VAULT_PATH = 'vendor/bin/php-vault';
 
     /**
      * 1) Check help.
@@ -85,13 +88,13 @@ final class WorkflowTest extends TestCase
     public function testEmptyKeyFolder(): void
     {
         /* Arrange */
-        $pathAbsolutePpk = self::getPathAbsolutePpk();
+        $pathAbsoluteTestFolder = self::getPathTestAbsolute();
 
         /* Act */
         /* Nothing to do. */
 
         /* Assert */
-        $this->assertTrue(!file_exists($pathAbsolutePpk));
+        $this->assertTrue(!file_exists($pathAbsoluteTestFolder));
     }
 
     /**
@@ -102,8 +105,8 @@ final class WorkflowTest extends TestCase
     public function testGenerateKeys(): void
     {
         /* Arrange */
-        $command = sprintf('%s gk --persist %s', self::PATH_EXECUTE_PHP_VAULT_PATH, self::PATH_KEY_FOLDER);
-        $pathAbsolutePpk = self::getPathAbsolutePpk();
+        $command = sprintf('%s gk --persist %s', self::PATH_EXECUTE_PHP_VAULT_PATH, self::PATH_TEST_FOLDER);
+        $pathAbsoluteTestFolder = self::getPathTestAbsolute();
         $search = 'The key pair is written to folder';
 
         /* Act */
@@ -111,9 +114,40 @@ final class WorkflowTest extends TestCase
 
         /* Assert */
         $this->assertIsInt(strpos($output, $search));
-        $this->assertTrue(file_exists($pathAbsolutePpk));
+        $this->assertTrue(file_exists($pathAbsoluteTestFolder));
     }
 
+    /**
+     * 5) Create .env.enc file with public key.
+     *
+     * @throws Exception
+     */
+    public function testSetCommand(): void
+    {
+        /* Arrange */
+        $pathAbsoluteEncFile = $this->getPathTestAbsolute(self::PATH_ENV_ENC);
+        $pathAbsolutePublicKey = $this->getPathTestAbsolute(GenerateKeysCommand::NAME_PUBLIC_KEY);
+        $commands = [
+            sprintf('%s set %s DB_USER secret.user "DB Configs" --public-key %s --create', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_PASS secret.pass --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_HOST secret.host --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
+            sprintf('%s set %s DB_NAME secret.name --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEncFile, $pathAbsolutePublicKey),
+        ];
+        $search = 'The file was successfully written to';
+
+        /* Act */
+        $outputs = [];
+        foreach ($commands as $command) {
+            $outputs[] = $this->executeCommand($command);
+        }
+
+        /* Assert */
+        foreach ($outputs as $output) {
+            $this->assertIsInt(strpos($output, $search));
+        }
+
+        // display .test-folder/.env.enc --load-encrypted --public-key .test-folder/public.key
+    }
 
     /**
      * Tidy up.
@@ -125,26 +159,30 @@ final class WorkflowTest extends TestCase
     public static function tearDownAfterClass(): void
     {
         /* Get absolute path to ppk folder */
-        $pathAbsolutePpk = self::getPathAbsolutePpk();
+        $pathAbsoluteTestFolder = self::getPathTestAbsolute();
 
         /* Delete files  */
-        $findFiles = glob(sprintf('%s/*.*', $pathAbsolutePpk));
+        $findFiles = glob(sprintf('%s/*.*', $pathAbsoluteTestFolder));
         if ($findFiles !== false) {
             array_map('unlink', $findFiles);
         }
 
         /* Delete dot files  */
-        $findDotFiles = glob(sprintf('%s/.git*', $pathAbsolutePpk));
+        $findDotFiles = glob(sprintf('%s/.git*', $pathAbsoluteTestFolder));
+        if ($findDotFiles !== false) {
+            array_map('unlink', $findDotFiles);
+        }
+        $findDotFiles = glob(sprintf('%s/.env*', $pathAbsoluteTestFolder));
         if ($findDotFiles !== false) {
             array_map('unlink', $findDotFiles);
         }
 
         /* Delete folder */
-        rmdir($pathAbsolutePpk);
+        rmdir($pathAbsoluteTestFolder);
 
         /* An error occurred while trying to delete the ppk folder */
-        if (file_exists($pathAbsolutePpk)) {
-            throw new Exception(sprintf('Unable to delete folder "%s"', $pathAbsolutePpk));
+        if (file_exists($pathAbsoluteTestFolder)) {
+            throw new Exception(sprintf('Unable to delete folder "%s"', $pathAbsoluteTestFolder));
         }
     }
 
@@ -180,9 +218,35 @@ final class WorkflowTest extends TestCase
      *
      * @return string
      */
-    public static function getPathAbsolutePpk(): string
+    public static function getComposerJsonRootPath(): string
     {
         $base = new BaseCommand('test');
-        return sprintf('%s/%s', $base->getComposerJsonRootPath(), self::PATH_KEY_FOLDER);
+        return $base->getComposerJsonRootPath();
+    }
+
+    /**
+     * Returns the ppk folder of this project.
+     *
+     * @param string $relativePath
+     * @return string
+     */
+    public static function getPathAbsolute(string $relativePath): string
+    {
+        return sprintf('%s/%s', self::getComposerJsonRootPath(), $relativePath);
+    }
+
+    /**
+     * Returns the ppk folder of this project.
+     *
+     * @param string|null $relativePath
+     * @return string
+     */
+    public static function getPathTestAbsolute(string $relativePath = null): string
+    {
+        if ($relativePath !== null) {
+            return sprintf('%s/%s/%s', self::getComposerJsonRootPath(), self::PATH_TEST_FOLDER, $relativePath);
+        } else {
+            return sprintf('%s/%s', self::getComposerJsonRootPath(), self::PATH_TEST_FOLDER);
+        }
     }
 }

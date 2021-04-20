@@ -155,7 +155,7 @@ class Logger
 
         /* Print line break. */
         if ($sol) {
-            print self::LB;
+            $this->writer->comment("", true);
         }
 
         /* Print log message. */

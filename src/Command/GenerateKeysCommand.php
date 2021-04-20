@@ -41,6 +41,10 @@ class GenerateKeysCommand extends BaseCommand
 
     const PATH_DEFAULT_KEY_FOLDER = '.keys';
 
+    const NAME_PRIVATE_KEY = 'private.key';
+
+    const NAME_PUBLIC_KEY = 'public.key';
+
     const OPTION_PERSIST = 'persist';
 
     const OPTION_PERSIST_FOLDER = 'persist-folder';
@@ -114,11 +118,11 @@ class GenerateKeysCommand extends BaseCommand
         mkdir($keyFolderAbsolute);
 
         /* Build private key path. */
-        $privateKey = 'private.key';
+        $privateKey = self::NAME_PRIVATE_KEY;
         $privateKeyAbsolute = sprintf('%s/%s', $keyFolderAbsolute, $privateKey);
 
         /* Build public key path. */
-        $publicKey = 'public.key';
+        $publicKey = self::NAME_PUBLIC_KEY;
         $publicKeyAbsolute = sprintf('%s/%s', $keyFolderAbsolute, $publicKey);
 
         /* Build .gitignore path. */
