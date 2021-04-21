@@ -129,12 +129,12 @@ $ vendor/bin/php-vault decrypt-file .env.enc --private-key
 The file was successfully written to ".env".
 ```
 
-### Display the decrypted file
+### Display the decrypted file without encryption
 
-* Use private key (`--private-key` → load from `.keys/private.key`).
+* Do not need any key
 
 ```bash
-$ vendor/bin/php-vault display .env --display-decrypted --private-key
+$ vendor/bin/php-vault display .env --display-decrypted
 +------+-------------+-------------+
 | Key  | Value       | Description |
 +------+-------------+-------------+

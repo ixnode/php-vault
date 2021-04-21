@@ -189,7 +189,7 @@ class Reader
             $array = $this->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
         }
 
-        $this->addArrayToVault($array, null, true);
+        $this->addArrayToVault($array, null);
     }
 
     /**
@@ -197,17 +197,16 @@ class Reader
      *
      * @param KeyValuePair[] $array
      * @param string|null $nonce
-     * @param bool $encryptedArray
      * @return void
      * @throws SodiumException
      */
-    public function addArrayToVault(array $array, string $nonce = null, bool $encryptedArray = false): void
+    public function addArrayToVault(array $array, string $nonce = null): void
     {
         foreach ($array as $name => $data) {
-            if ($encryptedArray) {
-                $this->vault->add($name, $data->getValueEncrypted(), $data->getDescriptionEncrypted(), $nonce, $encryptedArray);
+            if ($data->getValueDecrypted() !== null) {
+                $this->vault->add($name, $data->getValueDecrypted(), $data->getDescriptionDecrypted(), $nonce);
             } else {
-                $this->vault->add($name, $data->getValueDecrypted(), $data->getDescriptionDecrypted(), $nonce, $encryptedArray); // TODO: What about $encryptedArray? This should be !$encryptedArray? Test breaks.
+                $this->vault->add($name, $data->getValueEncrypted(), $data->getDescriptionEncrypted(), $nonce, true);
             }
         }
     }

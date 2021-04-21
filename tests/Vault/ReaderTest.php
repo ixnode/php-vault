@@ -207,7 +207,7 @@ final class ReaderTest extends VaultTestCase
         /* Act */
         self::$core->clearVault();
         $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
-        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce, true);
+        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
         $actual = self::$core->getVault()->getAllObjects(true, false);
 
         /* Assert */
@@ -235,7 +235,7 @@ final class ReaderTest extends VaultTestCase
         /* Act */
         self::$core->clearVault();
         $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_ENCRYPTED, self::$nonce);
-        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce, true);
+        self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
         $actual = self::$core->getVault()->getAllObjects(true, false);
 
         /* Assert */

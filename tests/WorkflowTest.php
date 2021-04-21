@@ -239,7 +239,7 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 09) Test display command with private key (encrypted content).
+     * 09) Test display command with private key (encrypted content to decrypted content).
      *
      * @throws Exception
      */
@@ -310,7 +310,7 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 10) Test encrypt file command with public key.
+     * 12) Test encrypt file command with public key.
      *
      * @throws Exception
      */
