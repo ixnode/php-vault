@@ -183,7 +183,13 @@ class Reader
      */
     public function addStreamToVault(string $stream, bool $encryptedStream = false): void
     {
-        $this->addArrayToVault($this->convertStreamToArray($stream), null, $encryptedStream);
+        if ($encryptedStream) {
+            $array = $this->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
+        } else {
+            $array = $this->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
+        }
+
+        $this->addArrayToVault($array, null, true);
     }
 
     /**
@@ -201,7 +207,7 @@ class Reader
             if ($encryptedArray) {
                 $this->vault->add($name, $data->getValueEncrypted(), $data->getDescriptionEncrypted(), $nonce, $encryptedArray);
             } else {
-                $this->vault->add($name, $data->getValueDecrypted(), $data->getDescriptionDecrypted(), $nonce, $encryptedArray);
+                $this->vault->add($name, $data->getValueDecrypted(), $data->getDescriptionDecrypted(), $nonce, $encryptedArray); // TODO: What about $encryptedArray? This should be !$encryptedArray? Test breaks.
             }
         }
     }

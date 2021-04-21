@@ -49,6 +49,10 @@ final class WorkflowTest extends TestCase
 
     const PATH_ENV = '.env';
 
+    const PATH_ENV_2_ENC = '.env2.enc';
+
+    const PATH_ENV_2 = '.env2';
+
     const PATH_EXECUTE_PHP_VAULT_PATH = 'vendor/bin/php-vault';
 
     const VALUE_USER = 'secret.user';
@@ -261,7 +265,7 @@ final class WorkflowTest extends TestCase
     }
 
     /**
-     * 10) Test display command with private key (encrypted content).
+     * 10) Test decrypt file command with private key.
      *
      * @throws Exception
      */
@@ -285,6 +289,55 @@ final class WorkflowTest extends TestCase
         foreach ($searches as $search) {
             $this->assertIsInt(strpos($envFileContent, $search));
         }
+    }
+
+    /**
+     * 11) Copy .env to .env2
+     *
+     * @throws Exception
+     */
+    public function testCopyEnvToEnv2(): void
+    {
+        /* Arrange */
+        $pathAbsoluteEnvFile = self::getPathAbsoluteWorking(self::PATH_ENV);
+        $pathAbsoluteEnv2File = self::getPathAbsoluteWorking(self::PATH_ENV_2);
+
+        /* Act */
+        copy($pathAbsoluteEnvFile, $pathAbsoluteEnv2File);
+
+        /* Assert */
+        $this->assertTrue(file_exists($pathAbsoluteEnv2File));
+    }
+
+    /**
+     * 10) Test encrypt file command with public key.
+     *
+     * @throws Exception
+     */
+    public function testEncryptFileCommand(): void
+    {
+        /* Arrange */
+        $pathAbsoluteEnv2EncFile = self::getPathAbsoluteWorking(self::PATH_ENV_2_ENC);
+        $pathAbsoluteEnv2File = self::getPathAbsoluteWorking(self::PATH_ENV_2);
+        $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PRIVATE_KEY);
+        $command = sprintf('%s encrypt-file %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEnv2File, $pathAbsolutePublicKey);
+        $searchCommand = 'The file was successfully written to';
+        $overheadLines = 4; /* One comment, three empty lines → four */
+        $expectedEntries = 4;
+
+        /* Act */
+        $output = $this->executeCommand($command);
+
+        /* Assert */
+        $this->assertIsInt(strpos($output, $searchCommand));
+        $this->assertTrue(file_exists($pathAbsoluteEnv2EncFile));
+
+        /* Act */
+        $envFileContent = file_get_contents($pathAbsoluteEnv2EncFile) ?: "";
+        $actualEntries = count(explode(Logger::LB, $envFileContent)) - $overheadLines;
+
+        /* Assert */
+        $this->assertEquals($expectedEntries, $actualEntries);
     }
 
     /**
