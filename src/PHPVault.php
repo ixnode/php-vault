@@ -175,7 +175,7 @@ class PHPVault
      */
     public function importEncryptedEnvFile(string $file): void
     {
-        $this->getVault()->getReader()->addFileToVault($file, true);
+        $this->getVault()->getReader()->addFileToVault($file, false);
         $this->getVault()->getWriter()->saveToServer();
         $this->getVault()->getWriter()->saveToEnv();
         $this->getVault()->getWriter()->putEnv();

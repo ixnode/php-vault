@@ -111,7 +111,7 @@ class DisplayCommand extends BaseCommand
         }
 
         /* Load env file */
-        $core->getVault()->getReader()->addFileToVault($envFile, $loadEncrypted);
+        $core->getVault()->getReader()->addFileToVault($envFile, !$loadEncrypted);
 
         /* Displays the vault */
         $this->logger->getDisplay()->envVariables($core, $displayDecrypted);

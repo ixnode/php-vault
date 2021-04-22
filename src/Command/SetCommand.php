@@ -90,7 +90,6 @@ class SetCommand extends BaseCommand
         $create = $this->getOption(self::OPTION_CREATE, false);
 
         /* Set options */
-        $loadEncrypted = true;
         $displayDecrypted = false;
 
         /* Check that the given env file exists. */
@@ -109,7 +108,7 @@ class SetCommand extends BaseCommand
 
         /* Load env file */
         if (file_exists($envFile)) {
-            $core->getVault()->getReader()->addFileToVault($envFile, $loadEncrypted);
+            $core->getVault()->getReader()->addFileToVault($envFile, false);
         }
 
         /* set new name value set */

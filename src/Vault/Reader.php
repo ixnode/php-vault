@@ -37,13 +37,13 @@ class Reader
 
     const PATTERN_DESCRIPTION = '~^#[ ]?(.+)$~i';
 
-    const LOAD_FROM_ENCRYPTED = false;
+    const LOAD_FROM_ENCRYPTED = 'LOAD_ENCRYPTED';
 
-    const LOAD_FROM_DECRYPTED = true;
+    const LOAD_FROM_DECRYPTED = 'LOAD_DECRYPTED';
 
-    const OUTPUT_TO_ENCRYPTED = false;
+    const OUTPUT_TO_ENCRYPTED = 'SHOW_ENCRYPTED';
 
-    const OUTPUT_TO_DECRYPTED = true;
+    const OUTPUT_TO_DECRYPTED = 'SHOW_DECRYPTED';
 
     /**
      * Writer constructor.
@@ -59,13 +59,13 @@ class Reader
      * Converts given stream to array.
      *
      * @param string $stream
-     * @param bool $loadAsDecrypted
-     * @param bool $outputAsDecrypted
+     * @param string $loadType
+     * @param string $outputType
      * @param string|null $nonce
      * @return KeyValuePair[]
      * @throws SodiumException
      */
-    public function convertStreamToArray(string $stream, bool $loadAsDecrypted = false, bool $outputAsDecrypted = false, string $nonce = null): array
+    public function convertStreamToArray(string $stream, string $loadType = self::LOAD_FROM_ENCRYPTED, string $outputType = self::OUTPUT_TO_ENCRYPTED, string $nonce = null): array
     {
         $lines = explode("\n", $stream);
         $return = array();
@@ -98,9 +98,9 @@ class Reader
                 $current->value = $matches[2];
 
                 /* add current array to return array */
-                if ($loadAsDecrypted) {
+                if ($loadType === self::LOAD_FROM_DECRYPTED) {
                     /* decrypted */
-                    if ($outputAsDecrypted) {
+                    if ($outputType === self::OUTPUT_TO_DECRYPTED) {
                         $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
                             $this->vault->getUnderscoredKey($current->name),
                             null,
@@ -117,7 +117,7 @@ class Reader
                         );
                     }
                 } else {
-                    if ($outputAsDecrypted) {
+                    if ($outputType === self::OUTPUT_TO_DECRYPTED) {
                         $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
                             $this->vault->getUnderscoredKey($current->name),
                             null,
@@ -149,12 +149,13 @@ class Reader
      * Adds given file to vault.
      *
      * @param string $file
-     * @param bool $encryptedFile
+     * @param bool $loadAsDecrypted
+     * @param bool $outputAsDecrypted
      * @return void
      * @throws SodiumException
      * @throws Exception
      */
-    public function addFileToVault(string $file, bool $encryptedFile = false): void
+    public function addFileToVault(string $file, bool $loadAsDecrypted = false, bool $outputAsDecrypted = false): void
     {
         /* Check given file. */
         if (!file_exists($file)) {
@@ -169,24 +170,24 @@ class Reader
             throw new Exception(sprintf('The given file "%s" could not be loaded.', $file));
         }
 
-        $this->addStreamToVault($fileContent, $encryptedFile);
+        $this->addStreamToVault($fileContent, $loadAsDecrypted, $outputAsDecrypted);
     }
 
     /**
      * Adds given stream to vault.
      *
      * @param string $stream
-     * @param bool $encryptedStream
+     * @param bool $loadAsDecrypted
+     * @param bool $outputAsDecrypted
      * @return void
      * @throws SodiumException
-     * @throws Exception
      */
-    public function addStreamToVault(string $stream, bool $encryptedStream = false): void
+    public function addStreamToVault(string $stream, bool $loadAsDecrypted = false, bool $outputAsDecrypted = false): void
     {
-        if ($encryptedStream) {
-            $array = $this->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
-        } else {
+        if ($loadAsDecrypted) {
             $array = $this->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
+        } else {
+            $array = $this->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
         }
 
         $this->addArrayToVault($array, null);
