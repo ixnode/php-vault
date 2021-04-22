@@ -30,6 +30,7 @@ use Ahc\Cli\Application as App;
 use Ixnode\PhpVault\PHPVault;
 use Exception;
 use Ixnode\PhpVault\TypeCheck\TypeCheck;
+use Ixnode\PhpVault\Vault\Reader;
 
 class SetCommand extends BaseCommand
 {
@@ -108,7 +109,7 @@ class SetCommand extends BaseCommand
 
         /* Load env file */
         if (file_exists($envFile)) {
-            $core->getVault()->getReader()->addFileToVault($envFile, false);
+            $core->getVault()->getReader()->addFileToVault($envFile, Reader::LOAD_FROM_ENCRYPTED);
         }
 
         /* set new name value set */

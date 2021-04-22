@@ -30,6 +30,7 @@ use Ahc\Cli\Application as App;
 use Exception;
 use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\TypeCheck\TypeCheck;
+use Ixnode\PhpVault\Vault\Reader;
 
 class DisplayCommand extends BaseCommand
 {
@@ -111,7 +112,7 @@ class DisplayCommand extends BaseCommand
         }
 
         /* Load env file */
-        $core->getVault()->getReader()->addFileToVault($envFile, !$loadEncrypted);
+        $core->getVault()->getReader()->addFileToVault($envFile, $loadEncrypted ? Reader::LOAD_FROM_ENCRYPTED : Reader::LOAD_FROM_DECRYPTED);
 
         /* Displays the vault */
         $this->logger->getDisplay()->envVariables($core, $displayDecrypted);

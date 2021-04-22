@@ -146,54 +146,6 @@ class Reader
     }
 
     /**
-     * Adds given file to vault.
-     *
-     * @param string $file
-     * @param bool $loadAsDecrypted
-     * @param bool $outputAsDecrypted
-     * @return void
-     * @throws SodiumException
-     * @throws Exception
-     */
-    public function addFileToVault(string $file, bool $loadAsDecrypted = false, bool $outputAsDecrypted = false): void
-    {
-        /* Check given file. */
-        if (!file_exists($file)) {
-            throw new Exception(sprintf('The given file "%s" does not exist.', $file));
-        }
-
-        /* Load file. */
-        $fileContent = file_get_contents($file);
-
-        /* Check loaded file. */
-        if ($fileContent === false) {
-            throw new Exception(sprintf('The given file "%s" could not be loaded.', $file));
-        }
-
-        $this->addStreamToVault($fileContent, $loadAsDecrypted, $outputAsDecrypted);
-    }
-
-    /**
-     * Adds given stream to vault.
-     *
-     * @param string $stream
-     * @param bool $loadAsDecrypted
-     * @param bool $outputAsDecrypted
-     * @return void
-     * @throws SodiumException
-     */
-    public function addStreamToVault(string $stream, bool $loadAsDecrypted = false, bool $outputAsDecrypted = false): void
-    {
-        if ($loadAsDecrypted) {
-            $array = $this->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
-        } else {
-            $array = $this->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
-        }
-
-        $this->addArrayToVault($array, null);
-    }
-
-    /**
      * Adds given array to vault.
      *
      * @param KeyValuePair[] $array
@@ -210,5 +162,48 @@ class Reader
                 $this->vault->add($name, $data->getValueEncrypted(), $data->getDescriptionEncrypted(), $nonce, true);
             }
         }
+    }
+
+    /**
+     * Adds given stream to vault.
+     *
+     * @param string $stream
+     * @param string $loadType
+     * @param string $outputType
+     * @return void
+     * @throws SodiumException
+     */
+    public function addStreamToVault(string $stream, string $loadType = self::LOAD_FROM_ENCRYPTED, string $outputType = self::OUTPUT_TO_ENCRYPTED): void
+    {
+        $array = $this->convertStreamToArray($stream, $loadType, Reader::OUTPUT_TO_ENCRYPTED);
+
+        $this->addArrayToVault($array, null);
+    }
+
+    /**
+     * Adds given file to vault.
+     *
+     * @param string $file
+     * @param string $loadType
+     * @param string $outputType
+     * @return void
+     * @throws SodiumException
+     */
+    public function addFileToVault(string $file, string $loadType = self::LOAD_FROM_ENCRYPTED, string $outputType = self::OUTPUT_TO_ENCRYPTED): void
+    {
+        /* Check given file. */
+        if (!file_exists($file)) {
+            throw new Exception(sprintf('The given file "%s" does not exist.', $file));
+        }
+
+        /* Load file. */
+        $fileContent = file_get_contents($file);
+
+        /* Check loaded file. */
+        if ($fileContent === false) {
+            throw new Exception(sprintf('The given file "%s" could not be loaded.', $file));
+        }
+
+        $this->addStreamToVault($fileContent, $loadType, $outputType);
     }
 }

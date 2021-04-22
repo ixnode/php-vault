@@ -29,6 +29,7 @@ namespace Ixnode\PhpVault\Command;
 use Ahc\Cli\Application as App;
 use Exception;
 use Ixnode\PhpVault\PHPVault;
+use Ixnode\PhpVault\Vault\Reader;
 
 class DecryptFileCommand extends BaseCommand
 {
@@ -97,7 +98,7 @@ class DecryptFileCommand extends BaseCommand
         }
 
         /* Load env decrypted file */
-        $core->getVault()->getReader()->addFileToVault($envFileEncrypted, false);
+        $core->getVault()->getReader()->addFileToVault($envFileEncrypted, Reader::LOAD_FROM_ENCRYPTED);
 
         /* Writes the vault */
         $this->writeEnvVariables($core, $envFileDecrypted, $displayDecrypted);
