@@ -35,7 +35,7 @@ class PHPVault
 {
     const NAME = 'PHPVault';
 
-    const VERSION = 'v1.0.3';
+    const VERSION = 'v1.0.4';
 
     const CORE_PUBLIC_KEY = 'zodfptod/VHjzzgdPgT2vk7RThdowsYXLiPP+eNI6D4=';
 
@@ -176,7 +176,7 @@ class PHPVault
      */
     public function importEncryptedEnvFile(string $file): void
     {
-        $this->getVault()->getReader()->addFileToVault($file, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
+        $this->getVault()->getReader()->addFileToVault($file, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_DECRYPTED);
         $this->getVault()->getWriter()->saveToServer();
         $this->getVault()->getWriter()->saveToEnv();
         $this->getVault()->getWriter()->putEnv();

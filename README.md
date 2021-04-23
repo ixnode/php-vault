@@ -48,6 +48,11 @@ Commands:
 Run `<command> --help` for specific help
 ```
 
+```bash
+$ vendor/bin/php-vault --version
+v1.0.3
+```
+
 ## On development system
 
 Usually, you need the *public* key in this environment. Examples can be found below. There are several
