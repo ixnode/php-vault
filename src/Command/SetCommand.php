@@ -109,16 +109,16 @@ class SetCommand extends BaseCommand
 
         /* Load env file */
         if (file_exists($envFile)) {
-            $core->getVault()->getReader()->addFileToVault($envFile, Reader::LOAD_FROM_ENCRYPTED);
+            $core->getVault()->getReader()->addFileToVault($envFile, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
         }
 
         /* set new name value set */
         $core->getVault()->add($name, $value, $description);
 
         /* Displays the vault */
-        $this->logger->getDisplay()->envVariables($core, $displayDecrypted);
+        $this->logger->getDisplay()->envVariables($core, Reader::OUTPUT_TO_DECRYPTED);
 
         /* Writes the vault */
-        $this->writeEnvVariables($core, $envFile, $displayDecrypted, true);
+        $this->writeEnvVariables($core, $envFile, Reader::OUTPUT_TO_ENCRYPTED, true);
     }
 }

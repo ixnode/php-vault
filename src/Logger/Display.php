@@ -29,6 +29,7 @@ namespace Ixnode\PhpVault\Logger;
 use Ixnode\PhpVault\KeyPair;
 use Ixnode\PhpVault\PHPVault;
 use Exception;
+use Ixnode\PhpVault\Vault\Reader;
 
 class Display
 {
@@ -217,20 +218,20 @@ class Display
      * Displays all environment variables from given file.
      *
      * @param PHPVault $core
-     * @param bool $displayDecrypted
+     * @param string $outputType
      * @return void
      * @throws Exception
      */
-    public function envVariables(PHPVault $core, bool $displayDecrypted = false): void
+    public function envVariables(PHPVault $core, string $outputType = Reader::OUTPUT_TO_ENCRYPTED): void
     {
         $table = array();
 
         /* Collect all environment variables. */
-        foreach ($core->getVault()->getAllObjects(true, $displayDecrypted) as $key => $data) {
+        foreach ($core->getVault()->getAllObjectsRaw(true) as $key => $data) {
             $table[] = [
                 'key' => $key,
-                'value' => $displayDecrypted ? $data->getValueDecrypted() : $data->getValueEncrypted(),
-                'description' => $displayDecrypted ? $data->getDescriptionDecrypted(): $data->getDescriptionEncrypted(),
+                'value' => $outputType === Reader::OUTPUT_TO_DECRYPTED ? $data->getValueDecrypted() : $data->getValueEncrypted(),
+                'description' => $outputType === Reader::OUTPUT_TO_DECRYPTED ? $data->getDescriptionDecrypted(): $data->getDescriptionEncrypted(),
             ];
         }
 

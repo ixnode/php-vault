@@ -94,11 +94,11 @@ class Vault
      * Gets a decrypted single value vault entry.
      *
      * @param string $key
-     * @return false|string
+     * @return null|string
      * @throws SodiumException
      * @throws Exception
      */
-    public function getDecryptedValue(string $key)
+    public function getDecryptedValue(string $key): ?string
     {
         return $this->core->getDecrypter()->decrypt($this->getValue($key));
     }
@@ -117,6 +117,19 @@ class Vault
     }
 
     /**
+     * Gets an encrypted single full object vault entry.
+     *
+     * @param string $key
+     * @return KeyValuePair
+     * @throws SodiumException
+     * @throws Exception
+     */
+    public function getEncryptedObject(string $key): object
+    {
+        return $this->getObject($key)->encrypt($this->core->getEncrypter());
+    }
+
+    /**
      * Gets the whole decrypted or encrypted vault as value array.
      *
      * @param bool $underscored
@@ -132,9 +145,7 @@ class Vault
         foreach (array_keys($this->vault) as $key) {
             $keyArray = $underscored ? $this->getUnderscoredKey($key) : $key;
 
-            $value = $decrypt ? $this->getDecryptedValue($key) : $this->getValue($key);
-
-            $vault[$keyArray] = $value === false ? null : $value;
+            $vault[$keyArray] = $decrypt ? $this->getDecryptedValue($key) : $this->getValue($key);
         }
 
         return $vault;
@@ -144,24 +155,49 @@ class Vault
      * Gets the whole decrypted or encrypted vault as object array.
      *
      * @param bool $underscored
-     * @param bool $decrypt
+     * @param string $outputType
      * @return KeyValuePair[]
      * @throws SodiumException
      * @throws Exception
      */
-    public function getAllObjects(bool $underscored = false, bool $decrypt = false): array
+    public function getAllObjects(bool $underscored = false, string $outputType = Reader::OUTPUT_TO_RAW): array
     {
         $vault = [];
 
         foreach (array_keys($this->vault) as $key) {
             $keyArray = $underscored ? $this->getUnderscoredKey($key) : $key;
 
-            $vault[$keyArray] = $decrypt ?
-                $this->getDecryptedObject($key) :
-                $this->getObject($key);
+            switch ($outputType) {
+                case Reader::OUTPUT_TO_DECRYPTED:
+                    $vault[$keyArray] = $this->getDecryptedObject($key);
+                    break;
+
+                case Reader::OUTPUT_TO_ENCRYPTED:
+                    $vault[$keyArray] = $this->getEncryptedObject($key);
+                    break;
+
+                case Reader::OUTPUT_TO_RAW:
+                    $vault[$keyArray] = $this->getObject($key);
+                    break;
+
+                default:
+                    throw new Exception('Unknown given output type.');
+            }
         }
 
         return $vault;
+    }
+
+    /**
+     * Returns the whole raw vault as object array (Do not encrypt or decrypt!).
+     *
+     * @param bool $underscored
+     * @return KeyValuePair[]
+     * @throws Exception
+     */
+    public function getAllObjectsRaw(bool $underscored = false): array
+    {
+        return $this->getAllObjects($underscored);
     }
 
     /**
@@ -185,7 +221,19 @@ class Vault
      */
     public function getAllDecryptedObjects(bool $underscored = false): array
     {
-        return $this->getAllObjects($underscored, true);
+        return $this->getAllObjects($underscored, Reader::OUTPUT_TO_DECRYPTED);
+    }
+
+    /**
+     * Gets the whole decrypted vault as objects.
+     *
+     * @param bool $underscored
+     * @return KeyValuePair[]
+     * @throws SodiumException
+     */
+    public function getAllEncryptedObjects(bool $underscored = false): array
+    {
+        return $this->getAllObjects($underscored);
     }
 
     /**
@@ -213,6 +261,20 @@ class Vault
         }
 
         $this->vault[$key] = new KeyValuePair($key, $encryptedValue, $encryptedDescription);
+
+        return $this->vault;
+    }
+
+    /**
+     * Adds given KeyPair to vault.
+     *
+     * @param string $key
+     * @param KeyValuePair $keyPair
+     * @return KeyValuePair[]
+     */
+    public function addKeyValuePair(string $key, KeyValuePair $keyPair): array
+    {
+        $this->vault[$key] = $keyPair;
 
         return $this->vault;
     }

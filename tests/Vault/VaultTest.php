@@ -27,6 +27,7 @@
 namespace Test\Ixnode\PhpVault\Vault;
 
 use Ixnode\PhpVault\PHPVault;
+use Ixnode\PhpVault\Vault\Reader;
 use Ixnode\PhpVault\Vault\Vault;
 use Ixnode\PhpVault\Vault\KeyValuePair;
 use Exception;
@@ -538,7 +539,7 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString(false, true);
+        $actual = self::$core->getVault()->getWriter()->getEnvString(Reader::OUTPUT_TO_ENCRYPTED, true);
 
         /* Assert */
         $this->assertSame($expected, $actual);
@@ -568,7 +569,7 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString(true);
+        $actual = self::$core->getVault()->getWriter()->getEnvString(Reader::OUTPUT_TO_DECRYPTED);
 
         /* Assert */
         $this->assertSame($expected, $actual);
@@ -605,7 +606,7 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString(true, true);
+        $actual = self::$core->getVault()->getWriter()->getEnvString(Reader::OUTPUT_TO_DECRYPTED, true);
 
         /* Assert */
         $this->assertSame($expected, $actual);

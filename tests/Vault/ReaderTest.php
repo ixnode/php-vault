@@ -75,7 +75,7 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_DECRYPTED);
+        $actual = self::$core->getVault()->getReader()->convertStreamToKeyPairArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_DECRYPTED);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -100,7 +100,7 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, READER::OUTPUT_TO_ENCRYPTED);
+        $actual = self::$core->getVault()->getReader()->convertStreamToKeyPairArray($stream, Reader::LOAD_FROM_ENCRYPTED, READER::OUTPUT_TO_ENCRYPTED);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -125,7 +125,7 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, READER::LOAD_FROM_DECRYPTED, READER::OUTPUT_TO_ENCRYPTED, self::$nonce);
+        $actual = self::$core->getVault()->getReader()->convertStreamToKeyPairArray($stream, READER::LOAD_FROM_DECRYPTED, READER::OUTPUT_TO_ENCRYPTED, self::$nonce);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -150,7 +150,7 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $actual = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, READER::OUTPUT_TO_DECRYPTED);
+        $actual = self::$core->getVault()->getReader()->convertStreamToKeyPairArray($stream, Reader::LOAD_FROM_ENCRYPTED, READER::OUTPUT_TO_DECRYPTED);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -178,9 +178,9 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_DECRYPTED);
+        $array = self::$core->getVault()->getReader()->convertStreamToKeyPairArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_DECRYPTED);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAllObjects(true, true);
+        $actual = self::$core->getVault()->getAllObjects(true, Reader::OUTPUT_TO_DECRYPTED);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -206,9 +206,9 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
+        $array = self::$core->getVault()->getReader()->convertStreamToKeyPairArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAllObjects(true, false);
+        $actual = self::$core->getVault()->getAllObjects(true, Reader::OUTPUT_TO_ENCRYPTED);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -234,9 +234,9 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_ENCRYPTED, self::$nonce);
+        $array = self::$core->getVault()->getReader()->convertStreamToKeyPairArray($stream, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_ENCRYPTED, self::$nonce);
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAllObjects(true, false);
+        $actual = self::$core->getVault()->getAllObjects(true, Reader::OUTPUT_TO_ENCRYPTED);
 
         /* Assert */
         $this->assertEquals($expected, $actual);
@@ -262,10 +262,10 @@ final class ReaderTest extends VaultTestCase
 
         /* Act */
         self::$core->clearVault();
-        $array = self::$core->getVault()->getReader()->convertStreamToArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_DECRYPTED);
+        $array = self::$core->getVault()->getReader()->convertStreamToKeyPairArray($stream, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_DECRYPTED);
 
         self::$core->getVault()->getReader()->addArrayToVault($array, self::$nonce);
-        $actual = self::$core->getVault()->getAllObjects(true, true);
+        $actual = self::$core->getVault()->getAllObjects(true, Reader::OUTPUT_TO_DECRYPTED);
 
         /* Assert */
         $this->assertEquals($expected, $actual);

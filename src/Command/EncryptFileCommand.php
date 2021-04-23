@@ -72,9 +72,6 @@ class EncryptFileCommand extends BaseCommand
         $envFileDecrypted = $this->getArgument(self::ARGUMENT_ENV_FILE);
         $envFileEncrypted = sprintf('%s.enc', $envFileDecrypted);
 
-        /* Set options */
-        $displayDecrypted = false;
-
         /* Check if already encrypted */
         if (preg_match('~.+\.enc$~', $envFileDecrypted)) {
             $this->logger->getDisplay()->fileAlreadyEncrypted($envFileDecrypted);
@@ -96,9 +93,9 @@ class EncryptFileCommand extends BaseCommand
         }
 
         /* Load env decrypted file */
-        $core->getVault()->getReader()->addFileToVault($envFileDecrypted, Reader::LOAD_FROM_DECRYPTED);
+        $core->getVault()->getReader()->addFileToVault($envFileDecrypted, Reader::LOAD_FROM_DECRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
 
         /* Writes the vault */
-        $this->writeEnvVariables($core, $envFileEncrypted, $displayDecrypted);
+        $this->writeEnvVariables($core, $envFileEncrypted);
     }
 }

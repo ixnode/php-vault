@@ -34,6 +34,7 @@ use Composer\Autoload\ClassLoader;
 use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\Logger\Logger;
 use Exception;
+use Ixnode\PhpVault\Vault\Reader;
 use ReflectionClass;
 use SodiumException;
 
@@ -228,12 +229,12 @@ class BaseCommand extends Command
      *
      * @param PHPVault $core
      * @param string|null $envFile
-     * @param bool $displayDecrypted
+     * @param string $outputType
      * @param bool $ignoreExistingFile
      * @return void
      * @throws Exception
      */
-    protected function writeEnvVariables(PHPVault $core, ?string $envFile = null, bool $displayDecrypted = false, bool $ignoreExistingFile = false): void
+    protected function writeEnvVariables(PHPVault $core, ?string $envFile = null, string $outputType = Reader::OUTPUT_TO_ENCRYPTED, bool $ignoreExistingFile = false): void
     {
         /* Check if option was given to write a file. */
         if (!$envFile) {
@@ -247,7 +248,7 @@ class BaseCommand extends Command
         }
 
         /* Write file */
-        $envFileString = $core->getVault()->getWriter()->getEnvString($displayDecrypted, true);
+        $envFileString = $core->getVault()->getWriter()->getEnvString($outputType, true);
         file_put_contents($envFile, $envFileString);
 
         /* Check that the given env file was written. */

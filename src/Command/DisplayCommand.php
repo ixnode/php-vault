@@ -112,12 +112,16 @@ class DisplayCommand extends BaseCommand
         }
 
         /* Load env file */
-        $core->getVault()->getReader()->addFileToVault($envFile, $loadEncrypted ? Reader::LOAD_FROM_ENCRYPTED : Reader::LOAD_FROM_DECRYPTED);
+        $core->getVault()->getReader()->addFileToVault(
+            $envFile,
+            $loadEncrypted ? Reader::LOAD_FROM_ENCRYPTED : Reader::LOAD_FROM_DECRYPTED,
+            $displayDecrypted ? Reader::OUTPUT_TO_DECRYPTED : Reader::OUTPUT_TO_ENCRYPTED
+        );
 
         /* Displays the vault */
-        $this->logger->getDisplay()->envVariables($core, $displayDecrypted);
+        $this->logger->getDisplay()->envVariables($core, Reader::OUTPUT_TO_DECRYPTED);
 
         /* Writes the vault */
-        $this->writeEnvVariables($core, $writeEnv, $displayDecrypted);
+        $this->writeEnvVariables($core, $writeEnv, $displayDecrypted ? Reader::OUTPUT_TO_DECRYPTED : Reader::OUTPUT_TO_ENCRYPTED);
     }
 }

@@ -98,9 +98,9 @@ class DecryptFileCommand extends BaseCommand
         }
 
         /* Load env decrypted file */
-        $core->getVault()->getReader()->addFileToVault($envFileEncrypted, Reader::LOAD_FROM_ENCRYPTED);
+        $core->getVault()->getReader()->addFileToVault($envFileEncrypted, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_DECRYPTED);
 
         /* Writes the vault */
-        $this->writeEnvVariables($core, $envFileDecrypted, $displayDecrypted);
+        $this->writeEnvVariables($core, $envFileDecrypted, Reader::OUTPUT_TO_DECRYPTED);
     }
 }

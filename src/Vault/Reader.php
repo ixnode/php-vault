@@ -45,6 +45,8 @@ class Reader
 
     const OUTPUT_TO_DECRYPTED = 'SHOW_DECRYPTED';
 
+    const OUTPUT_TO_RAW = 'SHOW_RAW';
+
     /**
      * Writer constructor.
      *
@@ -65,7 +67,7 @@ class Reader
      * @return KeyValuePair[]
      * @throws SodiumException
      */
-    public function convertStreamToArray(string $stream, string $loadType = self::LOAD_FROM_ENCRYPTED, string $outputType = self::OUTPUT_TO_ENCRYPTED, string $nonce = null): array
+    public function convertStreamToKeyPairArray(string $stream, string $loadType = self::LOAD_FROM_ENCRYPTED, string $outputType = self::OUTPUT_TO_ENCRYPTED, string $nonce = null): array
     {
         $lines = explode("\n", $stream);
         $return = array();
@@ -146,7 +148,7 @@ class Reader
     }
 
     /**
-     * Adds given array to vault.
+     * Adds given array to vault (old).
      *
      * @param KeyValuePair[] $array
      * @param string|null $nonce
@@ -165,6 +167,19 @@ class Reader
     }
 
     /**
+     * Adds given key pair array to vault.
+     *
+     * @param KeyValuePair[] $array
+     * @return void
+     */
+    public function addKeyValuePairArrayToVault(array $array): void
+    {
+        foreach ($array as $name => $keyPair) {
+            $this->vault->addKeyValuePair($name, $keyPair);
+        }
+    }
+
+    /**
      * Adds given stream to vault.
      *
      * @param string $stream
@@ -175,9 +190,7 @@ class Reader
      */
     public function addStreamToVault(string $stream, string $loadType = self::LOAD_FROM_ENCRYPTED, string $outputType = self::OUTPUT_TO_ENCRYPTED): void
     {
-        $array = $this->convertStreamToArray($stream, $loadType, Reader::OUTPUT_TO_ENCRYPTED);
-
-        $this->addArrayToVault($array, null);
+        $this->addKeyValuePairArrayToVault($this->convertStreamToKeyPairArray($stream, $loadType, $outputType));
     }
 
     /**
@@ -188,6 +201,7 @@ class Reader
      * @param string $outputType
      * @return void
      * @throws SodiumException
+     * @throws Exception
      */
     public function addFileToVault(string $file, string $loadType = self::LOAD_FROM_ENCRYPTED, string $outputType = self::OUTPUT_TO_ENCRYPTED): void
     {

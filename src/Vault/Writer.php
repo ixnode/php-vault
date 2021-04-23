@@ -27,6 +27,7 @@
 namespace Ixnode\PhpVault\Vault;
 
 use Exception;
+use SodiumException;
 
 class Writer
 {
@@ -92,27 +93,29 @@ class Writer
     /**
      * Returns the .env string of decrypted vault values.
      *
-     * @param bool $decrypted
+     * @param string $outputType
      * @param bool $withDescription
      * @return string
+     * @throws SodiumException
      * @throws Exception
      */
-    public function getEnvString(bool $decrypted = false, bool $withDescription = false): string
+    public function getEnvString(string $outputType = Reader::OUTPUT_TO_ENCRYPTED, bool $withDescription = false): string
     {
-        $data = $this->vault->getAllObjects(true, $decrypted);
+        $data = $this->vault->getAllObjects(true, $outputType);
 
         $envString = '';
+        $getDecrypted = $outputType === Reader::OUTPUT_TO_DECRYPTED;
 
         foreach ($data as $key => $vaultItem) {
             if (!empty($envString)) {
                 $envString .= $withDescription ? "\n\n" : "\n";
             }
 
-            if ($withDescription && $vaultItem->getDescription($decrypted) !== null) {
-                $envString .= sprintf(self::TEMPLATE_ENV_DESCRIPTION, $vaultItem->getDescription($decrypted))."\n";
+            if ($withDescription && $vaultItem->getDescription($getDecrypted) !== null) {
+                $envString .= sprintf(self::TEMPLATE_ENV_DESCRIPTION, $vaultItem->getDescription($getDecrypted))."\n";
             }
 
-            $envString .= sprintf(self::TEMPLATE_ENV_VALUE, $key, $vaultItem->getValue($decrypted));
+            $envString .= sprintf(self::TEMPLATE_ENV_VALUE, $key, $vaultItem->getValue($getDecrypted));
         }
 
         return $envString;

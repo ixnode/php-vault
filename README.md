@@ -1,9 +1,9 @@
 # PHPVault
 
-PHPVault is a PHP library that can create, read, encrypt (`.env`) and decrypt (`.env.enc`) environment files (dotenv
-files). Within your project you can automatically load these encrypted environment variables from `.env.enc` into
-`getenv()`, `$_ENV` and `$_SERVER`. The corresponding key-value pairs within these dotenv files are encrypted and
-decrypted using an asymmetric encryption method
+PHPVault is a PHP library that can create, read, encrypt and decrypt environment files (so-called dotenv files). For
+example is `.env`, an encrypted file `.env.enc`, etc. Within your project you can automatically load these encrypted
+environment variables from `.env.enc` into `getenv()`, `$_ENV` and `$_SERVER`. The corresponding key-value pairs within
+these dotenv files are encrypted and decrypted using an asymmetric encryption method
 ([Public-key cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography)). Private keys are only available
 on productive systems for decrypting dotenv values. The public key, on the other hand, can be safely checked into
 the repository and is used everywhere to encrypt new values.

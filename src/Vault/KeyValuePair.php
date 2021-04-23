@@ -212,11 +212,17 @@ class KeyValuePair
      * Decrypts this class.
      *
      * @param Decrypter $decrypter
+     * @param bool $force
      * @return $this
      * @throws SodiumException
      */
-    public function decrypt(Decrypter $decrypter): KeyValuePair
+    public function decrypt(Decrypter $decrypter, bool $force = false): KeyValuePair
     {
+        /* Class is already decrypted */
+        if ($this->isDecrypted() && !$force) {
+            return $this;
+        }
+
         $this->setValueDecrypted(null);
         $this->setDescriptionDecrypted(null);
 
@@ -237,11 +243,17 @@ class KeyValuePair
      * Encrypts this class.
      *
      * @param Encrypter $encrypter
+     * @param bool $force
      * @return $this
      * @throws SodiumException
      */
-    public function encrypt(Encrypter $encrypter): KeyValuePair
+    public function encrypt(Encrypter $encrypter, bool $force = false): KeyValuePair
     {
+        /* Class is already encrypted */
+        if ($this->isEncrypted() && !$force) {
+            return $this;
+        }
+
         $this->setValueEncrypted(null);
         $this->setDescriptionEncrypted(null);
 
