@@ -100,25 +100,25 @@ class SetCommand extends BaseCommand
         }
 
         /* Initiates the PhpVault Core. Loads private or public key from $_SERVER if given. */
-        $core = new PHPVault();
+        $phpVaultCore = new PHPVault();
 
         /* Loads private or public key. */
-        if (!$this->loadPrivateOrPublicKey($core)) {
+        if (!$this->loadPrivateOrPublicKey($phpVaultCore)) {
             return;
         }
 
         /* Load env file */
         if (file_exists($envFile)) {
-            $core->getVault()->getReader()->addFileToVault($envFile, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
+            $phpVaultCore->getVault()->getReader()->addFileToVault($envFile, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_ENCRYPTED);
         }
 
         /* set new name value set */
-        $core->getVault()->add($name, $value, $description);
+        $phpVaultCore->getVault()->add($name, $value, $description);
 
         /* Displays the vault */
-        $this->logger->getDisplay()->envVariables($core, Reader::OUTPUT_TO_DECRYPTED);
+        $this->logger->getDisplay()->envVariables($phpVaultCore);
 
         /* Writes the vault */
-        $this->writeEnvVariables($core, $envFile, Reader::OUTPUT_TO_ENCRYPTED, true);
+        $this->writeEnvVariables($phpVaultCore, $envFile, Reader::OUTPUT_TO_ENCRYPTED, true);
     }
 }

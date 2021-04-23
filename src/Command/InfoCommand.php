@@ -65,30 +65,30 @@ class InfoCommand extends BaseCommand
     public function execute(): void
     {
         /* Initiate the PhpVault Core */
-        $core = new PHPVault();
+        $phpVaultCore = new PHPVault();
 
         /* Loads private or public key. */
-        if (!$this->loadPrivateOrPublicKey($core)) {
+        if (!$this->loadPrivateOrPublicKey($phpVaultCore)) {
             return;
         }
 
         /* No key was loaded */
-        if ($core->getKeyPair()->noKeyIsLoaded()) {
+        if ($phpVaultCore->getKeyPair()->noKeyIsLoaded()) {
             $this->logger->getDisplay()->noKeyLoaded();
             return;
         }
 
         /* Private key was loaded */
-        if ($core->getKeyPair()->getPrivateKey()) {
-            $this->logger->getDisplay()->privateKeyLoaded($core);
-            $this->logger->getDisplay()->keyLoadedFrom($core->getKeyPair());
+        if ($phpVaultCore->getKeyPair()->getPrivateKey()) {
+            $this->logger->getDisplay()->privateKeyLoaded($phpVaultCore);
+            $this->logger->getDisplay()->keyLoadedFrom($phpVaultCore->getKeyPair());
             return;
         }
 
         /* Private key was loaded */
-        if ($core->getKeyPair()->getPublicKey()) {
-            $this->logger->getDisplay()->publicKeyLoaded($core);
-            $this->logger->getDisplay()->keyLoadedFrom($core->getKeyPair());
+        if ($phpVaultCore->getKeyPair()->getPublicKey()) {
+            $this->logger->getDisplay()->publicKeyLoaded($phpVaultCore);
+            $this->logger->getDisplay()->keyLoadedFrom($phpVaultCore->getKeyPair());
             return;
         }
     }

@@ -105,7 +105,7 @@ TEXT;
         $expected = [];
 
         /* Act */
-        $vault = self::$core->getVault()->getAllValues();
+        $vault = self::$core->getVault()->getAllValuesFromVault();
 
         /* Assert */
         $this->assertSame($expected, $vault);
@@ -130,7 +130,7 @@ TEXT;
 
         /* Act */
         self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueEncrypted = self::$core->getVault()->getValue($name);
+        $vaultValueEncrypted = self::$core->getVault()->getKeyValuePairRaw($name)->getValueEncrypted();
 
         /* Assert */
         $this->assertSame($expected, $vaultValueEncrypted);
@@ -154,12 +154,14 @@ TEXT;
         $expected = new KeyValuePair(
             $name,
             $data->getValueEncrypted(),
-            $data->getDescriptionEncrypted()
+            $data->getDescriptionEncrypted(),
+            $data->getValueDecrypted(),
+            $data->getDescriptionDecrypted()
         );
 
         /* Act */
         self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueEncrypted = self::$core->getVault()->getObject($name);
+        $vaultValueEncrypted = self::$core->getVault()->getKeyValuePairDecrypted($name);
 
         /* Assert */
         $this->assertEquals($expected, $vaultValueEncrypted);
@@ -185,7 +187,7 @@ TEXT;
 
         /* Act */
         self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValue = self::$core->getVault()->getValue($name);
+        $vaultValue = self::$core->getVault()->getKeyValuePairRaw($name)->getValueEncrypted();
         $vaultValueDecrypted = self::$core->getDecrypter()->decrypt($vaultValue);
 
         /* Assert */
@@ -219,7 +221,7 @@ TEXT;
 
         /* Act */
         self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueDecrypted = self::$core->getVault()->getDecryptedObject($name);
+        $vaultValueDecrypted = self::$core->getVault()->getKeyValuePairDecrypted($name);
 
         /* Assert */
         $this->assertEquals($expected, $vaultValueDecrypted);
@@ -244,7 +246,7 @@ TEXT;
 
         /* Act */
         self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueDecrypted = self::$core->getVault()->getDecryptedValue($name);
+        $vaultValueDecrypted = self::$core->getVault()->getKeyValuePairRaw($name)->getValueDecrypted();
 
         /* Assert */
         $this->assertSame($expected, $vaultValueDecrypted);
@@ -269,7 +271,7 @@ TEXT;
 
         /* Act */
         self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueDecrypted = self::$core->getVault()->getDecryptedValue($name);
+        $vaultValueDecrypted = self::$core->getVault()->getKeyValuePairRaw($name)->getValueDecrypted();
 
         /* Assert */
         $this->assertSame($expected, $vaultValueDecrypted);
@@ -297,7 +299,7 @@ TEXT;
         );
 
         /* Act */
-        $vault = self::$core->getVault()->getAllValues();
+        $vault = self::$core->getVault()->getAllValuesFromVault();
 
         /* Assert */
         $this->assertSame($expected, $vault);
@@ -325,7 +327,7 @@ TEXT;
         );
 
         /* Act */
-        $vault = self::$core->getVault()->getAllDecryptedValues();
+        $vault = self::$core->getVault()->getAllValuesFromVaultDecrypted();
 
         /* Assert */
         $this->assertSame($expected, $vault);
@@ -353,7 +355,7 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getAllDecryptedValues(true);
+        $actual = self::$core->getVault()->getAllValuesFromVaultDecrypted(true);
 
         /* Assert */
         $this->assertSame($expected, $actual);

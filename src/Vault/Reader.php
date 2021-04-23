@@ -26,6 +26,7 @@
 
 namespace Ixnode\PhpVault\Vault;
 
+use Ixnode\PhpVault\Tools\Converter;
 use SodiumException;
 use Exception;
 
@@ -44,8 +45,6 @@ class Reader
     const OUTPUT_TO_ENCRYPTED = 'SHOW_ENCRYPTED';
 
     const OUTPUT_TO_DECRYPTED = 'SHOW_DECRYPTED';
-
-    const OUTPUT_TO_RAW = 'SHOW_RAW';
 
     /**
      * Writer constructor.
@@ -66,6 +65,7 @@ class Reader
      * @param string|null $nonce
      * @return KeyValuePair[]
      * @throws SodiumException
+     * @throws Exception
      */
     public function convertStreamToKeyPairArray(string $stream, string $loadType = self::LOAD_FROM_ENCRYPTED, string $outputType = self::OUTPUT_TO_ENCRYPTED, string $nonce = null): array
     {
@@ -99,39 +99,41 @@ class Reader
                 $current->name = $matches[1];
                 $current->value = $matches[2];
 
+                $underscoredKey = Converter::getUnderscoredKey($current->name);
+
                 /* add current array to return array */
                 if ($loadType === self::LOAD_FROM_DECRYPTED) {
                     /* decrypted */
                     if ($outputType === self::OUTPUT_TO_DECRYPTED) {
-                        $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
-                            $this->vault->getUnderscoredKey($current->name),
+                        $return[$underscoredKey] = new KeyValuePair(
+                            $underscoredKey,
                             null,
                             null,
-                            $this->vault->convertString($current->value, false, false),
-                            $this->vault->convertString($current->description, false, false)
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, false, false),
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, false, false)
                         );
                     /* encrypted */
                     } else {
-                        $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
-                            $this->vault->getUnderscoredKey($current->name),
-                            $this->vault->convertString($current->value, false, true, $nonce),
-                            $this->vault->convertString($current->description, false, true, $nonce)
+                        $return[$underscoredKey] = new KeyValuePair(
+                            $underscoredKey,
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, false, true, $nonce),
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, false, true, $nonce)
                         );
                     }
                 } else {
                     if ($outputType === self::OUTPUT_TO_DECRYPTED) {
-                        $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
-                            $this->vault->getUnderscoredKey($current->name),
+                        $return[$underscoredKey] = new KeyValuePair(
+                            $underscoredKey,
                             null,
                             null,
-                            $this->vault->convertString($current->value, true, false),
-                            $this->vault->convertString($current->description, true, false)
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, true, false),
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, true, false)
                         );
                     } else {
-                        $return[$this->vault->getUnderscoredKey($current->name)] = new KeyValuePair(
-                            $this->vault->getUnderscoredKey($current->name),
-                            $this->vault->convertString($current->value, false, false),
-                            $this->vault->convertString($current->description, false, false)
+                        $return[$underscoredKey] = new KeyValuePair(
+                            $underscoredKey,
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, false, false),
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, false, false)
                         );
                     }
                 }

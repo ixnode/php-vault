@@ -185,12 +185,12 @@ class BaseCommand extends Command
     /**
      *
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      * @return bool
      * @throws SodiumException
      * @throws Exception
      */
-    protected function loadPrivateOrPublicKey(PHPVault $core): bool
+    protected function loadPrivateOrPublicKey(PHPVault $phpVaultCore): bool
     {
         $privateKey = $this->getOption(self::OPTION_PRIVATE_KEY, $this->getPrivateKeyPath(), true);
         $publicKey = $this->getOption(self::OPTION_PUBLIC_KEY, $this->getPublicKeyPath(), true);
@@ -204,7 +204,7 @@ class BaseCommand extends Command
                 return false;
             }
 
-            $core->getKeyPair()->loadPublicKeyFromFile($publicKey);
+            $phpVaultCore->getKeyPair()->loadPublicKeyFromFile($publicKey);
             return true;
         }
 
@@ -217,7 +217,7 @@ class BaseCommand extends Command
                 return false;
             }
 
-            $core->getKeyPair()->loadPrivateKeyFromFile($privateKey);
+            $phpVaultCore->getKeyPair()->loadPrivateKeyFromFile($privateKey);
             return true;
         }
 
@@ -227,14 +227,14 @@ class BaseCommand extends Command
     /**
      * Writes all environment variables from vault to file.
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      * @param string|null $envFile
      * @param string $outputType
      * @param bool $ignoreExistingFile
      * @return void
      * @throws Exception
      */
-    protected function writeEnvVariables(PHPVault $core, ?string $envFile = null, string $outputType = Reader::OUTPUT_TO_ENCRYPTED, bool $ignoreExistingFile = false): void
+    protected function writeEnvVariables(PHPVault $phpVaultCore, ?string $envFile = null, string $outputType = Reader::OUTPUT_TO_ENCRYPTED, bool $ignoreExistingFile = false): void
     {
         /* Check if option was given to write a file. */
         if (!$envFile) {
@@ -248,7 +248,7 @@ class BaseCommand extends Command
         }
 
         /* Write file */
-        $envFileString = $core->getVault()->getWriter()->getEnvString($outputType, true);
+        $envFileString = $phpVaultCore->getVault()->getWriter()->getEnvString($outputType, true);
         file_put_contents($envFile, $envFileString);
 
         /* Check that the given env file was written. */

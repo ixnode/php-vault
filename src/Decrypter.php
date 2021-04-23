@@ -31,16 +31,16 @@ use Exception;
 
 class Decrypter
 {
-    protected PHPVault $core;
+    protected PHPVault $phpVaultCore;
 
     /**
      * Decrypter constructor.
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      */
-    public function __construct(PHPVault $core)
+    public function __construct(PHPVault $phpVaultCore)
     {
-        $this->core = $core;
+        $this->phpVaultCore = $phpVaultCore;
     }
 
     /**
@@ -54,12 +54,12 @@ class Decrypter
     public function decrypt(string $data): ?string
     {
         /* Check mode */
-        if ($this->core->getMode() < Mode::MODE_DECRYPT) {
+        if ($this->phpVaultCore->getMode() < Mode::MODE_DECRYPT) {
             throw new Exception('Decrypter::decrypt: The Decrypter class is not able to decrypt strings. Please load a private key to do this.');
         }
 
         $key = sodium_crypto_box_keypair_from_secretkey_and_publickey(
-            base64_decode($this->core->getKeyPair()->getPrivateKey()),
+            base64_decode($this->phpVaultCore->getKeyPair()->getPrivateKey()),
             base64_decode(PHPVault::CORE_PUBLIC_KEY)
         );
 

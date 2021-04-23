@@ -104,24 +104,24 @@ class DisplayCommand extends BaseCommand
         }
 
         /* Initiates the PhpVault Core. Loads private or public key from $_SERVER if given. */
-        $core = new PHPVault(false);
+        $phpVaultCore = new PHPVault(false);
 
         /* Loads private or public key. */
-        if (!$this->loadPrivateOrPublicKey($core)) {
+        if (!$this->loadPrivateOrPublicKey($phpVaultCore)) {
             return;
         }
 
         /* Load env file */
-        $core->getVault()->getReader()->addFileToVault(
+        $phpVaultCore->getVault()->getReader()->addFileToVault(
             $envFile,
             $loadEncrypted ? Reader::LOAD_FROM_ENCRYPTED : Reader::LOAD_FROM_DECRYPTED,
             $displayDecrypted ? Reader::OUTPUT_TO_DECRYPTED : Reader::OUTPUT_TO_ENCRYPTED
         );
 
         /* Displays the vault */
-        $this->logger->getDisplay()->envVariables($core, Reader::OUTPUT_TO_DECRYPTED);
+        $this->logger->getDisplay()->envVariables($phpVaultCore, $displayDecrypted ? Reader::OUTPUT_TO_DECRYPTED : Reader::OUTPUT_TO_ENCRYPTED);
 
         /* Writes the vault */
-        $this->writeEnvVariables($core, $writeEnv, $displayDecrypted ? Reader::OUTPUT_TO_DECRYPTED : Reader::OUTPUT_TO_ENCRYPTED);
+        $this->writeEnvVariables($phpVaultCore, $writeEnv, $displayDecrypted ? Reader::OUTPUT_TO_DECRYPTED : Reader::OUTPUT_TO_ENCRYPTED);
     }
 }

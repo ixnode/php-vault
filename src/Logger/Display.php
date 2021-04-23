@@ -59,25 +59,25 @@ class Display
     /**
      * Indicates that a private key was loaded.
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      * @return void
      * @throws Exception
      */
-    public function privateKeyLoaded(PHPVault $core): void
+    public function privateKeyLoaded(PHPVault $phpVaultCore): void
     {
-        $this->logger->info('Private key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPrivateKey())), true, true);
+        $this->logger->info('Private key was loaded ({bytes} bytes).', array('bytes' => strlen($phpVaultCore->getKeyPair()->getPrivateKey())), true, true);
     }
 
     /**
      * Indicates that a public key was loaded.
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      * @return void
      * @throws Exception
      */
-    public function publicKeyLoaded(PHPVault $core): void
+    public function publicKeyLoaded(PHPVault $phpVaultCore): void
     {
-        $this->logger->info('Public key was loaded ({bytes} bytes).', array('bytes' => strlen($core->getKeyPair()->getPublicKey())), true, true);
+        $this->logger->info('Public key was loaded ({bytes} bytes).', array('bytes' => strlen($phpVaultCore->getKeyPair()->getPublicKey())), true, true);
     }
 
     /**
@@ -203,31 +203,31 @@ class Display
     /**
      * Displays the private and public keys.
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      * @return void
      */
-    public function privateAndPublicKeys(PHPVault $core): void
+    public function privateAndPublicKeys(PHPVault $phpVaultCore): void
     {
         $this->logger->getWriter()->table([
-            ['name' => 'private key', 'value' => $core->getKeyPair()->getPrivateKey()],
-            ['name' => 'public key', 'value' => $core->getKeyPair()->getPublicKey()],
+            ['name' => 'private key', 'value' => $phpVaultCore->getKeyPair()->getPrivateKey()],
+            ['name' => 'public key', 'value' => $phpVaultCore->getKeyPair()->getPublicKey()],
         ]);
     }
 
     /**
      * Displays all environment variables from given file.
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      * @param string $outputType
      * @return void
      * @throws Exception
      */
-    public function envVariables(PHPVault $core, string $outputType = Reader::OUTPUT_TO_ENCRYPTED): void
+    public function envVariables(PHPVault $phpVaultCore, string $outputType = Reader::OUTPUT_TO_ENCRYPTED): void
     {
         $table = array();
 
         /* Collect all environment variables. */
-        foreach ($core->getVault()->getAllObjectsRaw(true) as $key => $data) {
+        foreach ($phpVaultCore->getVault()->getAllKeyValuePairsRaw(true) as $key => $data) {
             $table[] = [
                 'key' => $key,
                 'value' => $outputType === Reader::OUTPUT_TO_DECRYPTED ? $data->getValueDecrypted() : $data->getValueEncrypted(),

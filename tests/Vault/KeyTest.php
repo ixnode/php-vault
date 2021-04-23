@@ -28,6 +28,7 @@ namespace Test\Ixnode\PhpVault\Vault;
 
 use PHPUnit\Framework\TestCase;
 use Ixnode\PhpVault\PHPVault;
+use Ixnode\PhpVault\Tools\Converter;
 
 final class KeyTest extends TestCase
 {
@@ -55,7 +56,7 @@ final class KeyTest extends TestCase
         /* comes from @dataProvider */
 
         /* Act */
-        $actual = self::$core->getVault()->getUnderscoredKey($key);
+        $actual = Converter::getUnderscoredKey($key);
 
         /* Assert */
         $this->assertIsString($key);

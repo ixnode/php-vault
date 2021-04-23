@@ -31,7 +31,7 @@ use SodiumException;
 
 class KeyPair
 {
-    private PHPVault $core;
+    private PHPVault $phpVaultCore;
 
     private ?string $privateKey = null;
 
@@ -58,15 +58,15 @@ class KeyPair
     /**
      * KeyPair constructor.
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      * @param bool $forceCreateNew
      * @param string|null $privateKey
      * @param string|null $publicKey
      * @throws SodiumException
      */
-    public function __construct(PHPVault $core, bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null)
+    public function __construct(PHPVault $phpVaultCore, bool $forceCreateNew = false, string $privateKey = null, string $publicKey = null)
     {
-        $this->core = $core;
+        $this->phpVaultCore = $phpVaultCore;
 
         /* Renew key if given. */
         $this->init($forceCreateNew, $privateKey, $publicKey);
@@ -82,7 +82,7 @@ class KeyPair
     {
         $this->setPrivateKey(null);
         $this->setPublicKey(null);
-        $this->core->setMode(Mode::MODE_NONE);
+        $this->phpVaultCore->setMode(Mode::MODE_NONE);
         $this->loadedFromSource = null;
         $this->loadedFromPath = null;
         $this->loadedFromEnvironment = null;
@@ -105,7 +105,7 @@ class KeyPair
         $this->setPublicKey($keyPair['public']);
 
         /* Set mode, loaded from source and environment */
-        $this->core->setMode($mode);
+        $this->phpVaultCore->setMode($mode);
         $this->loadedFromSource = $loadedFromSource;
         $this->loadedFromEnvironment = $loadedFromEnvironment;
     }

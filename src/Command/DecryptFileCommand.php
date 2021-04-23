@@ -90,17 +90,17 @@ class DecryptFileCommand extends BaseCommand
         }
 
         /* Initiate the PhpVault Core */
-        $core = new PHPVault();
+        $phpVaultCore = new PHPVault();
 
         /* Loads private or public key. */
-        if (!$this->loadPrivateOrPublicKey($core)) {
+        if (!$this->loadPrivateOrPublicKey($phpVaultCore)) {
             return;
         }
 
         /* Load env decrypted file */
-        $core->getVault()->getReader()->addFileToVault($envFileEncrypted, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_DECRYPTED);
+        $phpVaultCore->getVault()->getReader()->addFileToVault($envFileEncrypted, Reader::LOAD_FROM_ENCRYPTED, Reader::OUTPUT_TO_DECRYPTED);
 
         /* Writes the vault */
-        $this->writeEnvVariables($core, $envFileDecrypted, Reader::OUTPUT_TO_DECRYPTED);
+        $this->writeEnvVariables($phpVaultCore, $envFileDecrypted, Reader::OUTPUT_TO_DECRYPTED);
     }
 }

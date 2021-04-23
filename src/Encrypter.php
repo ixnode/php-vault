@@ -33,16 +33,16 @@ class Encrypter
 {
     const PATTERN_ALREADY_DECRYPTED = '~^Wy[IJ][A-Za-z0-9]+[=]*$~';
 
-    protected PHPVault $core;
+    protected PHPVault $phpVaultCore;
 
     /**
      * Decrypter constructor.
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      */
-    public function __construct(PHPVault $core)
+    public function __construct(PHPVault $phpVaultCore)
     {
-        $this->core = $core;
+        $this->phpVaultCore = $phpVaultCore;
     }
 
     /**
@@ -57,7 +57,7 @@ class Encrypter
     public function encrypt(string $message, string $nonce = null): ?string
     {
         /* Check mode */
-        if ($this->core->getMode() < Mode::MODE_ENCRYPT) {
+        if ($this->phpVaultCore->getMode() < Mode::MODE_ENCRYPT) {
             throw new Exception('Encrypter::encrypt: The Encrypter class is not able to encrypt strings. Please load at least a public key to do this.');
         }
 
@@ -74,7 +74,7 @@ class Encrypter
 
         $key = sodium_crypto_box_keypair_from_secretkey_and_publickey(
             base64_decode(PHPVault::CORE_PRIVATE_KEY),
-            base64_decode($this->core->getKeyPair()->getPublicKey())
+            base64_decode($this->phpVaultCore->getKeyPair()->getPublicKey())
         );
 
         $dataArray = array(

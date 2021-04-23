@@ -1,9 +1,9 @@
 # PHPVault
 
 PHPVault is a PHP library that can create, read, encrypt and decrypt environment files (so-called dotenv files). For
-example is `.env`, an encrypted file `.env.enc`, etc. Within your project you can automatically load these encrypted
-environment variables from `.env.enc` into `getenv()`, `$_ENV` and `$_SERVER`. The corresponding key-value pairs within
-these dotenv files are encrypted and decrypted using an asymmetric encryption method
+example is `.env` a plain file, `.env.enc` an encrypted file, etc. Within your project you can automatically load these
+encrypted  environment variables from `.env.enc` into `getenv()`, `$_ENV` and `$_SERVER`. The corresponding key-value
+pairs within these dotenv files are encrypted and decrypted using an asymmetric encryption method
 ([Public-key cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography)). Private keys are only available
 on productive systems for decrypting dotenv values. The public key, on the other hand, can be safely checked into
 the repository and is used everywhere to encrypt new values.
@@ -89,10 +89,10 @@ $ vendor/bin/php-vault set .env.enc DB_NAME secret.name --public-key
 ### Display the environment file
 
 * The contents displayed are encrypted.
-* Use public key (`--public-key` → read from `.keys/public.key`).
+* Do not need any key.
 
 ```bash
-$ vendor/bin/php-vault display .env.enc --load-encrypted --public-key
+$ vendor/bin/php-vault display .env.enc --load-encrypted
 ...
 ```
 
@@ -131,7 +131,7 @@ The file was successfully written to ".env".
 
 ### Display the decrypted file without encryption
 
-* Do not need any key
+* Do not need any key.
 
 ```bash
 $ vendor/bin/php-vault display .env --display-decrypted

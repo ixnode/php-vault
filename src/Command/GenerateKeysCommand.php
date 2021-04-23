@@ -77,28 +77,28 @@ class GenerateKeysCommand extends BaseCommand
     public function execute(): void
     {
         /* Initiate the PhpVault Core */
-        $core = new PHPVault(true);
+        $phpVaultCore = new PHPVault(true);
 
         /* Load options */
         $persist = $this->getOption(self::OPTION_PERSIST);
 
         /* Display the private and public key */
         if (!$persist) {
-            $this->logger->getDisplay()->privateAndPublicKeys($core);
+            $this->logger->getDisplay()->privateAndPublicKeys($phpVaultCore);
         }
 
         /* Persist keys */
-        $this->persistKeys($core);
+        $this->persistKeys($phpVaultCore);
     }
 
     /**
      * Persist keys.
      *
-     * @param PHPVault $core
+     * @param PHPVault $phpVaultCore
      * @return void
      * @throws Exception
      */
-    protected function persistKeys(PHPVault $core): void
+    protected function persistKeys(PHPVault $phpVaultCore): void
     {
         /* Check if persist option exists. */
         if (!$this->getOption(self::OPTION_PERSIST)) {
@@ -134,8 +134,8 @@ CONTENT;
         $gitignoreAbsolute = sprintf('%s/%s', $pathKeys, $gitignore);
 
         /* Write files. */
-        file_put_contents($pathPrivateKey, $core->getKeyPair()->getPrivateKey());
-        file_put_contents($pathPublicKey, $core->getKeyPair()->getPublicKey());
+        file_put_contents($pathPrivateKey, $phpVaultCore->getKeyPair()->getPrivateKey());
+        file_put_contents($pathPublicKey, $phpVaultCore->getKeyPair()->getPublicKey());
         file_put_contents($gitignoreAbsolute, $gitignoreContent);
 
         /* Check files. */
