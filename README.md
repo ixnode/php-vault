@@ -174,10 +174,10 @@ $phpVault->loadPrivateKeyFromFile($pathToPrivateKey);
 $phpVault->importEncryptedEnvFile($pathToEncryptedEnv);
 
 /* Usage */
-$dbUser = getenv('DB_USER');
-$dbPass = getenv('DB_PASS');
-$dbHost = getenv('DB_HOST');
-$dbName = getenv('DB_NAME');
+$dbUser = getenv('PHPVAULT_DB_USER');
+$dbPass = getenv('PHPVAULT_DB_PASS');
+$dbHost = getenv('PHPVAULT_DB_HOST');
+$dbName = getenv('PHPVAULT_DB_NAME');
 ```
 
 ### Load the private key from the server environment variable `PRIVATE_KEY`
@@ -201,10 +201,10 @@ $phpVault = new PHPVault();
 $phpVault->importEncryptedEnvFile($pathToEncryptedEnv);
 
 /* Usage */
-$dbUser = getenv('DB_USER');
-$dbPass = getenv('DB_PASS');
-$dbHost = getenv('DB_HOST');
-$dbName = getenv('DB_NAME');
+$dbUser = getenv('PHPVAULT_DB_USER');
+$dbPass = getenv('PHPVAULT_DB_PASS');
+$dbHost = getenv('PHPVAULT_DB_HOST');
+$dbName = getenv('PHPVAULT_DB_NAME');
 ```
 
 ## Run tests

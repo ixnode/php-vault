@@ -35,6 +35,8 @@ class Writer
 
     const TEMPLATE_ENV_DESCRIPTION = '# %s';
 
+    const ENV_PREFIX = 'PHPVAULT_';
+
     protected Vault $vault;
 
     /**
@@ -56,7 +58,7 @@ class Writer
     public function saveToEnv(): array
     {
         foreach ($this->vault->getAllValuesFromVaultDecrypted(true) as $key => $value) {
-            $_ENV[$key] = $value;
+            $_ENV[$this->getPhpVaultEnvironmentKey($key)] = $value;
         }
 
         return $_ENV;
@@ -71,7 +73,7 @@ class Writer
     public function saveToServer(): array
     {
         foreach ($this->vault->getAllValuesFromVaultDecrypted(true) as $key => $value) {
-            $_SERVER[$key] = $value;
+            $_SERVER[$this->getPhpVaultEnvironmentKey($key)] = $value;
         }
 
         return $_SERVER;
@@ -86,8 +88,40 @@ class Writer
     public function putEnv(): void
     {
         foreach ($this->vault->getAllValuesFromVaultDecrypted(true) as $key => $value) {
-            putenv(sprintf('%s=%s', $key, $value));
+            putenv(sprintf('%s=%s', $this->getPhpVaultEnvironmentKey($key), $value));
         }
+    }
+
+    /**
+     * Returns the PHPVault key name used by system environment.
+     *
+     * @param string $key
+     * @return string
+     */
+    public function getPhpVaultEnvironmentKey(string $key): string
+    {
+        if (preg_match(sprintf('~^%s~', self::ENV_PREFIX), $key)) {
+            return $key;
+        }
+
+        return sprintf('%s%s', self::ENV_PREFIX, $key);
+    }
+
+    /**
+     * Filters the given array by own used and created PHPVAULT_ elements. Do not return system variables.
+     *
+     * @param string[] $array
+     * @return string[]
+     */
+    public function filterArrayByNonePhpVaultEnvironmentKeys(array $array): array
+    {
+        return array_filter(
+            $array,
+            function (string $key) {
+                return (bool)preg_match(sprintf('~^%s~', self::ENV_PREFIX), $key);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /**

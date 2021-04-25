@@ -51,4 +51,37 @@ final class WriterTest extends VaultTestCase
         $this->assertTrue(method_exists(Vault::class, 'getWriter'), 'Class Vault does not have method getWriter.');
         $this->assertInstanceOf($expected, self::$core->getVault()->getWriter());
     }
+
+    /**
+     * Tests the key_writer.
+     *
+     * @param string $given
+     * @param string $expected
+     * @dataProvider dataProvider
+     */
+    public function testWriterKeyGenerator(string $given, string $expected): void
+    {
+        /* Arrange */
+        /* Given from dataProvider */
+
+        /* Act */
+        $actual = self::$core->getVault()->getWriter()->getPhpVaultEnvironmentKey($given);
+
+        /* Assert */
+        $this->assertSame($expected, $actual);
+    }
+
+    /**
+     * Returns an data provider.
+     *
+     * @return array[]
+     */
+    public function dataProvider(): array
+    {
+        return [
+            ['test', sprintf('%s%s', Writer::ENV_PREFIX, 'test')],
+            ['DB_VALUE', sprintf('%s%s', Writer::ENV_PREFIX, 'DB_VALUE')],
+            [sprintf('%s%s', Writer::ENV_PREFIX, 'DB_VALUE'), sprintf('%s%s', Writer::ENV_PREFIX, 'DB_VALUE')],
+        ];
+    }
 }

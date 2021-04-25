@@ -377,7 +377,7 @@ TEXT;
         $expected = array();
 
         /* Act */
-        $actual = $_ENV;
+        $actual = self::$core->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_ENV);
 
         /* Assert */
         $this->assertSame($expected, $actual, '$_ENV seems not to be empty.');
@@ -395,13 +395,14 @@ TEXT;
     public function testSaveEnvArray(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
+        $writer = self::$core->getVault()->getWriter();
         $expected = array(
-            'NAME_WITHOUT_ENCRYPTION' => $data->getValueDecrypted(),
-            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_ENCRYPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_ENCRYPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_AUTO_ENCRYPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
         );
 
         /* Act */
@@ -424,13 +425,14 @@ TEXT;
     public function testSaveServerArray(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
+        $writer = self::$core->getVault()->getWriter();
         $expected = array(
-            'NAME_WITHOUT_ENCRYPTION' => $data->getValueDecrypted(),
-            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_ENCRYPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_ENCRYPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_AUTO_ENCRYPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
         );
 
         /* Act */
@@ -460,14 +462,15 @@ TEXT;
         $name = 'name-new';
         $value = $data2->getValueDecrypted();
         $description = $data2->getDescriptionDecrypted();
+        $writer = self::$core->getVault()->getWriter();
         $expected = array(
-            'NAME_WITHOUT_ENCRYPTION' => $data->getValueDecrypted(),
-            'NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_ENCRYPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_AUTO_ENCRYPTION' => $data->getValueDecrypted(),
-            'NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION' => $data->getValueDecrypted(),
-            'NAME_NEW' => $data2->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_ENCRYPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_AUTO_ENCRYPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_WITH_AUTO_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
+            $writer->getPhpVaultEnvironmentKey('NAME_NEW') => $data2->getValueDecrypted(),
         );
 
         /* Act */
