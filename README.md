@@ -1,9 +1,9 @@
 # PHPVault
 
 [![CI workflow](https://github.com/ixnode/php-vault/actions/workflows/ci-workflow.yml/badge.svg?branch=master)](https://github.com/ixnode/php-vault/actions/workflows/ci-workflow.yml)
+[![PHP](https://img.shields.io/badge/php-7.4,%208.0-777bb3.svg?logo=php&logoColor=white&labelColor=555555&style=flat)](https://www.php.net/supported-versions.php)
 [![LICENSE](https://img.shields.io/badge/license-MIT-428f7e.svg?logo=open%20source%20initiative&logoColor=white&labelColor=555555&style=flat)](https://github.com/ixnode/php-vault/blob/master/LICENSE)
-[![LICENSE](https://img.shields.io/badge/PHPStan-level%208-brightgreen.svg?style=flat)](https://phpstan.org/user-guide/rule-levels)
-[![LICENSE](https://img.shields.io/badge/php-7.4,%208.0-777bb3.svg?logo=php&logoColor=white&labelColor=555555&style=flat)](https://www.php.net/supported-versions.php)
+[![PHPStan](https://img.shields.io/badge/PHPStan-level%208-brightgreen.svg?style=flat)](https://phpstan.org/user-guide/rule-levels)
 
 PHPVault is a PHP library that can create, read, encrypt and decrypt environment files (so-called dotenv files). For
 example is `.env` a plain file, `.env.enc` an encrypted file, etc. Within your project you can automatically load these
