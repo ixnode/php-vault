@@ -1,0 +1,44 @@
+name: CI workflow
+
+# Configure GitHub branch hooks
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+# Configure jobs
+jobs:
+  build:
+    name: composer run ci
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04]
+        php-versions: ['7.4', '8.0']
+    steps:
+      # git clone
+      - name: Checkout project
+        uses: actions/checkout@v2
+
+      # composer install
+      - uses: php-actions/composer@v5
+        with:
+          php_version: ${{ matrix.php-versions }}
+          version: 2
+
+      # composer run ci
+      - uses: php-actions/composer@v5
+        with:
+          php_version: ${{ matrix.php-versions }}
+          version: 2
+          command: run ci
