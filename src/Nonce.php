@@ -30,7 +30,7 @@ use Exception;
 
 class Nonce
 {
-    private ?string $nonce;
+    private string $nonce;
 
     /**
      * Nonce constructor.

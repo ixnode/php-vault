@@ -188,9 +188,11 @@ TEXT;
         /* Act */
         self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
         $vaultValue = self::$core->getVault()->getKeyValuePairRaw($name)->getValueEncrypted();
-        $vaultValueDecrypted = self::$core->getDecrypter()->decrypt($vaultValue);
+        $vaultValueDecrypted = $vaultValue === null ? null : self::$core->getDecrypter()->decrypt($vaultValue);
 
         /* Assert */
+        $this->assertIsString($vaultValue);
+        $this->assertIsString($vaultValueDecrypted);
         $this->assertSame($expected, $vaultValueDecrypted);
     }
 

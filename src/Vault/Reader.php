@@ -46,6 +46,12 @@ class Reader
 
     const OUTPUT_TO_DECRYPTED = 'SHOW_DECRYPTED';
 
+    const ACTION_ENCRYPT = 'ENCRYPT';
+
+    const ACTION_DECRYPT = 'DECRYPT';
+
+    const ACTION_NONE = 'NONE';
+
     /**
      * Writer constructor.
      *
@@ -109,15 +115,15 @@ class Reader
                             $underscoredKey,
                             null,
                             null,
-                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, false, false),
-                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, false, false)
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value),
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description)
                         );
                     /* encrypted */
                     } else {
                         $return[$underscoredKey] = new KeyValuePair(
                             $underscoredKey,
-                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, false, true, $nonce),
-                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, false, true, $nonce)
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, Reader::ACTION_ENCRYPT, $nonce),
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, Reader::ACTION_ENCRYPT, $nonce)
                         );
                     }
                 } else {
@@ -126,14 +132,14 @@ class Reader
                             $underscoredKey,
                             null,
                             null,
-                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, true, false),
-                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, true, false)
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, Reader::ACTION_DECRYPT),
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, Reader::ACTION_DECRYPT)
                         );
                     } else {
                         $return[$underscoredKey] = new KeyValuePair(
                             $underscoredKey,
-                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value, false, false),
-                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description, false, false)
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->value),
+                            Converter::convertString($this->vault->getPhpVaultCore(), $current->description)
                         );
                     }
                 }

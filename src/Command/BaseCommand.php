@@ -31,12 +31,14 @@ use Ahc\Cli\Input\Command;
 use Ahc\Cli\IO\Interactor;
 use Ahc\Cli\Output\Writer;
 use Composer\Autoload\ClassLoader;
+use Ixnode\PhpVault\Exception\NullException;
 use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\Logger\Logger;
 use Exception;
 use Ixnode\PhpVault\Vault\Reader;
 use ReflectionClass;
 use SodiumException;
+use Ixnode\PhpVault\Tools\Converter;
 
 /**
  * Class BaseCommand
@@ -57,7 +59,7 @@ class BaseCommand extends Command
 
     protected Logger $logger;
 
-    protected string $root;
+    protected ?string $root;
 
     /**
      * BaseCommand constructor.
@@ -91,6 +93,7 @@ class BaseCommand extends Command
      * @param string|bool $default
      * @param bool $replaceWithDefaultIfTrue
      * @return mixed
+     * @throws Exception
      */
     protected function getOption(string $option, $default = null, bool $replaceWithDefaultIfTrue = false)
     {
@@ -111,6 +114,7 @@ class BaseCommand extends Command
      * @param string $argument
      * @param null $default
      * @return mixed
+     * @throws Exception
      */
     protected function getArgument(string $argument, $default = null)
     {
@@ -126,11 +130,12 @@ class BaseCommand extends Command
      *
      * @param string $value
      * @return string
+     * @throws NullException
      */
     protected function convertToCamelCase(string $value): string
     {
         /* Replace capitals to "-capital". */
-        $value = preg_replace('~([A-Z])~', '-$1', $value);
+        $value = Converter::preg_replace_string('~([A-Z])~', '-$1', $value);
 
         /* Split string by - */
         $array = explode('-', $value);
@@ -145,14 +150,15 @@ class BaseCommand extends Command
     /**
      * Returns the composer.json root path (project path).
      *
-     * @return string|null
+     * @return string
+     * @throws Exception
      */
-    public function getComposerJsonRootPath(): ?string
+    public function getComposerJsonRootPath(): string
     {
         $reflection = new ReflectionClass(ClassLoader::class);
 
         if ($reflection->getFileName() === false) {
-            return null;
+            throw new Exception('The file name of ClassLoader class was not found.');
         }
 
         return dirname($reflection->getFileName(), 3);
@@ -164,6 +170,7 @@ class BaseCommand extends Command
      * @param string $path
      * @param string $name
      * @return string
+     * @throws Exception
      */
     protected function getPrivateKeyPath(string $path = '.keys', string $name = 'private.key'): string
     {
@@ -176,6 +183,7 @@ class BaseCommand extends Command
      * @param string $path
      * @param string $name
      * @return string
+     * @throws Exception
      */
     protected function getPublicKeyPath(string $path = '.keys', string $name = 'public.key'): string
     {

@@ -72,9 +72,10 @@ final class PHPVaultTest extends TestCase
 
         /* Act */
         $encrypted = $core->getEncrypter()->encrypt($expected);
-        $decrypted = $core->getDecrypter()->decrypt($encrypted);
+        $decrypted = $encrypted === null ? null : $core->getDecrypter()->decrypt($encrypted);
 
         /* Assert */
+        $this->assertIsString($encrypted);
         $this->assertIsString($decrypted);
         $this->assertSame($expected, $decrypted);
     }

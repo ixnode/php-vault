@@ -55,6 +55,10 @@ class KeyPair
 
     const LOADED_FROM_RANDOM_GENERATOR = 'RANDOM_GENERATOR';
 
+    const TEXT_NO_PRIVATE_KEY_LOADED = 'Decrypter::decrypt: The Decrypter class is not able to decrypt strings. Please load a private key to do this.';
+
+    const TEXT_NO_PUBLIC_KEY_LOADED = 'Encrypter::encrypt: The Encrypter class is not able to encrypt strings. Please load at least a public key to do this.';
+
     /**
      * KeyPair constructor.
      *
@@ -132,6 +136,20 @@ class KeyPair
     }
 
     /**
+     * Returns the length of base64 encoded private key string.
+     *
+     * @return int
+     */
+    public function getPrivateKeyLength(): int
+    {
+        if ($this->privateKey === null) {
+            return 0;
+        }
+
+        return strlen($this->privateKey);
+    }
+
+    /**
      * Returns the base64 decoded public string.
      *
      * @return string|null
@@ -150,6 +168,20 @@ class KeyPair
     public function setPublicKey(?string $publicKey): void
     {
         $this->publicKey = $publicKey;
+    }
+
+    /**
+     * Returns the length of base64 encoded public key string.
+     *
+     * @return int
+     */
+    public function getPublicKeyLength(): int
+    {
+        if ($this->publicKey === null) {
+            return 0;
+        }
+
+        return strlen($this->publicKey);
     }
 
     /**

@@ -408,7 +408,9 @@ final class WorkflowTest extends TestCase
 
         /* Builds path to new writer */
         $pathWriter = tempnam($pathAbsoluteTemporary, self::TEMP_PREFIX);
-        $pathWriter = $pathWriter === false ? null : $pathWriter;
+        if ($pathWriter === false) {
+            return '';
+        }
 
         /* Builds new interactor */
         $interactor = new Interactor(null, $pathWriter);
@@ -428,6 +430,7 @@ final class WorkflowTest extends TestCase
      * Returns the root of this project.
      *
      * @return string
+     * @throws Exception
      */
     public static function getPathAbsoluteRootComposerJson(): string
     {
@@ -439,6 +442,7 @@ final class WorkflowTest extends TestCase
      * Returns an absolute path of given fs elements.
      *
      * @return string
+     * @throws Exception
      */
     public static function getPathAbsolute(): string
     {

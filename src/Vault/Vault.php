@@ -123,8 +123,7 @@ class Vault
      *
      * @param bool $underscored
      * @param bool $decrypt
-     * @return string[]
-     * @throws SodiumException
+     * @return string[]|null[]
      * @throws Exception
      */
     public function getAllValuesFromVault(bool $underscored = false, bool $decrypt = false): array
@@ -144,8 +143,8 @@ class Vault
      * Returns all values of the vault encrypted.
      *
      * @param bool $underscored
-     * @return string[]
-     * @throws SodiumException
+     * @return string[]|null[]
+     * @throws Exception
      */
     public function getAllValuesFromVaultEncrypted(bool $underscored = false): array
     {
@@ -156,8 +155,8 @@ class Vault
      * Returns all values of the vault decrypted.
      *
      * @param bool $underscored
-     * @return string[]
-     * @throws SodiumException
+     * @return string[]|null[]
+     * @throws Exception
      */
     public function getAllValuesFromVaultDecrypted(bool $underscored = false): array
     {
@@ -259,7 +258,7 @@ class Vault
      * Adds given name and value to vault.
      *
      * @param string $key
-     * @param string $value
+     * @param ?string $value
      * @param ?string $description
      * @param ?string $nonce
      * @param bool $alreadyEncrypted
@@ -267,7 +266,7 @@ class Vault
      * @throws SodiumException
      * @throws Exception
      */
-    public function add(string $key, string $value, string $description = null, string $nonce = null, bool $alreadyEncrypted = false): array
+    public function add(string $key, string $value = null, string $description = null, string $nonce = null, bool $alreadyEncrypted = false): array
     {
         if ($alreadyEncrypted) {
             $decryptedValue = null;
@@ -277,7 +276,7 @@ class Vault
         } else {
             $decryptedValue = $value;
             $decryptedDescription = $description;
-            $encryptedValue = $this->phpVaultCore->getEncrypter()->encrypt($value, $nonce);
+            $encryptedValue = $value === null ? null : $this->phpVaultCore->getEncrypter()->encrypt($value, $nonce);
             $encryptedDescription = $description === null ? null : $this->phpVaultCore->getEncrypter()->encrypt($description, $nonce);
         }
 

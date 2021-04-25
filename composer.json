@@ -28,5 +28,17 @@
     },
     "bin": [
         "bin/php-vault"
-    ]
+    ],
+    "scripts": {
+        "analyse": [
+            "phpstan analyse src --level max --no-progress",
+            "phpstan analyse tests --level max --no-progress"
+        ],
+        "tests": "phpunit tests",
+        "ci": [
+            "@analyse",
+            "@tests"
+        ]
+    }
 }
+

@@ -53,16 +53,24 @@ class Decrypter
      */
     public function decrypt(string $data): ?string
     {
-        /* Check mode */
+        /* Check encryption mode (private key given). */
         if ($this->phpVaultCore->getMode() < Mode::MODE_DECRYPT) {
-            throw new Exception('Decrypter::decrypt: The Decrypter class is not able to decrypt strings. Please load a private key to do this.');
+            throw new Exception(KeyPair::TEXT_NO_PRIVATE_KEY_LOADED);
         }
 
+        /* Try to load private key. */
+        $privateKey = $this->phpVaultCore->getKeyPair()->getPrivateKey();
+        if ($privateKey === null) {
+            throw new Exception(KeyPair::TEXT_NO_PRIVATE_KEY_LOADED);
+        }
+
+        /* Get crypto box keypair. */
         $key = sodium_crypto_box_keypair_from_secretkey_and_publickey(
-            base64_decode($this->phpVaultCore->getKeyPair()->getPrivateKey()),
+            base64_decode($privateKey),
             base64_decode(PHPVault::CORE_PUBLIC_KEY)
         );
 
+        /* Extract data array. */
         $dataArray = json_decode(base64_decode($data), true);
 
         /* Check whether the value could be decrypted. */

@@ -56,9 +56,15 @@ class Encrypter
      */
     public function encrypt(string $message, string $nonce = null): ?string
     {
-        /* Check mode */
+        /* Check encryption mode (private or public key). */
         if ($this->phpVaultCore->getMode() < Mode::MODE_ENCRYPT) {
-            throw new Exception('Encrypter::encrypt: The Encrypter class is not able to encrypt strings. Please load at least a public key to do this.');
+            throw new Exception(KeyPair::TEXT_NO_PUBLIC_KEY_LOADED);
+        }
+
+        /* Try to load public key. */
+        $publicKey = $this->phpVaultCore->getKeyPair()->getPublicKey();
+        if ($publicKey === null) {
+            throw new Exception(KeyPair::TEXT_NO_PUBLIC_KEY_LOADED);
         }
 
         /* Check whether the message is already encrypted. */
@@ -66,17 +72,16 @@ class Encrypter
             throw new Exception(sprintf('Encrypter::encrypt: The given message "%s" seems to be encrypted.', $message));
         }
 
-        if ($nonce === null) {
-            $nonce = Nonce::getNewNonce();
-        }
+        /* Use given or new random nonce. */
+        $nonce = base64_decode($nonce === null ? Nonce::getNewNonce() : $nonce);
 
-        $nonce = base64_decode($nonce);
-
+        /* Get crypto box keypair. */
         $key = sodium_crypto_box_keypair_from_secretkey_and_publickey(
             base64_decode(PHPVault::CORE_PRIVATE_KEY),
-            base64_decode($this->phpVaultCore->getKeyPair()->getPublicKey())
+            base64_decode($publicKey)
         );
 
+        /* Build data array. */
         $dataArray = array(
             base64_encode($nonce),
             base64_encode(sodium_crypto_box($message, $nonce, $key))

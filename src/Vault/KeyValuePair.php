@@ -85,9 +85,9 @@ class KeyValuePair
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getValueEncrypted(): string
+    public function getValueEncrypted(): ?string
     {
         return $this->valueEncrypted;
     }
@@ -226,12 +226,14 @@ class KeyValuePair
         $this->setValueDecrypted(null);
         $this->setDescriptionDecrypted(null);
 
-        if ($this->getValueEncrypted() !== null) {
-            $this->setValueDecrypted($decrypter->decrypt($this->getValueEncrypted()));
+        $valueEncrypted = $this->getValueEncrypted();
+        if ($valueEncrypted !== null) {
+            $this->setValueDecrypted($decrypter->decrypt($valueEncrypted));
         }
 
-        if ($this->getDescriptionEncrypted() !== null) {
-            $this->setDescriptionDecrypted($decrypter->decrypt($this->getDescriptionEncrypted()));
+        $descriptionEncrypted = $this->getDescriptionEncrypted();
+        if ($descriptionEncrypted !== null) {
+            $this->setDescriptionDecrypted($decrypter->decrypt($descriptionEncrypted));
         }
 
         $this->setDecrypted(true);
