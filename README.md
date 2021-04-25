@@ -207,6 +207,52 @@ $dbHost = getenv('DB_HOST');
 $dbName = getenv('DB_NAME');
 ```
 
+## Run tests
+
+The part is only available if the project is checked out directly for development:
+
+```bash
+$ git clone https://github.com/ixnode/php-vault.git && cd php-vault
+$ composer install
+```
+
+### PHPUnit tests
+
+```bash
+$ composer run tests
+> phpunit tests
+PHPUnit 9.5.4 by Sebastian Bergmann and contributors.
+
+...............................................................  63 / 154 ( 40%)
+............................................................... 126 / 154 ( 81%)
+............................                                    154 / 154 (100%)
+
+Time: 00:00.136, Memory: 8.00 MB
+
+OK (154 tests, 274 assertions)
+```
+
+### Static code analysis (PHPStan)
+
+```bash
+$ composer run analyse
+> phpstan analyse src --level max --no-progress
+
+ [OK] No errors
+
+> phpstan analyse tests --level max --no-progress
+
+ [OK] No errors
+```
+
+### Continuous integration
+
+Runs `@analyse` and `@tests`:
+
+```bash
+$ composer run ci
+```
+
 ## Security
 
 If you discover a security vulnerability within this package, please send an email to Björn Hempel at
