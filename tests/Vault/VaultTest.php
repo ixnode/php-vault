@@ -407,7 +407,7 @@ TEXT;
 
         /* Act */
         self::$core->getVault()->getWriter()->saveToEnv();
-        $actual = $_ENV;
+        $actual = self::$core->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_ENV);
 
         /* Assert */
         $this->assertSame($expected, $actual);
@@ -437,7 +437,7 @@ TEXT;
 
         /* Act */
         self::$core->getVault()->getWriter()->saveToServer();
-        $actual = $_SERVER;
+        $actual = self::$core->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_SERVER);
 
         /* Assert */
         foreach ($expected as $key => $name) {
@@ -476,7 +476,7 @@ TEXT;
         /* Act */
         self::$core->getVault()->add($name, $value, $description, self::$nonce);
         self::$core->getVault()->getWriter()->saveToEnv();
-        $actual = $_ENV;
+        $actual = self::$core->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_ENV);
 
         /* Assert */
         foreach ($expected as $key => $name) {
