@@ -35,7 +35,7 @@ class PHPVault
 {
     const NAME = 'PHPVault';
 
-    const VERSION = 'v1.0.5';
+    const VERSION = 'v1.0.6';
 
     const CORE_PUBLIC_KEY = 'zodfptod/VHjzzgdPgT2vk7RThdowsYXLiPP+eNI6D4=';
 
