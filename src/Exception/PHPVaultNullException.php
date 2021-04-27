@@ -24,42 +24,22 @@
  * SOFTWARE.
  */
 
-namespace Ixnode\PhpVault\Command;
+namespace Ixnode\PhpVault\Exception;
 
-use Ahc\Cli\Application as App;
-
-class DisplayEnvCommand extends BaseCommand
+class PHPVaultNullException extends BasePHPVaultException
 {
-    const COMMAND = 'display-env';
+    const FUNCTION_PREG_REPLACE = 'preg_replace';
 
-    const ALIAS = 'de';
-
-    const DESCRIPTION = 'Displays the environment variables from server.';
+    const TEXT_EXCEPTION = 'An error occurred while trying to execute %s (%s:%d).';
 
     /**
-     * GenerateKeysCommand constructor.
+     * Returns the return code of this exception class.
      *
-     * @param bool $allowUnknown
-     * @param App|null $app
-     * @throws \Exception
+     * @return int
      */
-    public function __construct(bool $allowUnknown = false, App $app = null)
+    public function getReturnCode(): int
     {
-        parent::__construct(self::COMMAND, self::DESCRIPTION, $allowUnknown, $app);
-
-        $this
-            ->usage(
-                '<bold>  $0 display-env</end> ## Displays the environment variables from server.<eol/>'
-            );
-    }
-
-    /**
-     * Bootstrap display environment function.
-     *
-     * @return void
-     */
-    public function handle(): void
-    {
-        $this->logger->getDisplay()->serverEnvVariables();
+        return self::RETURN_CODE_NULL;
     }
 }
+

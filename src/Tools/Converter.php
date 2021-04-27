@@ -27,7 +27,7 @@
 namespace Ixnode\PhpVault\Tools;
 
 use Exception;
-use Ixnode\PhpVault\Exception\NullException;
+use Ixnode\PhpVault\Exception\PHPVaultNullException;
 use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\Vault\Reader;
 use SodiumException;
@@ -43,14 +43,14 @@ class Converter {
      * @param int $limit [optional]
      * @param int $count [optional]
      * @return string
-     * @throws NullException
+     * @throws PHPVaultNullException
      */
     public static function preg_replace_string(string $pattern, string $replacement, string $subject, int $limit = -1, int &$count = 0): string
     {
         $value = preg_replace($pattern, $replacement, $subject, $limit, $count);
 
         if ($value === null) {
-            throw new NullException(sprintf(NullException::TEXT_EXCEPTION, NullException::FUNCTION_PREG_REPLACE, __FILE__, __LINE__));
+            throw new PHPVaultNullException(sprintf(PHPVaultNullException::TEXT_EXCEPTION, PHPVaultNullException::FUNCTION_PREG_REPLACE, __FILE__, __LINE__));
         }
 
         return $value;
@@ -65,14 +65,14 @@ class Converter {
      * @param int $limit [optional]
      * @param int $count [optional]
      * @return string[]
-     * @throws NullException
+     * @throws PHPVaultNullException
      */
     public static function preg_replace_array(array $pattern, array $replacement, array $subject, int $limit = -1, int &$count = 0): array
     {
         $array = preg_replace($pattern, $replacement, $subject, $limit, $count);
 
         if ($array === null) {
-            throw new NullException(sprintf(NullException::TEXT_EXCEPTION, NullException::FUNCTION_PREG_REPLACE, __FILE__, __LINE__));
+            throw new PHPVaultNullException(sprintf(PHPVaultNullException::TEXT_EXCEPTION, PHPVaultNullException::FUNCTION_PREG_REPLACE, __FILE__, __LINE__));
         }
 
         return $array;
@@ -83,7 +83,7 @@ class Converter {
      *
      * @param string $keyName
      * @return string
-     * @throws NullException
+     * @throws PHPVaultNullException
      */
     public static function getUnderscoredKey(string $keyName): string
     {
@@ -112,7 +112,7 @@ class Converter {
      *
      * @param string $string $string
      * @return string
-     * @throws NullException
+     * @throws PHPVaultNullException
      */
     public static function removeQuotes(string $string): string
     {

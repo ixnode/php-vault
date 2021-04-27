@@ -145,14 +145,14 @@ The file was successfully written to ".env".
 
 ```bash
 $ vendor/bin/php-vault display .env --display-decrypted
-+------+-------------+-------------+
-| Key  | Value       | Description |
-+------+-------------+-------------+
-| USER | secret.user | DB Configs  |
-| PASS | secret.pass |             |
-| HOST | secret.host |             |
-| NAME | secret.name |             |
-+------+-------------+-------------+
++---------+-------------+-------------+
+| Key     | Value       | Description |
++---------+-------------+-------------+
+| DB_USER | secret.user | DB Configs  |
+| DB_PASS | secret.pass |             |
+| DB_HOST | secret.host |             |
+| DB_NAME | secret.name |             |
++---------+-------------+-------------+
 ```
 
 ## Using the PHPVault class

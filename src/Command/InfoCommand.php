@@ -43,6 +43,7 @@ class InfoCommand extends BaseCommand
      *
      * @param bool $allowUnknown
      * @param App|null $app
+     * @throws Exception
      */
     public function __construct(bool $allowUnknown = false, App $app = null)
     {
@@ -62,7 +63,7 @@ class InfoCommand extends BaseCommand
      * @return void
      * @throws Exception
      */
-    public function execute(): void
+    public function handle(): void
     {
         /* Initiate the PhpVault Core */
         $phpVaultCore = new PHPVault();

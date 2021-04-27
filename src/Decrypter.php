@@ -26,6 +26,9 @@
 
 namespace Ixnode\PhpVault;
 
+use Ixnode\PhpVault\Exception\PHPVaultCorruptedDataException;
+use Ixnode\PhpVault\Exception\PHPVaultNoPrivateKeyLoadedException;
+use Ixnode\PhpVault\Exception\PHPVaultVerificationFailedException;
 use SodiumException;
 use Exception;
 
@@ -49,19 +52,22 @@ class Decrypter
      * @param string $data
      * @return string|null
      * @throws SodiumException
+     * @throws PHPVaultVerificationFailedException
+     * @throws PHPVaultNoPrivateKeyLoadedException
+     * @throws PHPVaultCorruptedDataException
      * @throws Exception
      */
     public function decrypt(string $data): ?string
     {
         /* Check encryption mode (private key given). */
         if ($this->phpVaultCore->getMode() < Mode::MODE_DECRYPT) {
-            throw new Exception(KeyPair::TEXT_NO_PRIVATE_KEY_LOADED);
+            throw new PHPVaultNoPrivateKeyLoadedException();
         }
 
         /* Try to load private key. */
         $privateKey = $this->phpVaultCore->getKeyPair()->getPrivateKey();
         if ($privateKey === null) {
-            throw new Exception(KeyPair::TEXT_NO_PRIVATE_KEY_LOADED);
+            throw new PHPVaultNoPrivateKeyLoadedException();
         }
 
         /* Get crypto box keypair. */
@@ -75,7 +81,7 @@ class Decrypter
 
         /* Check whether the value could be decrypted. */
         if (gettype($dataArray) !== 'array') {
-            throw new Exception('Decrypter::decrypt: Unable to decrypt the given data block.');
+            throw new PHPVaultCorruptedDataException();
         }
 
         $nonce = base64_decode($dataArray[0]);
@@ -84,6 +90,11 @@ class Decrypter
         /* Decrypt message */
         $decrypted = sodium_crypto_box_open($encryptedMessage, $nonce, $key);
 
-        return $decrypted === false ? null : $decrypted;
+        /* Verification of given private key and message failed. */
+        if ($decrypted === false) {
+            throw new PHPVaultVerificationFailedException();
+        }
+
+        return $decrypted;
     }
 }

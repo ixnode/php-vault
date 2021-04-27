@@ -29,11 +29,11 @@ namespace Test\Ixnode\PhpVault;
 use Ahc\Cli\IO\Interactor;
 use Exception;
 use Ixnode\PhpVault\Command\GenerateKeysCommand;
+use Ixnode\PhpVault\Command\TestCommand;
 use Ixnode\PhpVault\Logger\Logger;
 use Ixnode\PhpVault\PHPVault;
 use PHPUnit\Framework\TestCase;
 use Ixnode\PhpVault\Cli;
-use Ixnode\PhpVault\Command\BaseCommand;
 
 final class WorkflowTest extends TestCase
 {
@@ -319,7 +319,7 @@ final class WorkflowTest extends TestCase
         /* Arrange */
         $pathAbsoluteEnv2EncFile = self::getPathAbsoluteWorking(self::PATH_ENV_2_ENC);
         $pathAbsoluteEnv2File = self::getPathAbsoluteWorking(self::PATH_ENV_2);
-        $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PRIVATE_KEY);
+        $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PUBLIC_KEY);
         $command = sprintf('%s encrypt-file %s --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsoluteEnv2File, $pathAbsolutePublicKey);
         $searchCommand = 'The file was successfully written to';
         $overheadLines = 4; /* One comment, three empty lines → four */
@@ -434,7 +434,7 @@ final class WorkflowTest extends TestCase
      */
     public static function getPathAbsoluteRootComposerJson(): string
     {
-        $base = new BaseCommand('test');
+        $base = new TestCommand('test');
         return $base->getComposerJsonRootPath();
     }
 

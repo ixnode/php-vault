@@ -24,14 +24,20 @@
  * SOFTWARE.
  */
 
-namespace Ixnode\PhpVault\Exception;
+namespace Ixnode\PhpVault\Command;
 
 use Exception;
 
-class NullException extends Exception
+class TestCommand extends BaseCommand
 {
-    const FUNCTION_PREG_REPLACE = 'preg_replace';
-
-    const TEXT_EXCEPTION = 'An error occurred while trying to execute %s (%s:%d).';
+    /**
+     * Bootstrap test function.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function handle(): void
+    {
+        /* Nothing to do here. */
+    }
 }
-

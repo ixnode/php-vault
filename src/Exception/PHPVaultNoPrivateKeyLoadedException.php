@@ -24,42 +24,33 @@
  * SOFTWARE.
  */
 
-namespace Ixnode\PhpVault\Command;
+namespace Ixnode\PhpVault\Exception;
 
-use Ahc\Cli\Application as App;
+use Throwable;
 
-class DisplayEnvCommand extends BaseCommand
+class PHPVaultNoPrivateKeyLoadedException extends BasePHPVaultException
 {
-    const COMMAND = 'display-env';
-
-    const ALIAS = 'de';
-
-    const DESCRIPTION = 'Displays the environment variables from server.';
+    const TEXT_NO_PRIVATE_KEY_LOADED = 'Decrypter::decrypt: The Decrypter class is not able to decrypt strings. Please load a private key to do this.';
 
     /**
-     * GenerateKeysCommand constructor.
+     * PHPVaultNoPrivateKeyLoadedException constructor.
      *
-     * @param bool $allowUnknown
-     * @param App|null $app
-     * @throws \Exception
+     * @param int $code
+     * @param Throwable|null $previous
      */
-    public function __construct(bool $allowUnknown = false, App $app = null)
+    public function __construct($code = 0, Throwable $previous = null)
     {
-        parent::__construct(self::COMMAND, self::DESCRIPTION, $allowUnknown, $app);
-
-        $this
-            ->usage(
-                '<bold>  $0 display-env</end> ## Displays the environment variables from server.<eol/>'
-            );
+        parent::__construct(self::TEXT_NO_PRIVATE_KEY_LOADED, $code, $previous);
     }
 
     /**
-     * Bootstrap display environment function.
+     * Returns the return code of this exception class.
      *
-     * @return void
+     * @return int
      */
-    public function handle(): void
+    public function getReturnCode(): int
     {
-        $this->logger->getDisplay()->serverEnvVariables();
+        return self::RETURN_CODE_NO_PRIVATE_KEY_LOADED;
     }
 }
+

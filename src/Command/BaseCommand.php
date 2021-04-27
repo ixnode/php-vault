@@ -26,19 +26,24 @@
 
 namespace Ixnode\PhpVault\Command;
 
+use Ahc\Cli\Application;
 use Ahc\Cli\Application as App;
+use Ahc\Cli\Helper\OutputHelper;
 use Ahc\Cli\Input\Command;
 use Ahc\Cli\IO\Interactor;
 use Ahc\Cli\Output\Writer;
 use Composer\Autoload\ClassLoader;
-use Ixnode\PhpVault\Exception\NullException;
+use Ixnode\PhpVault\Exception\PHPVaultNullException;
+use Ixnode\PhpVault\Exception\BasePHPVaultException;
 use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\Logger\Logger;
 use Exception;
+use Ixnode\PhpVault\TypeCheck\TypeCheck;
 use Ixnode\PhpVault\Vault\Reader;
 use ReflectionClass;
 use SodiumException;
 use Ixnode\PhpVault\Tools\Converter;
+use Throwable;
 
 /**
  * Class BaseCommand
@@ -47,13 +52,15 @@ use Ixnode\PhpVault\Tools\Converter;
  *
  * @method BaseCommand displayNoKeyLoaded()
  */
-class BaseCommand extends Command
+abstract class BaseCommand extends Command
 {
     const LOGO = 'PHPVault command line interpreter.';
 
     const OPTION_PRIVATE_KEY = 'private-key';
 
     const OPTION_PUBLIC_KEY = 'public-key';
+
+    const TEMPLATE_SIMPLE_EXCEPTION = '<eol/><boldRed>%s</end><red>: %s</end><eol/>';
 
     protected Writer $writer;
 
@@ -62,12 +69,18 @@ class BaseCommand extends Command
     protected ?string $root;
 
     /**
+     * Abstract function handle to handle all the command stuff.
+     */
+    abstract public function handle(): void;
+
+    /**
      * BaseCommand constructor.
      *
      * @param string $name
      * @param string $desc
      * @param bool $allowUnknown
      * @param App|null $app
+     * @throws Exception
      */
     public function __construct(string $name, string $desc = '', bool $allowUnknown = false, App $app = null)
     {
@@ -84,6 +97,61 @@ class BaseCommand extends Command
 
         /* Set root path */
         $this->root = $this->getComposerJsonRootPath();
+
+        /* Add debug option */
+        $this->option('-D --debug', 'Set application in debug mode.', function($value) { return TypeCheck::isBoolean($value); }, false);
+    }
+
+    /**
+     * The execute function from Ahc\Cli\Application
+     *
+     * @return int
+     * @throws Exception
+     */
+    public function execute(): int
+    {
+        try {
+            $this->handle();
+        } catch (BasePHPVaultException $exception) {
+            if ($this->getOption('debug')) {
+                $this->printTrace($exception);
+            } else {
+                $this->printSimpleException($exception);
+            }
+
+            return $exception->getReturnCode();
+        }
+
+        return 0;
+    }
+
+    /**
+     * Prints a simple exception message.
+     *
+     * @param Throwable $exception
+     * @return void
+     */
+    public function printSimpleException(Throwable $exception): void
+    {
+        $message = sprintf(
+            self::TEMPLATE_SIMPLE_EXCEPTION,
+            (new ReflectionClass($exception))->getShortName(),
+            $exception->getMessage()
+        );
+
+        $this->writer->colors($message);
+    }
+
+    /**
+     * Print stack trace and error msg of an exception.
+     *
+     * @param Throwable $exception
+     * @return void
+     */
+    public function printTrace(Throwable $exception): void
+    {
+        $outputHelper = new OutputHelper($this->io()->writer());
+        $outputHelper->printTrace($exception);
     }
 
     /**
@@ -130,7 +198,7 @@ class BaseCommand extends Command
      *
      * @param string $value
      * @return string
-     * @throws NullException
+     * @throws PHPVaultNullException
      */
     protected function convertToCamelCase(string $value): string
     {

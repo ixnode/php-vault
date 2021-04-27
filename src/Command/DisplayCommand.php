@@ -57,6 +57,7 @@ class DisplayCommand extends BaseCommand
      *
      * @param bool $allowUnknown
      * @param App|null $app
+     * @throws Exception
      */
     public function __construct(bool $allowUnknown = false, App $app = null)
     {
@@ -83,7 +84,7 @@ class DisplayCommand extends BaseCommand
      * @return void
      * @throws Exception
      */
-    public function execute(): void
+    public function handle(): void
     {
         /* Load arguments and options */
         $envFile = $this->getArgument(self::ARGUMENT_ENV_FILE);

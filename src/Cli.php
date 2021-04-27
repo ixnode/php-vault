@@ -144,6 +144,7 @@ class Cli
      * Handle cli commands.
      *
      * @return void
+     * @throws Exception
      */
     public function handle(): void
     {

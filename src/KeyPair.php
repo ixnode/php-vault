@@ -27,6 +27,8 @@
 namespace Ixnode\PhpVault;
 
 use Exception;
+use Ixnode\PhpVault\Exception\PHPVaultPrivateKeyLoadedException;
+use Ixnode\PhpVault\Exception\PHPVaultPublicKeyLoadedException;
 use SodiumException;
 
 class KeyPair
@@ -54,10 +56,6 @@ class KeyPair
     const LOADED_FROM_PASSED_STRING = 'PASSED_STRING';
 
     const LOADED_FROM_RANDOM_GENERATOR = 'RANDOM_GENERATOR';
-
-    const TEXT_NO_PRIVATE_KEY_LOADED = 'Decrypter::decrypt: The Decrypter class is not able to decrypt strings. Please load a private key to do this.';
-
-    const TEXT_NO_PUBLIC_KEY_LOADED = 'Encrypter::encrypt: The Encrypter class is not able to encrypt strings. Please load at least a public key to do this.';
 
     /**
      * KeyPair constructor.
@@ -150,6 +148,37 @@ class KeyPair
     }
 
     /**
+     * Returns a private key hash.
+     *
+     * @return string|null
+     */
+    public function getPrivateKeyHash(): ?string
+    {
+        if ($this->privateKey === null) {
+            return null;
+        }
+
+        return md5($this->privateKey);
+    }
+
+    /**
+     * Returns a private key hash.
+     *
+     * @return string|null
+     */
+    public function getPrivateKeyCombined(): ?string
+    {
+        $json = json_encode(
+            array(
+                $this->getPrivateKey(),
+                $this->getPublicKeyHash(),
+            )
+        );
+
+        return $json === false ? null : base64_encode($json);
+    }
+
+    /**
      * Returns the base64 decoded public string.
      *
      * @return string|null
@@ -182,6 +211,37 @@ class KeyPair
         }
 
         return strlen($this->publicKey);
+    }
+
+    /**
+     * Returns a private key hash.
+     *
+     * @return string|null
+     */
+    public function getPublicKeyHash(): ?string
+    {
+        if ($this->publicKey === null) {
+            return null;
+        }
+
+        return md5($this->publicKey);
+    }
+
+    /**
+     * Returns a private key hash.
+     *
+     * @return string|null
+     */
+    public function getPublicKeyCombined(): ?string
+    {
+        $json = json_encode(
+            array(
+                $this->getPublicKey(),
+                $this->getPrivateKeyHash(),
+            )
+        );
+
+        return $json === false ? null : base64_encode($json);
     }
 
     /**
@@ -400,16 +460,25 @@ class KeyPair
     /**
      * Returns a new public private key object (static function).
      *
-     * @return array{'private': string, 'public': string}
+     * @return array{'private': string, 'private-hashed': string, 'public': string, 'public-hashed': string, 'version': int}
      * @throws SodiumException
      */
     static public function getNewPair(): array
     {
         $keyPair = sodium_crypto_box_keypair();
 
+        $publicKey = base64_encode(sodium_crypto_box_publickey($keyPair));
+        $publicKeyHash = md5($publicKey);
+        $privateKey = base64_encode(sodium_crypto_box_secretkey($keyPair));
+        $privateKeyHash = md5($privateKey);
+        $version = 2;
+
         return [
-            'public' => base64_encode(sodium_crypto_box_publickey($keyPair)),
-            'private' => base64_encode(sodium_crypto_box_secretkey($keyPair))
+            'public' => $publicKey,
+            'public-hashed' => $publicKeyHash,
+            'private' => $privateKey,
+            'private-hashed' => $privateKeyHash,
+            'version' => $version,
         ];
     }
 
@@ -417,14 +486,38 @@ class KeyPair
      * Returns a public private key object from given base64 encoded private key (static function).
      *
      * @param string $privateKey
-     * @return array{'private': string, 'public': string}
+     * @return array{'private': string, 'private-hashed': string, 'public': string, 'public-hashed': string, 'version': int}
      * @throws SodiumException
+     * @throws Exception
      */
     static public function getPairFromPrivateKey(string $privateKey): array
     {
+        $privateKeyArray = array();
+        $version = 1;
+
+        if (self::isJson(base64_decode($privateKey))) {
+            $privateKeyArray = json_decode(base64_decode($privateKey));
+            $privateKey = $privateKeyArray[0];
+        }
+
+        $privateKeyHash = md5($privateKey);
+        $publicKey = base64_encode(sodium_crypto_box_publickey_from_secretkey(base64_decode($privateKey)));
+        $publicKeyHash = md5($publicKey);
+
+        /* Check hash match. */
+        if (count($privateKeyArray) > 1) {
+            $version = 2;
+            if ($publicKeyHash !== $privateKeyArray[1]) {
+                throw new PHPVaultPublicKeyLoadedException();
+            }
+        }
+
         return [
-            'public' => base64_encode(sodium_crypto_box_publickey_from_secretkey(base64_decode($privateKey))),
-            'private' => $privateKey
+            'public' => $publicKey,
+            'public-hashed' => $publicKeyHash,
+            'private' => $privateKey,
+            'private-hashed' => $privateKeyHash,
+            'version' => $version,
         ];
     }
 
@@ -432,13 +525,66 @@ class KeyPair
      * Returns a public private key object from given base64 encoded public key (static function).
      *
      * @param string $publicKey
-     * @return array{'private': null, 'public': string}
+     * @return array{'private': null, 'private-hashed': ?string, 'public': string, 'public-hashed': string, 'version': int}
+     * @throws Exception
      */
     static public function getPairFromPublicKey(string $publicKey): array
     {
+        $privateKeyLoaded = true;
+
+        /* Try to load private key. */
+        try {
+            $return = self::getPairFromPrivateKey($publicKey);
+
+            if ($return['version'] === 1) {
+                $privateKeyLoaded = false;
+            }
+        } catch (PHPVaultPublicKeyLoadedException $e) {
+            $privateKeyLoaded = false;
+        }
+
+        /* A private key was loaded. */
+        if ($privateKeyLoaded) {
+            throw new PHPVaultPrivateKeyLoadedException();
+        }
+
+        $publicKeyArray = array();
+        $version = 1;
+
+        if (self::isJson(base64_decode($publicKey))) {
+            $publicKeyArray = json_decode(base64_decode($publicKey));
+            $publicKey = $publicKeyArray[0];
+        }
+
+        $privateKey = null;
+        $privateKeyHash = null;
+        $publicKeyHash = md5($publicKey);
+
+        /* Private key hash given. */
+        if (count($publicKeyArray) > 1) {
+            $privateKeyHash = $publicKeyArray[1];
+            $version = 2;
+        }
+
         return [
             'public' => $publicKey,
-            'private' => null
+            'public-hashed' => $publicKeyHash,
+            'private' => $privateKey,
+            'private-hashed' => $privateKeyHash,
+            'version' => $version,
         ];
+    }
+
+    /**
+     * Check if given string is json encoded.
+     *
+     * @param string $string
+     * @return bool
+     */
+    static public function isJson(string $string): bool
+    {
+        json_decode($string);
+
+        return json_last_error() === JSON_ERROR_NONE;
     }
 }

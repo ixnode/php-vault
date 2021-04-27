@@ -27,6 +27,7 @@
 namespace Ixnode\PhpVault;
 
 use Exception;
+use Ixnode\PhpVault\Exception\PHPVaultNoPublicKeyLoadedException;
 use SodiumException;
 
 class Encrypter
@@ -58,13 +59,13 @@ class Encrypter
     {
         /* Check encryption mode (private or public key). */
         if ($this->phpVaultCore->getMode() < Mode::MODE_ENCRYPT) {
-            throw new Exception(KeyPair::TEXT_NO_PUBLIC_KEY_LOADED);
+            throw new PHPVaultNoPublicKeyLoadedException();
         }
 
         /* Try to load public key. */
         $publicKey = $this->phpVaultCore->getKeyPair()->getPublicKey();
         if ($publicKey === null) {
-            throw new Exception(KeyPair::TEXT_NO_PUBLIC_KEY_LOADED);
+            throw new PHPVaultNoPublicKeyLoadedException();
         }
 
         /* Check whether the message is already encrypted. */

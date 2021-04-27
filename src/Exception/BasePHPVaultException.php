@@ -24,42 +24,28 @@
  * SOFTWARE.
  */
 
-namespace Ixnode\PhpVault\Command;
+namespace Ixnode\PhpVault\Exception;
 
-use Ahc\Cli\Application as App;
+use Exception;
 
-class DisplayEnvCommand extends BaseCommand
+abstract class BasePHPVaultException extends Exception
 {
-    const COMMAND = 'display-env';
+    /* General codes */
+    const RETURN_CODE_CORRUPTED_DATA = 100;
+    const RETURN_CODE_NULL = 101;
+    const RETURN_CODE_VERIFICATION_FAILED = 102;
 
-    const ALIAS = 'de';
-
-    const DESCRIPTION = 'Displays the environment variables from server.';
-
-    /**
-     * GenerateKeysCommand constructor.
-     *
-     * @param bool $allowUnknown
-     * @param App|null $app
-     * @throws \Exception
-     */
-    public function __construct(bool $allowUnknown = false, App $app = null)
-    {
-        parent::__construct(self::COMMAND, self::DESCRIPTION, $allowUnknown, $app);
-
-        $this
-            ->usage(
-                '<bold>  $0 display-env</end> ## Displays the environment variables from server.<eol/>'
-            );
-    }
+    /* Public and private key codes */
+    const RETURN_CODE_NO_PRIVATE_KEY_LOADED = 150;
+    const RETURN_CODE_NO_PUBLIC_KEY_LOADED = 151;
+    const RETURN_CODE_PRIVATE_KEY_LOADED = 152;
+    const RETURN_CODE_PUBLIC_KEY_LOADED = 153;
 
     /**
-     * Bootstrap display environment function.
+     * Returns the return code of current exception.
      *
-     * @return void
+     * @return int
      */
-    public function handle(): void
-    {
-        $this->logger->getDisplay()->serverEnvVariables();
-    }
+    abstract public function getReturnCode(): int;
 }
+

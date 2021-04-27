@@ -54,6 +54,7 @@ class GenerateKeysCommand extends BaseCommand
      *
      * @param bool $allowUnknown
      * @param App|null $app
+     * @throws Exception
      */
     public function __construct(bool $allowUnknown = false, App $app = null)
     {
@@ -74,7 +75,7 @@ class GenerateKeysCommand extends BaseCommand
      * @return void
      * @throws Exception
      */
-    public function execute(): void
+    public function handle(): void
     {
         /* Initiate the PhpVault Core */
         $phpVaultCore = new PHPVault(true);
@@ -134,8 +135,8 @@ CONTENT;
         $gitignoreAbsolute = sprintf('%s/%s', $pathKeys, $gitignore);
 
         /* Write files. */
-        file_put_contents($pathPrivateKey, $phpVaultCore->getKeyPair()->getPrivateKey());
-        file_put_contents($pathPublicKey, $phpVaultCore->getKeyPair()->getPublicKey());
+        file_put_contents($pathPrivateKey, $phpVaultCore->getKeyPair()->getPrivateKeyCombined());
+        file_put_contents($pathPublicKey, $phpVaultCore->getKeyPair()->getPublicKeyCombined());
         file_put_contents($gitignoreAbsolute, $gitignoreContent);
 
         /* Check files. */
