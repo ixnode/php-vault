@@ -39,7 +39,7 @@ The basis of all operations is the command line tool `vendor/bin/php-vault`.  He
 ```bash
 $ vendor/bin/php-vault --help
 PHPVault command line interpreter.
-PHPVault, version v1.0.6
+PHPVault, version v1.0.7
 
 Commands:
   decrypt-file  df    Decrypts a given file. Requires a private key.
@@ -55,7 +55,7 @@ Run `<command> --help` for specific help
 
 ```bash
 $ vendor/bin/php-vault --version
-v1.0.6
+v1.0.7
 ```
 
 ## On development system
