@@ -26,27 +26,31 @@
 
 namespace Ixnode\PhpVault\Exception;
 
-use Exception;
+use Throwable;
 
-abstract class BasePHPVaultException extends Exception
+class PHPVaultUnknownKeyVersionException extends BasePHPVaultException
 {
-    /* General codes */
-    const RETURN_CODE_CORRUPTED_DATA = 100;
-    const RETURN_CODE_NULL = 101;
-    const RETURN_CODE_VERIFICATION_FAILED = 102;
-    const RETURN_CODE_UNKNOWN_KEY_VERSION = 103;
-
-    /* Public and private key codes */
-    const RETURN_CODE_NO_PRIVATE_KEY_LOADED = 150;
-    const RETURN_CODE_NO_PUBLIC_KEY_LOADED = 151;
-    const RETURN_CODE_PRIVATE_KEY_LOADED = 152;
-    const RETURN_CODE_PUBLIC_KEY_LOADED = 153;
+    const TEXT_UNKNOWN_KEY_VERSION = 'Unknown key version.';
 
     /**
-     * Returns the return code of current exception.
+     * PHPVaultUnknownKeyVersionException constructor.
+     *
+     * @param int $code
+     * @param Throwable|null $previous
+     */
+    public function __construct($code = 0, Throwable $previous = null)
+    {
+        parent::__construct(self::TEXT_UNKNOWN_KEY_VERSION, $code, $previous);
+    }
+
+    /**
+     * Returns the return code of this exception class.
      *
      * @return int
      */
-    abstract public function getReturnCode(): int;
+    public function getReturnCode(): int
+    {
+        return self::RETURN_CODE_UNKNOWN_KEY_VERSION;
+    }
 }
 

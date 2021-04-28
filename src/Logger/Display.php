@@ -26,6 +26,7 @@
 
 namespace Ixnode\PhpVault\Logger;
 
+use Ixnode\PhpVault\Exception\PHPVaultUnknownKeyVersionException;
 use Ixnode\PhpVault\KeyPair;
 use Ixnode\PhpVault\PHPVault;
 use Exception;
@@ -201,16 +202,47 @@ class Display
     }
 
     /**
+     * Returns the private and public key according to its given version.
+     *
+     * @param PHPVault $phpVaultCore
+     * @param string $version
+     * @return string[]|null[]
+     * @throws PHPVaultUnknownKeyVersionException
+     */
+    protected function getPrivateAndPublicKey(PHPVault $phpVaultCore, string $version): array
+    {
+        switch ($version) {
+            case 'v1':
+                return [
+                    $phpVaultCore->getKeyPair()->getPrivateKey(),
+                    $phpVaultCore->getKeyPair()->getPublicKey(),
+                ];
+
+            case 'v2':
+                return [
+                    $phpVaultCore->getKeyPair()->getPrivateKeyCombined(),
+                    $phpVaultCore->getKeyPair()->getPublicKeyCombined()
+                ];
+
+            default:
+                throw new PHPVaultUnknownKeyVersionException();
+        }
+    }
+
+    /**
      * Displays the private and public keys.
      *
      * @param PHPVault $phpVaultCore
+     * @param string $version
      * @return void
+     * @throws PHPVaultUnknownKeyVersionException
      */
-    public function privateAndPublicKeys(PHPVault $phpVaultCore): void
+    public function privateAndPublicKeys(PHPVault $phpVaultCore, string $version): void
     {
         $this->logger->getWriter()->table([
-            ['name' => 'private key', 'value' => $phpVaultCore->getKeyPair()->getPrivateKey()],
-            ['name' => 'public key', 'value' => $phpVaultCore->getKeyPair()->getPublicKey()],
+            ['name' => 'private key', 'value' => $phpVaultCore->getKeyPair()->getPrivateKeyByVersion($version)],
+            ['name' => 'public key', 'value' => $phpVaultCore->getKeyPair()->getPublicKeyByVersion($version)],
+            ['name' => 'version', 'value' => $version]
         ]);
     }
 

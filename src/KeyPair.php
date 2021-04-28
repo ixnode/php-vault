@@ -29,6 +29,7 @@ namespace Ixnode\PhpVault;
 use Exception;
 use Ixnode\PhpVault\Exception\PHPVaultPrivateKeyLoadedException;
 use Ixnode\PhpVault\Exception\PHPVaultPublicKeyLoadedException;
+use Ixnode\PhpVault\Exception\PHPVaultUnknownKeyVersionException;
 use SodiumException;
 
 class KeyPair
@@ -179,6 +180,27 @@ class KeyPair
     }
 
     /**
+     * Returns the private key according to given version.
+     *
+     * @param string $version
+     * @return ?string
+     * @throws PHPVaultUnknownKeyVersionException
+     */
+    public function getPrivateKeyByVersion(string $version = 'v1'): ?string
+    {
+        switch ($version) {
+            case 'v1':
+                return $this->getPrivateKey();
+
+            case 'v2':
+                return $this->getPrivateKeyCombined();
+
+            default:
+                throw new PHPVaultUnknownKeyVersionException();
+        }
+    }
+
+    /**
      * Returns the base64 decoded public string.
      *
      * @return string|null
@@ -242,6 +264,27 @@ class KeyPair
         );
 
         return $json === false ? null : base64_encode($json);
+    }
+
+    /**
+     * Returns the public key according to given version.
+     *
+     * @param string $version
+     * @return ?string
+     * @throws PHPVaultUnknownKeyVersionException
+     */
+    public function getPublicKeyByVersion(string $version = 'v1'): ?string
+    {
+        switch ($version) {
+            case 'v1':
+                return $this->getPublicKey();
+
+            case 'v2':
+                return $this->getPublicKeyCombined();
+
+            default:
+                throw new PHPVaultUnknownKeyVersionException();
+        }
     }
 
     /**

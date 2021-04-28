@@ -62,6 +62,8 @@ class GenerateKeysCommand extends BaseCommand
 
         $this
             ->option('-p --persist', 'Persists generated keys to given folder', null, false)
+            ->option('-1 --version1', 'Generate version 1 keys', function($value) { return TypeCheck::isBoolean($value); }, false)
+            ->option('-2 --version2', 'Generate version 2 keys', function($value) { return TypeCheck::isBoolean($value); }, false)
             ->usage(
                 '<bold>  $0 generate-keys</end> ## Simply shows the key pair.<eol/>'.
                 '<bold>  $0 generate-keys</end> <comment>--persist</end> ## Also persists key pair to folder ".keys" (Default path).<eol/>'.
@@ -85,11 +87,31 @@ class GenerateKeysCommand extends BaseCommand
 
         /* Display the private and public key */
         if (!$persist) {
-            $this->logger->getDisplay()->privateAndPublicKeys($phpVaultCore);
+            $this->logger->getDisplay()->privateAndPublicKeys($phpVaultCore, $this->getVersion());
         }
 
         /* Persist keys */
         $this->persistKeys($phpVaultCore);
+    }
+
+    /**
+     * Returns the wanted version of keys.
+     *
+     * @return string
+     * @throws Exception
+     */
+    protected function getVersion(): string
+    {
+        $version1 = $this->getOption('version1', false);
+        $version2 = $this->getOption('version2', false);
+
+        switch (true) {
+            case $version1:
+                return 'v1';
+
+            default:
+                return 'v2';
+        }
     }
 
     /**
