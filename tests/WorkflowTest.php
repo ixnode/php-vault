@@ -416,7 +416,8 @@ final class WorkflowTest extends TestCase
         $interactor = new Interactor(null, $pathWriter);
 
         /* Builds cli command with one exit handler. */
-        $cli = new Cli($command, $interactor, function ($exitCode = 0) { });
+        $cli = new Cli($command, $interactor, function ($exitCode = 0) {
+        });
         $cli->handle();
 
         /* Gets all contents from writer. */

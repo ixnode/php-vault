@@ -555,12 +555,18 @@ final class ReaderTest extends VaultTestCase
      */
     protected function convertConfig(array $config, int $number): array
     {
-        array_walk($config, function(&$item) use ($number) {
+        array_walk($config, function (&$item) use ($number) {
             $item = array(
                 $item[$number],
-                array_map(function ($array) { return $array['decrypted']; }, $item[2]),
-                array_map(function ($array) { return $array['encrypted']; }, $item[2]),
-                array_map(function ($array) { return $array['combined']; }, $item[2]),
+                array_map(function ($array) {
+                    return $array['decrypted'];
+                }, $item[2]),
+                array_map(function ($array) {
+                    return $array['encrypted'];
+                }, $item[2]),
+                array_map(function ($array) {
+                    return $array['combined'];
+                }, $item[2]),
             );
         });
 
