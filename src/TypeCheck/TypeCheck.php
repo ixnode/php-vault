@@ -34,7 +34,7 @@ class TypeCheck
      * @param bool $value
      * @return bool
      */
-    static public function isBoolean(bool $value): bool
+    public static function isBoolean(bool $value): bool
     {
         return is_bool($value);
     }

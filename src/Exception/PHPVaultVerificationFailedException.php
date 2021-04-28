@@ -53,4 +53,3 @@ class PHPVaultVerificationFailedException extends BasePHPVaultException
         return self::RETURN_CODE_VERIFICATION_FAILED;
     }
 }
-

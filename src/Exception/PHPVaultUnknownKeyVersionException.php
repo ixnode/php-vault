@@ -53,4 +53,3 @@ class PHPVaultUnknownKeyVersionException extends BasePHPVaultException
         return self::RETURN_CODE_UNKNOWN_KEY_VERSION;
     }
 }
-

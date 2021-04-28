@@ -42,4 +42,3 @@ class PHPVaultNullException extends BasePHPVaultException
         return self::RETURN_CODE_NULL;
     }
 }
-

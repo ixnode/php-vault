@@ -65,8 +65,12 @@ class DisplayCommand extends BaseCommand
 
         $this
             ->argument('<env-file>', 'The environment file to display.')
-            ->option('-e --load-encrypted', 'Indicates that an encrypted file is being loaded. Requires a public or a private key.', function($value) { return TypeCheck::isBoolean($value); }, false)
-            ->option('-d --display-decrypted', 'Specifies that the output is to be decrypted. Requires a private key.', function($value) { return TypeCheck::isBoolean($value); }, false)
+            ->option('-e --load-encrypted', 'Indicates that an encrypted file is being loaded. Requires a public or a private key.', function ($value) {
+                return TypeCheck::isBoolean($value);
+            }, false)
+            ->option('-d --display-decrypted', 'Specifies that the output is to be decrypted. Requires a private key.', function ($value) {
+                return TypeCheck::isBoolean($value);
+            }, false)
             ->option('-P --private-key', 'Specifies a private key to be loaded.')
             ->option('-p --public-key', 'Specifies a public key to be loaded.')
             ->option('-w --write-env', 'Specifies that the content of vault is to be saved to a file.')

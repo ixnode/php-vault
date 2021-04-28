@@ -99,7 +99,9 @@ abstract class BaseCommand extends Command
         $this->root = $this->getComposerJsonRootPath();
 
         /* Add debug option */
-        $this->option('-D --debug', 'Set application in debug mode.', function($value) { return TypeCheck::isBoolean($value); }, false);
+        $this->option('-D --debug', 'Set application in debug mode.', function ($value) {
+            return TypeCheck::isBoolean($value);
+        }, false);
     }
 
     /**
@@ -209,7 +211,9 @@ abstract class BaseCommand extends Command
         $array = explode('-', $value);
 
         /* Convert each string part into "strtolower" and "ucfirst". */
-        $array = array_map(function ($element) { return ucfirst(strtolower($element)); }, $array);
+        $array = array_map(function ($element) {
+            return ucfirst(strtolower($element));
+        }, $array);
 
         /* Rebuild string. */
         return lcfirst(implode('', $array));

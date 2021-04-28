@@ -556,7 +556,7 @@ class KeyPair
      * @return array{'private': string, 'private-hashed': string, 'public': string, 'public-hashed': string, 'loaded-version': ?string, 'loaded-size': int}
      * @throws SodiumException
      */
-    static public function getNewPair(): array
+    public static function getNewPair(): array
     {
         $keyPair = sodium_crypto_box_keypair();
 
@@ -585,7 +585,7 @@ class KeyPair
      * @throws SodiumException
      * @throws Exception
      */
-    static public function getPairFromPrivateKey(string $privateKey): array
+    public static function getPairFromPrivateKey(string $privateKey): array
     {
         $privateKeyArray = array();
         $loadedVersion = self::VERSION_1;
@@ -625,7 +625,7 @@ class KeyPair
      * @return array{'private': null, 'private-hashed': ?string, 'public': string, 'public-hashed': string, 'loaded-version': ?string, 'loaded-size': int}
      * @throws Exception
      */
-    static public function getPairFromPublicKey(string $publicKey): array
+    public static function getPairFromPublicKey(string $publicKey): array
     {
         $privateKeyLoaded = true;
 
@@ -680,7 +680,7 @@ class KeyPair
      * @param string $string
      * @return bool
      */
-    static public function isJson(string $string): bool
+    public static function isJson(string $string): bool
     {
         json_decode($string);
 

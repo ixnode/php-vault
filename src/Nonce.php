@@ -68,7 +68,7 @@ class Nonce
      * @return string
      * @throws Exception
      */
-    static public function getNewNonce(): string
+    public static function getNewNonce(): string
     {
         return base64_encode(random_bytes(SODIUM_CRYPTO_BOX_NONCEBYTES));
     }

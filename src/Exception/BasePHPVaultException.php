@@ -49,4 +49,3 @@ abstract class BasePHPVaultException extends Exception
      */
     abstract public function getReturnCode(): int;
 }
-

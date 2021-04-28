@@ -62,8 +62,12 @@ class GenerateKeysCommand extends BaseCommand
 
         $this
             ->option('-p --persist', 'Persists generated keys to given folder', null, false)
-            ->option('-1 --version1', 'Generate version 1 keys', function($value) { return TypeCheck::isBoolean($value); }, false)
-            ->option('-2 --version2', 'Generate version 2 keys', function($value) { return TypeCheck::isBoolean($value); }, false)
+            ->option('-1 --version1', 'Generate version 1 keys', function ($value) {
+                return TypeCheck::isBoolean($value);
+            }, false)
+            ->option('-2 --version2', 'Generate version 2 keys', function ($value) {
+                return TypeCheck::isBoolean($value);
+            }, false)
             ->usage(
                 '<bold>  $0 generate-keys</end> ## Simply shows the key pair.<eol/>'.
                 '<bold>  $0 generate-keys</end> <comment>--persist</end> ## Also persists key pair to folder ".keys" (Default path).<eol/>'.

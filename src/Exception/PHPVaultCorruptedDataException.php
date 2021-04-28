@@ -53,4 +53,3 @@ class PHPVaultCorruptedDataException extends BasePHPVaultException
         return self::RETURN_CODE_CORRUPTED_DATA;
     }
 }
-

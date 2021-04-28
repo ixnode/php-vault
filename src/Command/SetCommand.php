@@ -66,7 +66,9 @@ class SetCommand extends BaseCommand
             ->argument('<name>', 'The name of the new variable.')
             ->argument('<value>', 'The value of the new variable.')
             ->argument('[description]', 'The description of the new variable.')
-            ->option('-c --create', 'Specifies whether the environment variable is to be created.', function($value) { return TypeCheck::isBoolean($value); }, false)
+            ->option('-c --create', 'Specifies whether the environment variable is to be created.', function ($value) {
+                return TypeCheck::isBoolean($value);
+            }, false)
             ->option('-P --private-key', 'Specifies a private key to be loaded.')
             ->option('-p --public-key', 'Specifies a public key to be loaded.')
             ->usage(

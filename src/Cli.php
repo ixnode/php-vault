@@ -113,7 +113,9 @@ class Cli
         $parsed = str_getcsv($command, ' ');
 
         return array_values(
-            array_filter($parsed, function ($value) { return ($value !== null && $value !== false && $value !== ""); })
+            array_filter($parsed, function ($value) {
+                return ($value !== null && $value !== false && $value !== "");
+            })
         );
     }
 

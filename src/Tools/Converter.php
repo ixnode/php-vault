@@ -32,7 +32,8 @@ use Ixnode\PhpVault\PHPVault;
 use Ixnode\PhpVault\Vault\Reader;
 use SodiumException;
 
-class Converter {
+class Converter
+{
 
     /**
      * Replacement for the internal php preg_replace function.
@@ -200,4 +201,3 @@ class Converter {
         return $phpVaultCore->getDecrypter()->decrypt($string);
     }
 }
-

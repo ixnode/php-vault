@@ -53,4 +53,3 @@ class PHPVaultPrivateKeyLoadedException extends BasePHPVaultException
         return self::RETURN_CODE_PRIVATE_KEY_LOADED;
     }
 }
-

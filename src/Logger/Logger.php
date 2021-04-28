@@ -159,8 +159,7 @@ class Logger
         }
 
         /* Print log message. */
-        switch ($level)
-        {
+        switch ($level) {
             case self::LOG_LEVEL_OK: $this->writer->ok($message, $eol); break;
             case self::LOG_LEVEL_INFO: $this->writer->info($message, $eol); break;
             case self::LOG_LEVEL_WARN: $this->writer->warn($message, $eol); break;
