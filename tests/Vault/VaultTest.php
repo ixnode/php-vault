@@ -87,7 +87,7 @@ TEXT;
         /* Assert */
         $this->assertClassHasAttribute('vault', PHPVault::class);
         $this->assertTrue(method_exists(PHPVault::class, 'getVault'), 'Class Core does not have method getVault.');
-        $this->assertInstanceOf($expected, self::$core->getVault());
+        $this->assertInstanceOf($expected, self::$phpVaultCoreV1->getVault());
     }
 
     /**
@@ -105,7 +105,7 @@ TEXT;
         $expected = [];
 
         /* Act */
-        $vault = self::$core->getVault()->getAllValuesFromVault();
+        $vault = self::$phpVaultCoreV1->getVault()->getAllValuesFromVault();
 
         /* Assert */
         $this->assertSame($expected, $vault);
@@ -129,8 +129,8 @@ TEXT;
         $expected = $data->getValueEncrypted();
 
         /* Act */
-        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueEncrypted = self::$core->getVault()->getKeyValuePairRaw($name)->getValueEncrypted();
+        self::$phpVaultCoreV1->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
+        $vaultValueEncrypted = self::$phpVaultCoreV1->getVault()->getKeyValuePairRaw($name)->getValueEncrypted();
 
         /* Assert */
         $this->assertSame($expected, $vaultValueEncrypted);
@@ -160,8 +160,8 @@ TEXT;
         );
 
         /* Act */
-        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueEncrypted = self::$core->getVault()->getKeyValuePairDecrypted($name);
+        self::$phpVaultCoreV1->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
+        $vaultValueEncrypted = self::$phpVaultCoreV1->getVault()->getKeyValuePairDecrypted($name);
 
         /* Assert */
         $this->assertEquals($expected, $vaultValueEncrypted);
@@ -186,9 +186,9 @@ TEXT;
         $expected = $valueDecrypted;
 
         /* Act */
-        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValue = self::$core->getVault()->getKeyValuePairRaw($name)->getValueEncrypted();
-        $vaultValueDecrypted = $vaultValue === null ? null : self::$core->getDecrypter()->decrypt($vaultValue);
+        self::$phpVaultCoreV1->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
+        $vaultValue = self::$phpVaultCoreV1->getVault()->getKeyValuePairRaw($name)->getValueEncrypted();
+        $vaultValueDecrypted = $vaultValue === null ? null : self::$phpVaultCoreV1->getDecrypter()->decrypt($vaultValue);
 
         /* Assert */
         $this->assertIsString($vaultValue);
@@ -222,8 +222,8 @@ TEXT;
         );
 
         /* Act */
-        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueDecrypted = self::$core->getVault()->getKeyValuePairDecrypted($name);
+        self::$phpVaultCoreV1->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
+        $vaultValueDecrypted = self::$phpVaultCoreV1->getVault()->getKeyValuePairDecrypted($name);
 
         /* Assert */
         $this->assertEquals($expected, $vaultValueDecrypted);
@@ -247,8 +247,8 @@ TEXT;
         $expected = $valueDecrypted;
 
         /* Act */
-        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueDecrypted = self::$core->getVault()->getKeyValuePairRaw($name)->getValueDecrypted();
+        self::$phpVaultCoreV1->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
+        $vaultValueDecrypted = self::$phpVaultCoreV1->getVault()->getKeyValuePairRaw($name)->getValueDecrypted();
 
         /* Assert */
         $this->assertSame($expected, $vaultValueDecrypted);
@@ -272,8 +272,8 @@ TEXT;
         $expected = $valueDecrypted;
 
         /* Act */
-        self::$core->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
-        $vaultValueDecrypted = self::$core->getVault()->getKeyValuePairRaw($name)->getValueDecrypted();
+        self::$phpVaultCoreV1->getVault()->add($name, $valueDecrypted, $descriptionDecrypted, self::$nonce);
+        $vaultValueDecrypted = self::$phpVaultCoreV1->getVault()->getKeyValuePairRaw($name)->getValueDecrypted();
 
         /* Assert */
         $this->assertSame($expected, $vaultValueDecrypted);
@@ -301,7 +301,7 @@ TEXT;
         );
 
         /* Act */
-        $vault = self::$core->getVault()->getAllValuesFromVault();
+        $vault = self::$phpVaultCoreV1->getVault()->getAllValuesFromVault();
 
         /* Assert */
         $this->assertSame($expected, $vault);
@@ -329,7 +329,7 @@ TEXT;
         );
 
         /* Act */
-        $vault = self::$core->getVault()->getAllValuesFromVaultDecrypted();
+        $vault = self::$phpVaultCoreV1->getVault()->getAllValuesFromVaultDecrypted();
 
         /* Assert */
         $this->assertSame($expected, $vault);
@@ -357,7 +357,7 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getAllValuesFromVaultDecrypted(true);
+        $actual = self::$phpVaultCoreV1->getVault()->getAllValuesFromVaultDecrypted(true);
 
         /* Assert */
         $this->assertSame($expected, $actual);
@@ -377,7 +377,7 @@ TEXT;
         $expected = array();
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_ENV);
+        $actual = self::$phpVaultCoreV1->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_ENV);
 
         /* Assert */
         $this->assertSame($expected, $actual, '$_ENV seems not to be empty.');
@@ -395,7 +395,7 @@ TEXT;
     public function testSaveEnvArray(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
-        $writer = self::$core->getVault()->getWriter();
+        $writer = self::$phpVaultCoreV1->getVault()->getWriter();
         $expected = array(
             $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION') => $data->getValueDecrypted(),
             $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
@@ -406,8 +406,8 @@ TEXT;
         );
 
         /* Act */
-        self::$core->getVault()->getWriter()->saveToEnv();
-        $actual = self::$core->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_ENV);
+        self::$phpVaultCoreV1->getVault()->getWriter()->saveToEnv();
+        $actual = self::$phpVaultCoreV1->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_ENV);
 
         /* Assert */
         $this->assertSame($expected, $actual);
@@ -425,7 +425,7 @@ TEXT;
     public function testSaveServerArray(KeyValuePair $data, KeyValuePair $data2): void
     {
         /* Arrange */
-        $writer = self::$core->getVault()->getWriter();
+        $writer = self::$phpVaultCoreV1->getVault()->getWriter();
         $expected = array(
             $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION') => $data->getValueDecrypted(),
             $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
@@ -436,8 +436,8 @@ TEXT;
         );
 
         /* Act */
-        self::$core->getVault()->getWriter()->saveToServer();
-        $actual = self::$core->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_SERVER);
+        self::$phpVaultCoreV1->getVault()->getWriter()->saveToServer();
+        $actual = self::$phpVaultCoreV1->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_SERVER);
 
         /* Assert */
         foreach ($expected as $key => $name) {
@@ -462,7 +462,7 @@ TEXT;
         $name = 'name-new';
         $value = $data2->getValueDecrypted();
         $description = $data2->getDescriptionDecrypted();
-        $writer = self::$core->getVault()->getWriter();
+        $writer = self::$phpVaultCoreV1->getVault()->getWriter();
         $expected = array(
             $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION') => $data->getValueDecrypted(),
             $writer->getPhpVaultEnvironmentKey('NAME_WITHOUT_ENCRYPTION_WITH_DESCRIPTION') => $data->getValueDecrypted(),
@@ -474,9 +474,9 @@ TEXT;
         );
 
         /* Act */
-        self::$core->getVault()->add($name, $value, $description, self::$nonce);
-        self::$core->getVault()->getWriter()->saveToEnv();
-        $actual = self::$core->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_ENV);
+        self::$phpVaultCoreV1->getVault()->add($name, $value, $description, self::$nonce);
+        self::$phpVaultCoreV1->getVault()->getWriter()->saveToEnv();
+        $actual = self::$phpVaultCoreV1->getVault()->getWriter()->filterArrayByNonePhpVaultEnvironmentKeys($_ENV);
 
         /* Assert */
         foreach ($expected as $key => $name) {
@@ -509,7 +509,7 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString();
+        $actual = self::$phpVaultCoreV1->getVault()->getWriter()->getEnvString();
 
         /* Assert */
         $this->assertSame($expected, $actual);
@@ -546,7 +546,7 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString(Reader::OUTPUT_TO_ENCRYPTED, true);
+        $actual = self::$phpVaultCoreV1->getVault()->getWriter()->getEnvString(Reader::OUTPUT_TO_ENCRYPTED, true);
 
         /* Assert */
         $this->assertSame($expected, $actual);
@@ -576,7 +576,7 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString(Reader::OUTPUT_TO_DECRYPTED);
+        $actual = self::$phpVaultCoreV1->getVault()->getWriter()->getEnvString(Reader::OUTPUT_TO_DECRYPTED);
 
         /* Assert */
         $this->assertSame($expected, $actual);
@@ -613,7 +613,7 @@ TEXT;
         );
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getEnvString(Reader::OUTPUT_TO_DECRYPTED, true);
+        $actual = self::$phpVaultCoreV1->getVault()->getWriter()->getEnvString(Reader::OUTPUT_TO_DECRYPTED, true);
 
         /* Assert */
         $this->assertSame($expected, $actual);
@@ -628,6 +628,7 @@ TEXT;
     {
         return array(
             array(
+                /* Encrypted with version 1 of public and private key  */
                 'data' => new KeyValuePair(
                     'data',
                     'WyI1N25yc1hHWnR4ekQ1UHRSeWdaQXk5TnI3UFNDTEZzZSIsImJFNXhROVBHUUN4K2FFdnJTY2hOSHlKTTFOMXhpMlpEOXJiUHpObWlQQTQ9Il0=',

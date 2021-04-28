@@ -49,7 +49,7 @@ final class WriterTest extends VaultTestCase
         /* Assert */
         $this->assertClassHasAttribute('writer', Vault::class);
         $this->assertTrue(method_exists(Vault::class, 'getWriter'), 'Class Vault does not have method getWriter.');
-        $this->assertInstanceOf($expected, self::$core->getVault()->getWriter());
+        $this->assertInstanceOf($expected, self::$phpVaultCoreV1->getVault()->getWriter());
     }
 
     /**
@@ -65,7 +65,7 @@ final class WriterTest extends VaultTestCase
         /* Given from dataProvider */
 
         /* Act */
-        $actual = self::$core->getVault()->getWriter()->getPhpVaultEnvironmentKey($given);
+        $actual = self::$phpVaultCoreV1->getVault()->getWriter()->getPhpVaultEnvironmentKey($given);
 
         /* Assert */
         $this->assertSame($expected, $actual);

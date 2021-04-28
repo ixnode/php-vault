@@ -32,11 +32,17 @@ use SodiumException;
 
 class VaultTestCase extends TestCase
 {
-    protected static PHPVault $core;
+    protected static PHPVault $phpVaultCoreV1;
 
-    protected static string $publicKey = 'rzgp2/3Rtg8t6q/spiMrcEZq7cG75o1qsR/Kux/OC1E=';
+    protected static PHPVault $phpVaultCoreV2;
 
-    protected static string $privateKey = 'o8aZw6FIZmSMZq/89DNgxpNZHcgMbEOiU+1TMhNntb4=';
+    protected static string $publicKeyV1 = 'rzgp2/3Rtg8t6q/spiMrcEZq7cG75o1qsR/Kux/OC1E=';
+
+    protected static string $privateKeyV1 = 'o8aZw6FIZmSMZq/89DNgxpNZHcgMbEOiU+1TMhNntb4=';
+
+    protected static string $publicKeyV2 = 'WyIyaUhVRnNQT0tGOXdDbVwvMkRZQU9GUWpSaStPM0habmx0NTBOT0w1dG9SQT0iLCJjZTQyN2E5Zjc5ODgzMWNlZGIxMzVhYTQ1MzNiYjk2NCJd';
+
+    protected static string $privateKeyV2 = 'WyJUTE9qOUZwVWxYZjhLTFNFaUlnS3BOQllncE5IMXRWSlk1TFVtOU5INzNjPSIsIjU0ZTFiMmJkYjYwYjgwZDVkMzBmY2UzYjFkNzE4MjIxIl0=';
 
     protected static string $nonce = '57nrsXGZtxzD5PtRygZAy9Nr7PSCLFse';
 
@@ -46,6 +52,7 @@ class VaultTestCase extends TestCase
      */
     public static function setUpBeforeClass(): void
     {
-        self::$core = new PHPVault(false, self::$privateKey);
+        self::$phpVaultCoreV1 = new PHPVault(false, self::$privateKeyV1);
+        self::$phpVaultCoreV2 = new PHPVault(false, self::$privateKeyV2);
     }
 }
