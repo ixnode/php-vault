@@ -91,7 +91,7 @@ class GenerateKeysCommand extends BaseCommand
         }
 
         /* Persist keys */
-        $this->persistKeys($phpVaultCore);
+        $this->persistKeys($phpVaultCore, $this->getVersion());
     }
 
     /**
@@ -118,10 +118,11 @@ class GenerateKeysCommand extends BaseCommand
      * Persist keys.
      *
      * @param PHPVault $phpVaultCore
+     * @param string $version
      * @return void
      * @throws Exception
      */
-    protected function persistKeys(PHPVault $phpVaultCore): void
+    protected function persistKeys(PHPVault $phpVaultCore, string $version): void
     {
         /* Check if persist option exists. */
         if (!$this->getOption(self::OPTION_PERSIST)) {
@@ -157,8 +158,8 @@ CONTENT;
         $gitignoreAbsolute = sprintf('%s/%s', $pathKeys, $gitignore);
 
         /* Write files. */
-        file_put_contents($pathPrivateKey, $phpVaultCore->getKeyPair()->getPrivateKeyCombined());
-        file_put_contents($pathPublicKey, $phpVaultCore->getKeyPair()->getPublicKeyCombined());
+        file_put_contents($pathPrivateKey, $phpVaultCore->getKeyPair()->getPrivateKeyByVersion($version));
+        file_put_contents($pathPublicKey, $phpVaultCore->getKeyPair()->getPublicKeyByVersion($version));
         file_put_contents($gitignoreAbsolute, $gitignoreContent);
 
         /* Check files. */
