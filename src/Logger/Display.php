@@ -66,7 +66,10 @@ class Display
      */
     public function privateKeyLoaded(PHPVault $phpVaultCore): void
     {
-        $this->logger->info('Private key was loaded ({bytes} bytes).', array('bytes' => $phpVaultCore->getKeyPair()->getPrivateKeyLength()), true, true);
+        $this->logger->info('A private key was loaded ({bytes} bytes, version {version}).', array(
+            'bytes' => $phpVaultCore->getKeyPair()->loadedSize(),
+            'version' => $phpVaultCore->getKeyPair()->getVersionName(),
+        ), true, true);
     }
 
     /**
@@ -78,7 +81,10 @@ class Display
      */
     public function publicKeyLoaded(PHPVault $phpVaultCore): void
     {
-        $this->logger->info('Public key was loaded ({bytes} bytes).', array('bytes' => $phpVaultCore->getKeyPair()->getPublicKeyLength()), true, true);
+        $this->logger->info('A public key was loaded ({bytes} bytes, version {version}).', array(
+            'bytes' => $phpVaultCore->getKeyPair()->loadedSize(),
+            'version' => $phpVaultCore->getKeyPair()->getVersionName(),
+        ), true, true);
     }
 
     /**

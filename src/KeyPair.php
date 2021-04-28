@@ -46,6 +46,10 @@ class KeyPair
 
     protected ?string $loadedFromEnvironment = null;
 
+    protected ?string $loadedFromVersion = null;
+
+    protected int $loadedSize = 0;
+
     const SERVER_PUBLIC_KEY_NAME = 'PUBLIC_KEY';
 
     const SERVER_PRIVATE_KEY_NAME = 'PRIVATE_KEY';
@@ -57,6 +61,14 @@ class KeyPair
     const LOADED_FROM_PASSED_STRING = 'PASSED_STRING';
 
     const LOADED_FROM_RANDOM_GENERATOR = 'RANDOM_GENERATOR';
+
+    const VERSION_1 = 'v1';
+
+    const VERSION_2 = 'v2';
+
+    const VERSION_UNKNOWN = null;
+
+    const VERSION_UNKNOWN_NAME = 'unknown';
 
     /**
      * KeyPair constructor.
@@ -89,12 +101,13 @@ class KeyPair
         $this->loadedFromSource = null;
         $this->loadedFromPath = null;
         $this->loadedFromEnvironment = null;
+        $this->loadedFromVersion = null;
     }
 
     /**
      * Sets private key pair from given array.
      *
-     * @param array{'private': string|null, 'public': string} $keyPair
+     * @param array{'private': ?string, 'private-hashed': ?string, 'public': string, 'public-hashed': string, 'loaded-version': ?string, 'loaded-size': int} $keyPair
      * @param int $mode
      * @param string $loadedFromSource
      * @param string|null $loadedFromEnvironment
@@ -111,6 +124,8 @@ class KeyPair
         $this->phpVaultCore->setMode($mode);
         $this->loadedFromSource = $loadedFromSource;
         $this->loadedFromEnvironment = $loadedFromEnvironment;
+        $this->loadedFromVersion = $keyPair['loaded-version'];
+        $this->loadedSize = $keyPair['loaded-size'];
     }
 
     /**
@@ -186,13 +201,13 @@ class KeyPair
      * @return ?string
      * @throws PHPVaultUnknownKeyVersionException
      */
-    public function getPrivateKeyByVersion(string $version = 'v1'): ?string
+    public function getPrivateKeyByVersion(string $version = self::VERSION_1): ?string
     {
         switch ($version) {
-            case 'v1':
+            case self::VERSION_1:
                 return $this->getPrivateKey();
 
-            case 'v2':
+            case self::VERSION_2:
                 return $this->getPrivateKeyCombined();
 
             default:
@@ -273,13 +288,13 @@ class KeyPair
      * @return ?string
      * @throws PHPVaultUnknownKeyVersionException
      */
-    public function getPublicKeyByVersion(string $version = 'v1'): ?string
+    public function getPublicKeyByVersion(string $version = self::VERSION_1): ?string
     {
         switch ($version) {
-            case 'v1':
+            case self::VERSION_1:
                 return $this->getPublicKey();
 
-            case 'v2':
+            case self::VERSION_2:
                 return $this->getPublicKeyCombined();
 
             default:
@@ -315,6 +330,41 @@ class KeyPair
     public function loadedFromEnvironment(): ?string
     {
         return $this->loadedFromEnvironment;
+    }
+
+    /**
+     * Returns the version with which the key was loaded.
+     *
+     * @return string|null
+     */
+    public function loadedFromVersion(): ?string
+    {
+        return $this->loadedFromVersion;
+    }
+
+    /**
+     * Returns the loaded key size.
+     *
+     * @return int
+     */
+    public function loadedSize(): int
+    {
+        return $this->loadedSize;
+    }
+
+
+    /**
+     * Returns the name of version (including unknown).
+     *
+     * @return string
+     */
+    public function getVersionName(): string
+    {
+        if ($this->loadedFromVersion === null) {
+            return self::VERSION_UNKNOWN_NAME;
+        }
+
+        return $this->loadedFromVersion;
     }
 
     /**
@@ -503,7 +553,7 @@ class KeyPair
     /**
      * Returns a new public private key object (static function).
      *
-     * @return array{'private': string, 'private-hashed': string, 'public': string, 'public-hashed': string, 'version': int}
+     * @return array{'private': string, 'private-hashed': string, 'public': string, 'public-hashed': string, 'loaded-version': ?string, 'loaded-size': int}
      * @throws SodiumException
      */
     static public function getNewPair(): array
@@ -514,14 +564,16 @@ class KeyPair
         $publicKeyHash = md5($publicKey);
         $privateKey = base64_encode(sodium_crypto_box_secretkey($keyPair));
         $privateKeyHash = md5($privateKey);
-        $version = 2;
+        $loadedVersion = self::VERSION_UNKNOWN;
+        $loadedSize = 0;
 
         return [
             'public' => $publicKey,
             'public-hashed' => $publicKeyHash,
             'private' => $privateKey,
             'private-hashed' => $privateKeyHash,
-            'version' => $version,
+            'loaded-version' => $loadedVersion,
+            'loaded-size' => $loadedSize,
         ];
     }
 
@@ -529,14 +581,15 @@ class KeyPair
      * Returns a public private key object from given base64 encoded private key (static function).
      *
      * @param string $privateKey
-     * @return array{'private': string, 'private-hashed': string, 'public': string, 'public-hashed': string, 'version': int}
+     * @return array{'private': string, 'private-hashed': string, 'public': string, 'public-hashed': string, 'loaded-version': ?string, 'loaded-size': int}
      * @throws SodiumException
      * @throws Exception
      */
     static public function getPairFromPrivateKey(string $privateKey): array
     {
         $privateKeyArray = array();
-        $version = 1;
+        $loadedVersion = self::VERSION_1;
+        $loadedSize = strlen($privateKey);
 
         if (self::isJson(base64_decode($privateKey))) {
             $privateKeyArray = json_decode(base64_decode($privateKey));
@@ -549,7 +602,7 @@ class KeyPair
 
         /* Check hash match. */
         if (count($privateKeyArray) > 1) {
-            $version = 2;
+            $loadedVersion = self::VERSION_2;
             if ($publicKeyHash !== $privateKeyArray[1]) {
                 throw new PHPVaultPublicKeyLoadedException();
             }
@@ -560,7 +613,8 @@ class KeyPair
             'public-hashed' => $publicKeyHash,
             'private' => $privateKey,
             'private-hashed' => $privateKeyHash,
-            'version' => $version,
+            'loaded-version' => $loadedVersion,
+            'loaded-size' => $loadedSize,
         ];
     }
 
@@ -568,7 +622,7 @@ class KeyPair
      * Returns a public private key object from given base64 encoded public key (static function).
      *
      * @param string $publicKey
-     * @return array{'private': null, 'private-hashed': ?string, 'public': string, 'public-hashed': string, 'version': int}
+     * @return array{'private': null, 'private-hashed': ?string, 'public': string, 'public-hashed': string, 'loaded-version': ?string, 'loaded-size': int}
      * @throws Exception
      */
     static public function getPairFromPublicKey(string $publicKey): array
@@ -579,7 +633,7 @@ class KeyPair
         try {
             $return = self::getPairFromPrivateKey($publicKey);
 
-            if ($return['version'] === 1) {
+            if ($return['loaded-version'] === self::VERSION_1) {
                 $privateKeyLoaded = false;
             }
         } catch (PHPVaultPublicKeyLoadedException $e) {
@@ -592,7 +646,8 @@ class KeyPair
         }
 
         $publicKeyArray = array();
-        $version = 1;
+        $loadedVersion = self::VERSION_1;
+        $loadedSize = strlen($publicKey);
 
         if (self::isJson(base64_decode($publicKey))) {
             $publicKeyArray = json_decode(base64_decode($publicKey));
@@ -606,7 +661,7 @@ class KeyPair
         /* Private key hash given. */
         if (count($publicKeyArray) > 1) {
             $privateKeyHash = $publicKeyArray[1];
-            $version = 2;
+            $loadedVersion = self::VERSION_2;
         }
 
         return [
@@ -614,7 +669,8 @@ class KeyPair
             'public-hashed' => $publicKeyHash,
             'private' => $privateKey,
             'private-hashed' => $privateKeyHash,
-            'version' => $version,
+            'loaded-version' => $loadedVersion,
+            'loaded-size' => $loadedSize,
         ];
     }
 

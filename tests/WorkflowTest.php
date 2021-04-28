@@ -151,7 +151,7 @@ final class WorkflowTest extends TestCase
         /* Arrange */
         $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PUBLIC_KEY);
         $command = sprintf('%s i --public-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsolutePublicKey);
-        $searches = ['Public key was loaded', 'The key was loaded from given file', ];
+        $searches = ['A public key was loaded', 'The key was loaded from given file', ];
 
         /* Act */
         $output = $this->executeCommand($command);
@@ -227,7 +227,7 @@ final class WorkflowTest extends TestCase
         /* Arrange */
         $pathAbsolutePublicKey = self::getPathAbsoluteKeys(GenerateKeysCommand::NAME_PRIVATE_KEY);
         $command = sprintf('%s i --private-key %s', self::PATH_EXECUTE_PHP_VAULT_PATH, $pathAbsolutePublicKey);
-        $searches = ['Private key was loaded', 'The key was loaded from given file', ];
+        $searches = ['A private key was loaded', 'The key was loaded from given file', ];
 
         /* Act */
         $output = $this->executeCommand($command);
