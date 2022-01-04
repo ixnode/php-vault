@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Releases
 
+### [1.3.0] - 2022-01-05
+
+* [#6](https://github.com/ixnode/php-vault/issues/6) - Remove ubuntu-16.04 from pipeline
+
+### [1.2.0] - 2022-01-05
+
+* [#2](https://github.com/ixnode/php-vault/issues/2) - Add FUNDING.yml
+
 ### [1.1.0] - 2022-01-04
 
 * [#3](https://github.com/ixnode/php-vault/issues/3) - Add Semantic Versioning 2.0.0
