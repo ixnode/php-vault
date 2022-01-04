@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Releases
 
+### [1.1.0] - 2022-01-04
+
+* [#3](https://github.com/ixnode/php-vault/issues/3) - Add Semantic Versioning 2.0.0
+
 ### [v1.0.7] - 2021-04-28
 
 * Private and public key version 2 with verification hash
