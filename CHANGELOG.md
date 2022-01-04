@@ -59,5 +59,5 @@ $ vi CHANGELOG.md
 $ git add CHANGELOG.md VERSION && git commit -m "Add version $(cat VERSION)" && git push
 
 # Tag and push new version
-$ git tag -a "v$(cat VERSION)" -m "Version $(cat VERSION)" && git push origin "$(cat VERSION)"
+$ git tag -a "$(cat VERSION)" -m "Version $(cat VERSION)" && git push origin "$(cat VERSION)"
 ```
